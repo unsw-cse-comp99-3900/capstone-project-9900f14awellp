@@ -3,7 +3,7 @@
 这两个库已经被加入到 `package.json`中，在
 
 ```
-npm -install
+npm install
 ```
 
 时会自动下载。
@@ -32,6 +32,6 @@ npx eslint --fix <filePath/FileName>
 
 ![1718856330985](image/codeStyle-zhCN/1718856330985.png)
 
-然后格式化代码中选择`Prettier - Code formatter`，之后保存时就可以自动格式化代码了。
+然后格式化代码中选择 `Prettier - Code formatter`，之后保存时就可以自动格式化代码了。
 
 ![1718856372740](image/codeStyle-zhCN/1718856372740.png)
