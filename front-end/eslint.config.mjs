@@ -19,7 +19,16 @@ export default [
 	},
 	{
 		languageOptions: {
-			globals: globals.browser,
+			globals: {
+				...globals.browser,
+				jest: 'writable',
+				describe: 'writable',
+				it: 'writable',
+				expect: 'writable',
+				beforeEach: 'writable',
+				afterEach: 'writable',
+				test: 'writable',
+			},
 		},
 	},
 	pluginJs.configs.recommended,
@@ -31,7 +40,8 @@ export default [
 			},
 		},
 	},
-	prettierConfig, // 添加 Prettier 配置
+	// 添加 Prettier 配置
+	prettierConfig,
 	{
 		plugins: {
 			prettier: pluginPrettier,
