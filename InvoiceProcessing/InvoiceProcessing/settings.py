@@ -11,10 +11,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-e))(m#!c5i+w=ww@pxno12!vt*&qbes$@oeh#r$u)0g^%qp7hd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",  # RESTful API
+    "rest_framework.authtoken",  # DRF自带的token认证
+    "invoice",
 ]
 
 MIDDLEWARE = [
@@ -76,7 +79,7 @@ WSGI_APPLICATION = "InvoiceProcessing.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": str(BASE_DIR / "db.sqlite3"),
     }
 }
 
@@ -103,21 +106,65 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "zh-hans"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_L10N = True
+
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "staticfiles"),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 50,
+    "DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S",
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+    "DEFAULT_PARSER_CLASSES": [  # 解析request.data
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
+    ],
+    # 设置全局登录认证
+    # 一个认证通过登录的用户 能够访问哪些接口
+    # 只有登录的用户能进行操作
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",# IsAuthenticatedOrReadOnly 未登录的用户只能查询，不能增删改
+    ],
+    
+    # 对用户登录的身份进行校验
+    # 这一块发生在 "DEFAULT_PERMISSION_CLASSES" 之前的
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+    ]
+}
+
+"""
+        生成token的方式:
+        1. 使用Django manage.py 生成token
+        2. 通过Django的信号机制生成Token (创建用户的时候出发一个函数，这个函数能赋予该用户一个token)
+"""
