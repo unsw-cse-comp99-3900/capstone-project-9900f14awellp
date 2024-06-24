@@ -57,7 +57,7 @@ class CreateCompanyView(APIView):
     # permission_classes = [IsAuthenticated]
     authentication_classes = [MyAhenAuthentication]
 
-    def post(self, request, username):
+    def post(self, request, userid):
         ser = CompanySerializer(data=request.data)
         if ser.is_valid() and not Company.objects.filter(name=request.data.get('name')).first():
             validated_data = ser.validated_data
@@ -83,7 +83,7 @@ class JoinCompanyView(APIView):
 
 
 
-    def post(self, request, username):
+    def post(self, request, userid):
         company_name = request.data.get('name')
         print(company_name)
         if not company_name:
