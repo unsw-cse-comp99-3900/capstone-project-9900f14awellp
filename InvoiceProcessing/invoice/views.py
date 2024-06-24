@@ -7,6 +7,7 @@ from django.db.models.signals import post_save # 用户已经建好了，才触�
 from django.dispatch import receiver
 from django.db import models
 import uuid
+from .authentication import MyAhenAuthentication
 
 from rest_framework import generics, viewsets
 from rest_framework import status
@@ -54,24 +55,37 @@ class LoginView(APIView):
     
 class CreateCompanyView(APIView):
     # permission_classes = [IsAuthenticated]
+    authentication_classes = [MyAhenAuthentication]
 
-    def post(self, request):
+    def post(self, request, username):
         ser = CompanySerializer(data=request.data)
-        
-        if ser.is_valid():
-
-            request.user.company = request.data.get('name')
+        if ser.is_valid() and not Company.objects.filter(name=request.data.get('name')).first():
+            validated_data = ser.validated_data
+            company = Company(
+                name=validated_data['name'],
+                phone_number=validated_data['phone_number'],
+                email=validated_data['email'],
+                address=validated_data['address'],
+                boss_id=request.user,  # 将 boss_id 设置为当前用户
+            )
+            company.save()
+            request.user.company = company
+            request.user.is_admin = True
             request.user.save()
-            ser.save()
+
             return Response(ser.data, status=status.HTTP_201_CREATED)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class JoinCompanyView(APIView):
     # permission_classes = [IsAuthenticated]
+    authentication_classes = [MyAhenAuthentication]
 
-    def post(self, request):
+
+
+    def post(self, request, username):
         company_name = request.data.get('name')
+        print(company_name)
         if not company_name:
             return Response({'error': 'Company name is required'}, status=status.HTTP_400_BAD_REQUEST)
         

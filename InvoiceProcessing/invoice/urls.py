@@ -11,8 +11,8 @@ from invoice import views
 urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', views.LoginView.as_view(), name='login'),
-    path('create-company/',views.CreateCompanyView.as_view(), name='create-company'),
-    path('join-company/',views.JoinCompanyView.as_view(), name='join-company'),
+    path('create-company/<str:username>/',views.CreateCompanyView.as_view(), name='create-company'),
+    path('join-company/<str:username>/',views.JoinCompanyView.as_view(), name='join-company'),
     
     ]
 
