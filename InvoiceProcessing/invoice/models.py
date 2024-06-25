@@ -28,6 +28,7 @@ class User(AbstractBaseUser):
     update_date = models.DateTimeField(auto_now=True, verbose_name='Update Date')
 
 
+# use userid to bind user and file
 class UpFile(models.Model):
     file = models.FileField(upload_to="invoices_files/",blank=True, null=False)
     title = models.CharField(max_length=30)

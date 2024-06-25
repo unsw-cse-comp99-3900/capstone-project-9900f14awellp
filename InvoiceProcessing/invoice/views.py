@@ -110,7 +110,7 @@ def file_iterator(file_path, chunk_size=512):
             else:
                 break
 
-
+# for uploading and downloading files
 class UpFileAPIView(APIView):
     authentication_classes = [MyAhenAuthentication]
     parser_classes = (MultiPartParser, FormParser)
