@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db.models.signals import post_save # 用户已经建好了，才触发generate_token函数生成token
 from django.dispatch import receiver
 from django.db import models
+from django.http import FileResponse
 import uuid
 from .authentication import MyAhenAuthentication
 
@@ -18,7 +19,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer, FileSerializer
+from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer, FileUploadSerializer
 # Create your views here.
 
 
@@ -96,12 +97,26 @@ class JoinCompanyView(APIView):
         return Response({'success': 'Joined the company successfully'}, status=status.HTTP_200_OK)
         
     
+def file_iterator(file_path, chunk_size=512):
+    """
+    文件读取迭代器
+    :return:
+    """
+    with open(file_path, 'rb') as target_file:
+        while True:
+            chunk = target_file.read(chunk_size)
+            if chunk:
+                yield chunk
+            else:
+                break
+
+
 class UpFileAPIView(APIView):
     authentication_classes = [MyAhenAuthentication]
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, userid):
-        file_serializer = FileSerializer(data=request.data)
+        file_serializer = FileUploadSerializer(data=request.data)
         if file_serializer.is_valid():
             title = file_serializer.validated_data.get('title')
             if UpFile.objects.filter(userid=request.user, title=title).exists():
@@ -124,5 +139,33 @@ class UpFileAPIView(APIView):
                                 "data": file_serializer.errors
                             },
                             status=status.HTTP_400_BAD_REQUEST)
+    
+    def get(self,request,userid):
+        title = request.GET.get('title')
+        if not title:
+            return Response({
+                                "code": 400,
+                                "msg": "title is required",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        file = UpFile.objects.filter(userid=userid, title=title).first()
+        if file is None or file.file is None :
+            return Response({
+                                "code": 404,
+                                "msg": "file not found",
+                            },
+                            status=status.HTTP_404_NOT_FOUND
+                            )
+
+        response = FileResponse(file_iterator(str(file.file)))
+        response['Content-Type'] = 'application/octet-stream'
+        # Content-Disposition就是当用户想把请求所得的内容存为一个文件的时候提供一个默认的文件名
+        response['Content-Disposition'] = f'attachment; filename="{file.file.name}"'
+        return response
+        """return Response({
+            "code":200,
+            "msg":"success",
+        })"""
         
     

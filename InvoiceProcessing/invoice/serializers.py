@@ -43,7 +43,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 
-class FileSerializer(serializers.ModelSerializer):
+class FileUploadSerializer(serializers.ModelSerializer):
     timestamp = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
     class Meta():
         model = UpFile
