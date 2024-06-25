@@ -42,7 +42,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 
-
+# only data of uploading files need to be serialized
 class FileUploadSerializer(serializers.ModelSerializer):
     timestamp = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
     class Meta():
