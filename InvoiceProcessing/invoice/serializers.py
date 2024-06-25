@@ -1,5 +1,5 @@
 from rest_framework import serializers,exceptions
-from .models import Company, User
+from .models import Company, User, UpFile
 from django import forms
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -39,3 +39,12 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = '__all__'
+
+
+
+
+class FileSerializer(serializers.ModelSerializer):
+    timestamp = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    class Meta():
+        model = UpFile
+        fields = ('file', 'title', 'timestamp')

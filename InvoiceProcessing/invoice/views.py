@@ -1,7 +1,7 @@
 from django.shortcuts import render
 import json
 from django.http import JsonResponse
-from .models import Company, User
+from .models import Company, User, UpFile
 from django.conf import settings
 from django.db.models.signals import post_save # 用户已经建好了，才触发generate_token函数生成token
 from django.dispatch import receiver
@@ -9,6 +9,7 @@ from django.db import models
 import uuid
 from .authentication import MyAhenAuthentication
 
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import generics, viewsets
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
@@ -17,7 +18,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer
+from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer, FileSerializer
 # Create your views here.
 
 
@@ -80,12 +81,8 @@ class CreateCompanyView(APIView):
 class JoinCompanyView(APIView):
     # permission_classes = [IsAuthenticated]
     authentication_classes = [MyAhenAuthentication]
-
-
-
     def post(self, request, userid):
         company_name = request.data.get('name')
-        print(company_name)
         if not company_name:
             return Response({'error': 'Company name is required'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -99,7 +96,33 @@ class JoinCompanyView(APIView):
         return Response({'success': 'Joined the company successfully'}, status=status.HTTP_200_OK)
         
     
+class UpFileAPIView(APIView):
+    authentication_classes = [MyAhenAuthentication]
+    parser_classes = (MultiPartParser, FormParser)
 
-
+    def post(self, request, userid):
+        file_serializer = FileSerializer(data=request.data)
+        if file_serializer.is_valid():
+            title = file_serializer.validated_data.get('title')
+            if UpFile.objects.filter(userid=request.user, title=title).exists():
+                return Response({
+                    "code": 400,
+                    "msg": "Title already exists for this user",
+                }, status=status.HTTP_400_BAD_REQUEST)
+            file_serializer.save(userid=request.user)
+            return Response({
+                                "code": 0,
+                                "msg": "success!",
+                                "data": file_serializer.data
+                            },
+                            status=status.HTTP_200_OK
+                            )
+        else:
+            return Response({
+                                "code": 400,
+                                "msg": "bad request",
+                                "data": file_serializer.errors
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
         
     

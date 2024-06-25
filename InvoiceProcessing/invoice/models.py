@@ -26,7 +26,10 @@ class User(AbstractBaseUser):
     token = models.CharField(max_length=255, verbose_name='Token',null=True, blank=True)
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
     update_date = models.DateTimeField(auto_now=True, verbose_name='Update Date')
-    
-    
-    def __str__(self) -> str:
-        return self.name
+
+
+class UpFile(models.Model):
+    file = models.FileField(upload_to="invoices_files/",blank=True, null=False)
+    title = models.CharField(max_length=30)
+    userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="UserFiles",null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)

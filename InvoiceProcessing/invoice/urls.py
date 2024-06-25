@@ -13,6 +13,6 @@ urlpatterns = [
     path('login/', views.LoginView.as_view(), name='login'),
     path('create-company/<int:userid>/',views.CreateCompanyView.as_view(), name='create-company'),
     path('join-company/<int:userid>/',views.JoinCompanyView.as_view(), name='join-company'),
-    
+    path('invoice-creation/<int:userid>/',views.UpFileAPIView.as_view(), name='invoice-creation'),
     ]
 
