@@ -5,11 +5,12 @@ import Welcome from './views/Welcome';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';
 import Register from './views/Register';
-import Creation from './views/Dashboard_Subs/Creation';
-import Draft from './views/Draft';
+import Create from './views/Dashboard_Subs/Create';
+import Sending from './views/Dashboard_Subs/sending';
 import InvoiceManagement from './views/Dashboard_Subs/InvoiceManagement';
+import Draft from './views/Draft';
 import Profile from './views/Profile';
-import UserManagement from './views/Dashboard_Subs/UserManagement';
+import Validation from './views/Dashboard_Subs/Validation';
 import NotFound from './views/NotFound';
 
 export default function App() {
@@ -18,10 +19,11 @@ export default function App() {
 			<Routes>
 				<Route index element={<Welcome></Welcome>} />
 				<Route path="/home" element={<Dashboard></Dashboard>}>
-					<Route index element={<Creation />}></Route>
-					<Route path="creation" element={<Creation />}></Route>
-					<Route path="invoice-manage" element={<InvoiceManagement />}></Route>
-					<Route path="user-manage" element={<UserManagement />}></Route>
+					{/* <Route index element={<Create />}></Route> */}
+				<Route path="create" element={<Create />}></Route>
+				<Route path="manage" element={<InvoiceManagement />}></Route>
+				<Route path="validate" element={<Validation />}></Route>
+				<Route path="send" element={<Sending />}></Route>
 				</Route>
 				<Route path="/login" element={<Login></Login>} />
 				<Route path="/register" element={<Register></Register>} />
