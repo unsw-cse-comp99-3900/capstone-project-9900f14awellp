@@ -10,7 +10,7 @@ from django.http import FileResponse
 import uuid
 from .authentication import MyAhenAuthentication
 
-from rest_framework.parsers import MultiPartParser, FormParser
+#from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import generics, viewsets
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
@@ -115,7 +115,7 @@ def file_iterator(file_path, chunk_size=512):
 # for uploading and downloading files
 class UpFileAPIView(APIView):
     authentication_classes = [MyAhenAuthentication]
-    parser_classes = (MultiPartParser, FormParser)
+    #parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, userid):
         file_serializer = FileUploadSerializer(data=request.data)
