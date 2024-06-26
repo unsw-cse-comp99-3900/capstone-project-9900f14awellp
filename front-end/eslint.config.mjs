@@ -1,4 +1,4 @@
-import globals from 'globals';
+import globals, { node } from 'globals';
 import pluginJs from '@eslint/js';
 import pluginReactConfig from 'eslint-plugin-react/configs/recommended.js';
 import prettierConfig from 'eslint-config-prettier';
@@ -14,6 +14,7 @@ export default [
 				ecmaFeatures: {
 					jsx: true,
 				},
+				sourceType: 'script',
 			},
 		},
 	},
