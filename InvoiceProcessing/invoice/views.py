@@ -37,7 +37,7 @@ class RegisterView(APIView):
     
 # 用户登录
 class LoginView(APIView):
-    def post(self, request):
+    def get(self, request):
         ser = LoginSerializer(data=request.data)
 
         if not ser.is_valid():
@@ -46,14 +46,16 @@ class LoginView(APIView):
         instance = User.objects.filter(**ser.validated_data).first()
 
         if not instance:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'error': 'This user does not exist'}, status=status.HTTP_401_UNAUTHORIZED)
         # token, created = Token.objects.get_or_create(user=instance)
         
         token =str(uuid.uuid4())
         instance.token = token
         instance.save()
         
-        return Response({'token': token}, status=status.HTTP_200_OK)
+        return Response({"state":"Login success",
+                        'token': token}, 
+                        status=status.HTTP_200_OK)
     
 class CreateCompanyView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -83,9 +85,9 @@ class JoinCompanyView(APIView):
     # permission_classes = [IsAuthenticated]
     authentication_classes = [MyAhenAuthentication]
     def post(self, request, userid):
-        company_name = request.data.get('name')
+        company_name = request.data.get('company_name')
         if not company_name:
-            return Response({'error': 'Company name is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'company_name field is required'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             company = Company.objects.get(name=company_name)
