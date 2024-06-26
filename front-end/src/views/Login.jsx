@@ -30,8 +30,11 @@ export default function Login() {
         })
         .catch(error => {
         if (error.response) {
+            alert(error.response.data || 'Login failed');
+            console.log(username, password)
             console.log(error.response.data);
         } else {
+            alert(error.message);
             console.log(error.message);
         }
         });
@@ -40,8 +43,8 @@ export default function Login() {
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'white' }}>
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px', backgroundColor: 'white', border: '1px solid #ccc', borderRadius: '8px' }}>
                 <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Login</h1>
-                <InputTextField label="Email" id="Login-Email" defaultValue="Email" onChange={(e) => setUsername(e.target.value)}/>
-                <PasswordTextField onChange={(e) => setPassword(e.target.value)}/>
+                <InputTextField label="username" id="Login-username" defaultValue="username" value={username} onChange={(e) => setUsername(e.target.value)}/>
+                <PasswordTextField id="Login-password" label="Password" value={password} onChange={(e) => setPassword(e.target.value)}/>
                 <AlignRight>
                     <UnderlineLink onClick={goRegister} fontsize='9px'>
                         Forget your password?

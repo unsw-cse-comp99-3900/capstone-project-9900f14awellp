@@ -11,7 +11,7 @@ import FormControl from '@mui/material/FormControl';
 import { alpha, styled } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 
-export const InputTextField = ({ label, id, variant }) => {
+export const InputTextField = ({ label, id, variant, value, onChange }) => {
   return (
     <Box
       component="form"
@@ -26,13 +26,15 @@ export const InputTextField = ({ label, id, variant }) => {
           id={id} 
           label={label} 
           variant={variant} 
+          value={value}
+          onChange={onChange}
         />
     </div>
     </Box>
   );
 };
 
-export const PasswordTextField = () => {
+export const PasswordTextField = ({ id, label, value, onChange }) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (event) => {
@@ -45,10 +47,12 @@ export const PasswordTextField = () => {
     >
       <div>
         <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined">
-          <InputLabel htmlFor="all-password">Password</InputLabel>
+          <InputLabel htmlFor="all-password">{label}</InputLabel>
           <OutlinedInput
-            id="all-password"
+            id={id}
             type={showPassword ? 'text' : 'password'}
+            value={value}
+            onChange={onChange}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
@@ -61,7 +65,7 @@ export const PasswordTextField = () => {
                 </IconButton>
               </InputAdornment>
             }
-            label="Password"
+            label={label}
           />
         </FormControl>
       </div>
