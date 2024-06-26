@@ -1,16 +1,17 @@
   .button-and-progess{
     position: absolute;
-    top: 70%;
-    width: 100%;
+    bottom: 7%;
+    width: 100vw;
+    height: 16vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 30px;
+    justify-content: space-between;
   }
 
   .button-row{
-    width: 50%;
+    width: 55vw;
+    height: 5.6vh;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -18,13 +19,13 @@
 
   .back-button {
     width: 12%;
-    height: 50px;
+    height: 100%;
     background-color: transparent;
     color: #333;
     border: 1px dashed #333;
     border-radius: 20px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: calc(0.8vw + 0.5vh);
     font-weight: 500;
   }
 
@@ -34,13 +35,13 @@
 
   .continue-button {
     width: 12%;
-    height: 50px;
+    height: 100%;
     background-color: #333;
     color: white;
     border: 1px dashed #333;
     border-radius: 20px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: calc(0.8vw + 0.5vh);
     font-weight: 500;
   }
 
@@ -53,7 +54,7 @@
   }
 
   .progress-indicator {
-    width: 50%;
+    width: 55%;
     padding: 20px 20px 20px 20px;
   }
   
@@ -110,7 +111,7 @@
     left: 50%;
     transform: translateX(-50%);
     margin-top: 10px;
-    font-size: 20px;
+    font-size: calc(0.72vw + 0.72vh);
     font-weight: 500;
     color: #ccc;
     text-align: center;

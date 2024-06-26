@@ -17,7 +17,7 @@ export default function Create() {
   
     const cards = [
       { icon: '✏️', title: 'GUI Form', route: '/form' },
-      { icon: '< >', title: 'File Upload', route: '/upload' },
+      { icon: '📋', title: 'File Upload', route: '/upload' },
     ];
   
     const handleCardSelect = (index) => {
@@ -37,7 +37,10 @@ export default function Create() {
     return (
       <div className='center'>
         <ResponsiveAppBar />
-        <div className="title">Create your E-invoice</div>
+        <div className="head-title-div">
+          <div className="title">Create your E-invoice</div>
+          <div className="type">select your invoice type</div>
+        </div>
         <CardSelector 
           cards={cards}
           selectedCard={selectedCard}
