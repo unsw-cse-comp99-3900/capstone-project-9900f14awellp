@@ -38,7 +38,7 @@ export const ResponsiveAppBar = () => {
   };
 
   const handleNavigate = (page) => {
-    navigate(`/home/${page.toLowerCase().replace(' ', '-')}`);
+    navigate(`/${page.toLowerCase().replace(' ', '-')}`);
     handleCloseNavMenu();
   };
 
@@ -71,11 +71,11 @@ export const ResponsiveAppBar = () => {
               fontFamily: 'monospace',
               fontWeight: 700,
               letterSpacing: '.3rem',
-              color: 'inherit',
+              color: 'black',
               textDecoration: 'none',
             }}
           >
-            E-Inv Logo
+            E-InvLogo
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -94,12 +94,12 @@ export const ResponsiveAppBar = () => {
               anchorEl={anchorElNav}
               anchorOrigin={{
                 vertical: 'bottom',
-                horizontal: 'left',
+                horizontal: 'center',
               }}
               keepMounted
               transformOrigin={{
                 vertical: 'top',
-                horizontal: 'left',
+                horizontal: 'center',
               }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
@@ -115,7 +115,7 @@ export const ResponsiveAppBar = () => {
             </Menu>
           </Box>
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-          {/* <Typography
+          <Typography
             variant="h5"
             noWrap
             component="a"
@@ -132,7 +132,7 @@ export const ResponsiveAppBar = () => {
             }}
           >
             E-Invoice
-          </Typography> */}
+          </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
               <Button

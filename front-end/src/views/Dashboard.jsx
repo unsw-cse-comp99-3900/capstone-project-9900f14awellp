@@ -1,15 +1,16 @@
 import React from "react";
 import { Outlet} from "react-router-dom";
 import { ResponsiveAppBar } from "../components/Navbar";
+import { VirtualizedList } from "../components/List";
 
 export default function Dashboard() {
     //* 路由跳转
     return (
         <div>
             <ResponsiveAppBar />
-            {/* <div style={{ flexGrow: 1, overflow: 'auto' }}>
+            <div style={{ flexGrow: 1, overflow: 'auto' }}>
                 <VirtualizedList />
-            </div>*/}
+            </div>
             <Outlet />
         </div>
     );
