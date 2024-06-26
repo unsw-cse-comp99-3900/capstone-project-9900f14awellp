@@ -20,7 +20,23 @@ function renderRow(props) {
 export const VirtualizedList = () => {
   return (
     <Box
-      sx={{ width: '100%', height: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+      sx={{ 
+        width: '80%', 
+        height: '100%', 
+        maxWidth: 360, 
+        bgcolor: 'background.paper',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '0.5px',
+          boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.9)',
+          zIndex: 1,
+        }
+      }}
     >
       <FixedSizeList
         height={window.innerHeight-70}
