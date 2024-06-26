@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { InputTextField, PasswordTextField } from '../components/Inputs';
 import { ButtonSizes } from '../components/Buttons';
 import { UnderlineLink, AlignRight} from '../components/Link';
 import { BasicModal } from '../components/Model';
+import axios from 'axios';
 
 export default function Login() {
     //* 路由跳转
@@ -15,19 +16,39 @@ export default function Login() {
         navigate("/home");
     }
 
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleLogin = () => {
+        axios.post('http://localhost:8000/invoice/login/', {
+        username: username,
+        password: password
+        })
+        .then(response => {
+        console.log(response.data);
+        goDashboard();
+        })
+        .catch(error => {
+        if (error.response) {
+            console.log(error.response.data);
+        } else {
+            console.log(error.message);
+        }
+        });
+    };
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'white' }}>
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px', backgroundColor: 'white', border: '1px solid #ccc', borderRadius: '8px' }}>
                 <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Login</h1>
-                <InputTextField label="Email" id="Login-Email" defaultValue="Email" />
-                <PasswordTextField />
+                <InputTextField label="Email" id="Login-Email" defaultValue="Email" onChange={(e) => setUsername(e.target.value)}/>
+                <PasswordTextField onChange={(e) => setPassword(e.target.value)}/>
                 <AlignRight>
                     <UnderlineLink onClick={goRegister} fontsize='9px'>
                         Forget your password?
                     </UnderlineLink>
                 </AlignRight>
                 
-                <ButtonSizes onClick={goDashboard}>
+                <ButtonSizes onClick={handleLogin}>
                     Login
                 </ButtonSizes>
                 <UnderlineLink onClick={goRegister}  fontsize='10px'>
