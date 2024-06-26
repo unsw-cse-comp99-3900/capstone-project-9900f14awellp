@@ -16,13 +16,12 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include 
+from django.urls import include, path, re_path
 from rest_framework.documentation import include_docs_urls
 
-
 urlpatterns = [
-    path('api-auth/',include('rest_framework.urls')), # DRF的登录登出
+    path('api-auth/', include('rest_framework.urls')),  # DRF的登录登出
     path("admin/", admin.site.urls),
-    path("invoice/",include("invoice.urls")),
-    path('doc/',include_docs_urls(title='InvoiceProcessing API', description='InvoiceProcessing API文档'))
+    path("invoice/", include("invoice.urls")),
+    re_path(r'^doc/', include_docs_urls(title='InvoiceProcessing API', description='InvoiceProcessing API文档')),
 ]
