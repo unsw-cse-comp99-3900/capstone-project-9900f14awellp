@@ -1,0 +1,123 @@
+  .button-and-progess{
+    position: absolute;
+    top: 70%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+  }
+
+  .button-row{
+    width: 50%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .back-button {
+    width: 12%;
+    height: 50px;
+    background-color: transparent;
+    color: #333;
+    border: 1px dashed #333;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .back-button:hover {
+    background-color: #EAEAEA;
+  }
+
+  .continue-button {
+    width: 12%;
+    height: 50px;
+    background-color: #333;
+    color: white;
+    border: 1px dashed #333;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .continue-button:hover {
+    background-color: #494446;
+  }
+
+  .back-button:hover {
+    background-color: #EAEAEA;
+  }
+
+  .progress-indicator {
+    width: 50%;
+    padding: 20px 20px 20px 20px;
+  }
+  
+  .steps-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .step-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  
+  .step {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 20%;
+    border: 3px solid #ccc;
+    background-color: #fff;
+    transition: all 0.3s ease;
+  }
+  
+  .step.active .circle {
+    border-color: #333;
+    background-color: #333;
+  }
+  
+  .connector {
+    flex-grow: 1;
+    height: 3px;
+    background-color: #ccc;
+    transition: all 0.3s ease;
+    align-self: center;
+    margin: 0 -12px;
+  }
+  
+  .connector.active {
+    background-color: #333;
+  }
+  
+  .label {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 10px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #ccc;
+    text-align: center;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+  }
+  
+  .label.active {
+    color: #333;
+  }
