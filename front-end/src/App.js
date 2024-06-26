@@ -20,10 +20,10 @@ export default function App() {
 				<Route index element={<Welcome></Welcome>} />
 				<Route path="/home" element={<Dashboard></Dashboard>}>
 					{/* <Route index element={<Create />}></Route> */}
-				<Route path="create" element={<Create />}></Route>
-				<Route path="manage" element={<InvoiceManagement />}></Route>
-				<Route path="validate" element={<Validation />}></Route>
-				<Route path="send" element={<Sending />}></Route>
+					<Route path="create" element={<Create />}></Route>
+					<Route path="manage" element={<InvoiceManagement />}></Route>
+					<Route path="validate" element={<Validation />}></Route>
+					<Route path="send" element={<Sending />}></Route>
 				</Route>
 				<Route path="/login" element={<Login></Login>} />
 				<Route path="/register" element={<Register></Register>} />

@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { InputTextField, PasswordTextField } from './components/Inputs';
+import { InputTextField, PasswordTextField } from '../components/Inputs';
 
 export default function Login() {
     //* 路由跳转
