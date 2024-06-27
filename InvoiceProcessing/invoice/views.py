@@ -25,7 +25,8 @@ from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer, F
 
 # 用户注册
 class RegisterView(APIView):
-    
+    authentication_classes = []  # 禁用认证
+    permission_classes = []
     def post(self, request):
         ser = RegisterSerializer(data=request.data)
         if ser.is_valid():
@@ -37,7 +38,9 @@ class RegisterView(APIView):
     
 # 用户登录
 class LoginView(APIView):
-    def get(self, request):
+    authentication_classes = []  # 禁用认证
+    permission_classes = []
+    def post(self, request):
         ser = LoginSerializer(data=request.data)
 
         if not ser.is_valid():
