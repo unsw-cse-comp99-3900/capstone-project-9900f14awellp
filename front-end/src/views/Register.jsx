@@ -28,7 +28,7 @@ export default function Register() {
             alert('Passwords do not match');
             return;
         }
-        console.log(username,password,confirmPassword,name,email)
+        // console.log(username,password,confirmPassword,name,email)
         axios.post('http://localhost:8000/invoice/register/', {
             username: username,
             password: password,
@@ -37,14 +37,15 @@ export default function Register() {
             confirm_password: confirmPassword,
         })
         .then(response => {
-            // console.log(username,password,confirmPassword,name,email)
+            // localStorage.setItem('token', response.data.token);
+            // localStorage.setItem('userid', response.data.userid);
             console.log(response.data);
             goChoice();
         })
         .catch(error => {
             if (error.response) {
                 console.log(username,password,confirmPassword,name,email)
-                alert(error.response.data.message || 'Registration failed');
+                alert(error.response.data.detail || 'Registration failed');
                 console.log(error.response.data.detail);
 
             } else {

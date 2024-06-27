@@ -18,7 +18,6 @@ export default function Login() {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-
     const handleLogin = () => {
         axios.post('http://localhost:8000/invoice/login/', {
         username: username,
@@ -26,13 +25,18 @@ export default function Login() {
         })
         .then(response => {
         console.log(response.data);
+        // const token = response.data.token;
+        localStorage.setItem('token', response.data.token);
+        // localStorage.setItem('userid', response.data.userid);
+        alert(response.data.state);
         goDashboard();
         })
         .catch(error => {
         if (error.response) {
-            alert(error.response.data || 'Login failed');
+            alert(error.response.data.detail || 'Login failed');
             console.log(username, password)
-            console.log(error.response.data);
+            console.log(error.response.data.detail);
+
         } else {
             alert(error.message);
             console.log(error.message);

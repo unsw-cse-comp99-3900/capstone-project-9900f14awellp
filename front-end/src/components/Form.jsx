@@ -104,7 +104,7 @@ export const ChoiceCompanyForm = ({ open, handleClose , handleSubmit}) => {
   );
 };
 
-export const CreateCompanyForm = ({ open, handleClose, handleSubmit }) => {
+export const CreateCompanyForm = ({ open, handleClose, handleSubmit, formData, handleChange }) => {
     return (
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle>Create a company</DialogTitle>
@@ -113,7 +113,9 @@ export const CreateCompanyForm = ({ open, handleClose, handleSubmit }) => {
             <TextField
               fullWidth
               label="Company Name"
-              defaultValue="Jane"
+              name="name"
+              value={formData.name || ''} 
+              onChange={handleChange} 
               variant="outlined"
               margin="normal"
             />
@@ -121,7 +123,9 @@ export const CreateCompanyForm = ({ open, handleClose, handleSubmit }) => {
               <TextField
                 fullWidth
                 label="Phone Number"
-                defaultValue="XXXXXXXX"
+                name="phone_number"
+                value={formData.phone_number || ''} 
+                onChange={handleChange} 
                 variant="outlined"
                 margin="normal"
               />
@@ -129,21 +133,27 @@ export const CreateCompanyForm = ({ open, handleClose, handleSubmit }) => {
             <TextField
               fullWidth
               label="Company Email address"
-              defaultValue="email@janesfakedomain.net"
+              name="email"
+              value={formData.email || ''} 
+              onChange={handleChange} 
               variant="outlined"
               margin="normal"
             />
             <TextField
               fullWidth
               label="Australian Business Number(ABN)"
-              defaultValue="00 111 222 333"
+              name="ABN"
+              value={formData.ABN || ''} 
+              onChange={handleChange} 
               variant="outlined"
               margin="normal"
             />
             <TextField
               fullWidth
               label="Company address"
-              defaultValue="street, city, state, post code"
+              name="address"
+              value={formData.address || ''} 
+              onChange={handleChange} 
               variant="outlined"
               margin="normal"
             />

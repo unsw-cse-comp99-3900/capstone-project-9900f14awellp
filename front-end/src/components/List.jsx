@@ -11,18 +11,23 @@ function renderRow(props) {
   return (
     <ListItem style={style} key={index} component="div" disablePadding>
       <ListItemButton>
-        <ListItemText primary={`Item ${index + 1}`} />
+        <ListItemText primary={`Invoice ${index + 1}`} />
       </ListItemButton>
     </ListItem>
   );
 }
 
-export const VirtualizedList = () => {
+export const VirtualizedList = ({ height }) => {
   return (
     <Box
       sx={{ 
-        width: '80%', 
-        height: '100%', 
+        width: {
+          xs: '30%', // 宽度在小屏幕设备上
+          sm: '30%', // 30% 宽度在中等屏幕设备上
+          md: '30%', // 30% 宽度在较大屏幕设备上
+          lg: '30%', // 30% 宽度在超大屏幕设备上
+        },
+        height: height, 
         maxWidth: 360, 
         bgcolor: 'background.paper',
         position: 'relative',
@@ -39,8 +44,8 @@ export const VirtualizedList = () => {
       }}
     >
       <FixedSizeList
-        height={window.innerHeight-70}
-        width={360}
+        height={height}
+        width='100%'
         itemSize={46}
         itemCount={200}
         overscanCount={5}
