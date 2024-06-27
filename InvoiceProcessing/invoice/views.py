@@ -69,6 +69,7 @@ class CreateCompanyView(APIView):
                 name=validated_data['name'],
                 phone_number=validated_data['phone_number'],
                 email=validated_data['email'],
+                ABN = validated_data['ABN'],
                 address=validated_data['address'],
                 boss_id=request.user,  # 将 boss_id 设置为当前用户
             )
@@ -84,6 +85,12 @@ class CreateCompanyView(APIView):
 class JoinCompanyView(APIView):
     # permission_classes = [IsAuthenticated]
     authentication_classes = [MyAhenAuthentication]
+    
+    def get(self,request,userid):
+        companies = Company.objects.all()
+        return Response({'companies': [company.name for company in companies]}, status=status.HTTP_200_OK)
+        
+        
     def post(self, request, userid):
         company_name = request.data.get('company_name')
         if not company_name:
