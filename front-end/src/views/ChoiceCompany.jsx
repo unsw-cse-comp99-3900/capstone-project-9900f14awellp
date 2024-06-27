@@ -7,15 +7,23 @@ import { CreateCompanyForm } from '../components/Form'
 import axios from 'axios';
 
 export default function Choice() {
-    //* 路由跳转
+    const userid = '10'; // Replace with the actual user ID
     const navigate = useNavigate();
-
-    // const goDashboard = () => {
-    //     navigate("/home");
-    // }
     const [open, setOpen] = useState(false);
     const [openCreateForm, setOpenCreateForm] = useState(false);
+    const [names, setNames] = useState([]);
     const handleOpen = () => {
+        axios.get(`http://localhost:8000/invoice/join-company/${userid}/`)
+        .then(response => {
+            console.log('Response:', response.data);
+            setNames(response.data); // 更新 names 的值
+            handleSubmitCreateForm();
+        })
+        .catch(error => {
+            console.log(formData);
+            console.log(error.message);
+            alert(error.message);
+        });
         setOpen(true);
     };
     const handleClose = () => {
@@ -43,7 +51,7 @@ export default function Choice() {
     };
 
 
-    const userId = '10'; // Replace with the actual user ID
+    
     const [formData, setFormData] = useState({
         name: '',
         phone_number: '',
@@ -61,7 +69,7 @@ export default function Choice() {
       };
 
     const handleChioceCompany = () =>{
-        axios.post(`http://localhost:8000/invoice/create-company/${userId}/`, formData)
+        axios.post(`http://localhost:8000/invoice/create-company/${userid}/`, formData)
         .then(response => {
             console.log('Response:', response.data);
             console.log(formData);
@@ -81,7 +89,7 @@ export default function Choice() {
                 <OutlinedCard onClick={handleOpen} button = 'Join' title = 'Join a company'></OutlinedCard>
                 <OutlinedCard onClick={handleOpenCreateForm} button = 'Create' title = 'Create a company'></OutlinedCard>
             </div>
-            <ChoiceCompanyForm open={open} handleClose={handleClose} handleSubmit={handleSubmit}/>
+            <ChoiceCompanyForm open={open} handleClose={handleClose} handleSubmit={handleSubmit} names={names}/>
             <CreateCompanyForm open={openCreateForm} handleClose={handleCloseCreateForm} handleSubmit={handleChioceCompany} formData={formData} handleChange={handleChange} />
         </div>
     );
