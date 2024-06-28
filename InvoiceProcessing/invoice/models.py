@@ -8,7 +8,7 @@ class Company(models.Model):
     phone_number = models.CharField(max_length=20, verbose_name='Company Phone Number')
     boss_id = models.OneToOneField('User', on_delete=models.CASCADE, related_name='employee', verbose_name='Company', null=True, blank=True)
     email = models.EmailField(verbose_name='Company Email')
-    ABN = models.CharField(max_length=20, verbose_name='ABN')
+    ABN = models.CharField(max_length=20, verbose_name='ABN',default="000")
     address = models.CharField(max_length=255, verbose_name='Company Address')
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
     update_date = models.DateTimeField(auto_now=True, verbose_name='Update Date')

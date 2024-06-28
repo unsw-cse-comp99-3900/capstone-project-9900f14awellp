@@ -87,14 +87,18 @@ class CreateCompanyView(APIView):
 
 class JoinCompanyView(APIView):
     # permission_classes = [IsAuthenticated]
+
+    
     authentication_classes = [MyAhenAuthentication]
     
     def get(self,request,userid):
+
         companies = Company.objects.all()
         return Response({'companies': [company.name for company in companies]}, status=status.HTTP_200_OK)
         
         
     def post(self, request, userid):
+
         company_name = request.data.get('company_name')
         if not company_name:
             return Response({'error': 'company_name field is required'}, status=status.HTTP_400_BAD_REQUEST)
