@@ -31,7 +31,11 @@ class RegisterView(APIView):
         ser = RegisterSerializer(data=request.data)
         if ser.is_valid():
             ser.validated_data.pop('confirm_password')
-            ser.save()
+            user = ser.save()
+            token =str(uuid.uuid4())
+            response_data = ser.data
+            response_data['token'] = token
+            
             return Response(ser.data, status=status.HTTP_201_CREATED)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -57,6 +61,7 @@ class LoginView(APIView):
         instance.save()
         
         return Response({"state":"Login success",
+                         'userid':instance.id,
                         'token': token}, 
                         status=status.HTTP_200_OK)
     
