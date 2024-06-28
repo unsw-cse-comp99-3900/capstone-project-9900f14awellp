@@ -5,7 +5,9 @@ import Welcome from './views/Welcome';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';
 import Register from './views/Register';
-import Create from './views/Create';
+import Create from './views/Creation/Create';
+import Upload from './views/Creation/Upload';
+import GUI from './views/Creation/GUI';
 import Sending from './views/sending';
 import InvoiceManagement from './views/InvoiceManagement';
 import Draft from './views/Draft';
@@ -19,7 +21,10 @@ export default function App() {
 			<Routes>
 				<Route index element={<Welcome></Welcome>} />
 				<Route path="/home" element={<Dashboard></Dashboard>} />
-				<Route path="/create" element={<Create />}></Route>
+				<Route path="/create" element={<Create />}>
+					<Route path="upload" element={<Upload />}></Route>
+					<Route path="form" element={<GUI />}></Route>
+				</Route>
 				<Route path="/manage" element={<InvoiceManagement />}></Route>
 				<Route path="/validate" element={<Validation />}></Route>
 				<Route path="/send" element={<Sending />}></Route>
