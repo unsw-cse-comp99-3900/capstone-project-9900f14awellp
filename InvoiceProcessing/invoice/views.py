@@ -10,7 +10,7 @@ from django.http import FileResponse
 import uuid
 from .authentication import MyAhenAuthentication
 
-from rest_framework.parsers import MultiPartParser, FormParser
+#from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import generics, viewsets
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
@@ -25,18 +25,29 @@ from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer, F
 
 # 用户注册
 class RegisterView(APIView):
-    
+    authentication_classes = []  # 禁用认证
+    permission_classes = []
     def post(self, request):
         ser = RegisterSerializer(data=request.data)
         if ser.is_valid():
             ser.validated_data.pop('confirm_password')
+            token =str(uuid.uuid4())
+            ser.validated_data['token'] = token
             ser.save()
-            return Response(ser.data, status=status.HTTP_201_CREATED)
+            instance = User.objects.filter(**ser.validated_data).first()
+            return Response({
+                    'username':instance.username,
+                    'password':instance.password,
+                    'userid':instance.id,
+                    'token':instance.token,
+                }, status=status.HTTP_201_CREATED)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
 # 用户登录
 class LoginView(APIView):
+    authentication_classes = []  # 禁用认证
+    permission_classes = []
     def post(self, request):
         ser = LoginSerializer(data=request.data)
 
@@ -46,14 +57,14 @@ class LoginView(APIView):
         instance = User.objects.filter(**ser.validated_data).first()
 
         if not instance:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'error': 'This user does not exist'}, status=status.HTTP_401_UNAUTHORIZED)
         # token, created = Token.objects.get_or_create(user=instance)
+
         
-        token =str(uuid.uuid4())
-        instance.token = token
-        instance.save()
-        
-        return Response({'token': token}, status=status.HTTP_200_OK)
+        return Response({"state":"Login success",
+                         'userid':instance.id,
+                        'token': instance.token}, 
+                        status=status.HTTP_200_OK)
     
 class CreateCompanyView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -67,6 +78,7 @@ class CreateCompanyView(APIView):
                 name=validated_data['name'],
                 phone_number=validated_data['phone_number'],
                 email=validated_data['email'],
+                ABN = validated_data['ABN'],
                 address=validated_data['address'],
                 boss_id=request.user,  # 将 boss_id 设置为当前用户
             )
@@ -81,11 +93,21 @@ class CreateCompanyView(APIView):
 
 class JoinCompanyView(APIView):
     # permission_classes = [IsAuthenticated]
+
+    
     authentication_classes = [MyAhenAuthentication]
+    
+    def get(self,request,userid):
+
+        companies = Company.objects.all()
+        return Response({'companies': [company.name for company in companies]}, status=status.HTTP_200_OK)
+        
+        
     def post(self, request, userid):
-        company_name = request.data.get('name')
+
+        company_name = request.data.get('company_name')
         if not company_name:
-            return Response({'error': 'Company name is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'company_name field is required'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             company = Company.objects.get(name=company_name)
@@ -113,7 +135,7 @@ def file_iterator(file_path, chunk_size=512):
 # for uploading and downloading files
 class UpFileAPIView(APIView):
     authentication_classes = [MyAhenAuthentication]
-    parser_classes = (MultiPartParser, FormParser)
+    #parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, userid):
         file_serializer = FileUploadSerializer(data=request.data)
