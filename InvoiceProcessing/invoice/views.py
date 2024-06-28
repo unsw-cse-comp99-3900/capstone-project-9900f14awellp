@@ -31,12 +31,16 @@ class RegisterView(APIView):
         ser = RegisterSerializer(data=request.data)
         if ser.is_valid():
             ser.validated_data.pop('confirm_password')
-            user = ser.save()
             token =str(uuid.uuid4())
-            response_data = ser.data
-            response_data['token'] = token
-            
-            return Response(ser.data, status=status.HTTP_201_CREATED)
+            ser.validated_data['token'] = token
+            ser.save()
+            instance = User.objects.filter(**ser.validated_data).first()
+            return Response({
+                    'username':instance.username,
+                    'password':instance.password,
+                    'userid':instance.id,
+                    'token':instance.token,
+                }, status=status.HTTP_201_CREATED)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
@@ -55,14 +59,11 @@ class LoginView(APIView):
         if not instance:
             return Response({'error': 'This user does not exist'}, status=status.HTTP_401_UNAUTHORIZED)
         # token, created = Token.objects.get_or_create(user=instance)
-        
-        token =str(uuid.uuid4())
-        instance.token = token
-        instance.save()
+
         
         return Response({"state":"Login success",
                          'userid':instance.id,
-                        'token': token}, 
+                        'token': instance.token}, 
                         status=status.HTTP_200_OK)
     
 class CreateCompanyView(APIView):
