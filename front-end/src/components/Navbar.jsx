@@ -46,7 +46,7 @@ export const ResponsiveAppBar = () => {
     const path = setting.toLowerCase().replace(' ', '-');
     if (path === 'logout') {
       localStorage.removeItem('token');
-      localStorage.removeItem('userId');
+      localStorage.removeItem('userid');
       navigate("/login");
     } else {
       navigate(`/${path}`);

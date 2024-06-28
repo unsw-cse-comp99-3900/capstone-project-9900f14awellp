@@ -37,8 +37,8 @@ export default function Register() {
             confirm_password: confirmPassword,
         })
         .then(response => {
-            // localStorage.setItem('token', response.data.token);
-            // localStorage.setItem('userid', response.data.userid);
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('userid', response.data.userid);
             console.log(response.data);
             goChoice();
         })

@@ -27,7 +27,7 @@ export default function Login() {
         console.log(response.data);
         // const token = response.data.token;
         localStorage.setItem('token', response.data.token);
-        // localStorage.setItem('userid', response.data.userid);
+        localStorage.setItem('userid', response.data.userid);
         alert(response.data.state);
         goDashboard();
         })

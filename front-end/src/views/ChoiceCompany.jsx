@@ -7,7 +7,8 @@ import { CreateCompanyForm } from '../components/Form'
 import axios from 'axios';
 
 export default function Choice() {
-    const userid = '9'; // Replace with the actual user ID
+    //const userid = '9'; // Replace with the actual user ID
+    const userid = localStorage.getItem('userid'); // 从 localStorage 获取 userid
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [openCreateForm, setOpenCreateForm] = useState(false);
