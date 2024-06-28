@@ -48,18 +48,23 @@ function getStyles(name, personName, theme) {
 
 export const ChoiceCompanyForm = ({ open, handleClose , handleSubmit, names}) => {
   const theme = useTheme();
-  const [personName, setPersonName] = React.useState([]);
+  const [personName, setPersonName] = React.useState('');
 
+  // const handleChange = (event) => {
+  //   const {
+  //     target: { value },
+  //   } = event;
+  //   setPersonName(
+  //     // On autofill we get a stringified value.
+  //     typeof value === 'string' ? value.split(',') : value,
+  //   );
+  // };
   const handleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setPersonName(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    setPersonName(event.target.value); // 确保选中的值是一个字符串
   };
-
+  const handleFormSubmit = () => {
+    handleSubmit(personName); // 将选中的公司名称传递给 handleSubmit
+  };
   return (
     <Dialog disableEscapeKeyDown open={open} onClose={handleClose}>
       <DialogTitle>Company Select</DialogTitle>
@@ -98,7 +103,7 @@ export const ChoiceCompanyForm = ({ open, handleClose , handleSubmit, names}) =>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="inherit">Cancel</Button>
-        <Button onClick={handleSubmit} color="inherit">Submit</Button>
+        <Button onClick={handleFormSubmit} color="inherit">Submit</Button>
       </DialogActions>
     </Dialog>
   );

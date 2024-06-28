@@ -7,31 +7,47 @@ import { CreateCompanyForm } from '../components/Form'
 import axios from 'axios';
 
 export default function Choice() {
-    const userid = '10'; // Replace with the actual user ID
+    const userid = '9'; // Replace with the actual user ID
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [openCreateForm, setOpenCreateForm] = useState(false);
     const [names, setNames] = useState([]);
+
+  
     const handleOpen = () => {
         axios.get(`http://localhost:8000/invoice/join-company/${userid}/`)
         .then(response => {
-            console.log('Response:', response.data);
-            setNames(response.data); // 更新 names 的值
-            handleSubmitCreateForm();
+            console.log(response.data.companies);
+            setNames(response.data.companies); // 确保响应数据是一个数组
+            // handleSubmitCreateForm();
+            setOpen(true);
         })
         .catch(error => {
             console.log(formData);
             console.log(error.message);
             alert(error.message);
         });
-        setOpen(true);
+        
     };
     const handleClose = () => {
         setOpen(false);
     };
 
-    const handleSubmit = () => {
-        // Your submit logic here
+    const handleSubmit = (personName) => {
+        axios.post(`http://localhost:8000/invoice/join-company/${userid}/`, {
+            company_name: personName
+        })
+        .then(response => {
+            console.log(response.data);
+            console.log(formData);
+            handleSubmitCreateForm();
+            alert(response.data.success);
+        })
+        .catch(error => {
+            console.log(formData);
+            console.log(error.message);
+            alert(error.message);
+        });
         navigate("/home");
         setOpen(false);
     };
@@ -73,6 +89,7 @@ export default function Choice() {
         .then(response => {
             console.log('Response:', response.data);
             console.log(formData);
+            alert('You create a company!');
             handleSubmitCreateForm();
         })
         .catch(error => {
