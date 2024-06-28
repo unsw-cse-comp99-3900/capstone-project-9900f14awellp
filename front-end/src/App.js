@@ -14,6 +14,8 @@ import Draft from './views/Draft';
 import Profile from './views/Profile';
 import Validation from './views/Validation';
 import NotFound from './views/NotFound';
+import Choice from './views/ChoiceCompany';
+import CompanyDetails from './views/CompanyDetails';
 
 export default function App() {
 	return (
@@ -30,8 +32,10 @@ export default function App() {
 				<Route path="/send" element={<Sending />}></Route>
 				<Route path="/login" element={<Login></Login>} />
 				<Route path="/register" element={<Register></Register>} />
+				<Route path="/choice" element={<Choice></Choice>} />
 				<Route path="/draft" element={<Draft></Draft>} />
 				<Route path="/profile" element={<Profile></Profile>} />
+				<Route path="/company-details" element={<CompanyDetails></CompanyDetails>} />
 				<Route path="/404" element={<NotFound></NotFound>} />
 				<Route path="*" element={<Navigate to="/404" />} />
 			</Routes>

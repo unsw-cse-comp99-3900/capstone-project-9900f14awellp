@@ -15,7 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 
 const pages = ['Create', 'Validate', 'Send', 'Manage'];
-const settings = ['Profile', 'Drafts', 'Company Details', 'Logout'];
+const settings = ['Profile', 'Draft', 'Company Details', 'Logout'];
 
 export const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -45,7 +45,9 @@ export const ResponsiveAppBar = () => {
   const handleNavigateProfile = (setting) => {
     const path = setting.toLowerCase().replace(' ', '-');
     if (path === 'logout') {
-      // handle logout logic here
+      localStorage.removeItem('token');
+      localStorage.removeItem('userid');
+      navigate("/login");
     } else {
       navigate(`/${path}`);
     }
@@ -75,7 +77,7 @@ export const ResponsiveAppBar = () => {
               textDecoration: 'none',
             }}
           >
-            E-InvLogo
+            E-Invoice
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
