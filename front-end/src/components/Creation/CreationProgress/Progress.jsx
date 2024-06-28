@@ -14,7 +14,7 @@ const ProgressIndicator = ({ steps, currentStep, onContinue, onBack }) => {
               <React.Fragment key={index}>
                 <div className="step-wrapper">
                   <div className={`step ${index <= currentStep ? 'active' : ''}`}>
-                    <div className="circle"></div>
+                    <div className="circle">{index+1}</div>
                   </div>
                   <div className={`label ${index <= currentStep ? 'active' : ''}`}>{step}</div>
                 </div>

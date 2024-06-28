@@ -21,9 +21,10 @@ export default function App() {
 			<Routes>
 				<Route index element={<Welcome></Welcome>} />
 				<Route path="/home" element={<Dashboard></Dashboard>} />
-				<Route path="/create" element={<Create />}></Route>
-				<Route path="/upload" element={<Upload />}></Route>
-				<Route path="/form" element={<GUI />}></Route>
+				<Route path="/create" element={<Create />}>
+					<Route path="upload" element={<Upload />}></Route>
+					<Route path="form" element={<GUI />}></Route>
+				</Route>
 				<Route path="/manage" element={<InvoiceManagement />}></Route>
 				<Route path="/validate" element={<Validation />}></Route>
 				<Route path="/send" element={<Sending />}></Route>

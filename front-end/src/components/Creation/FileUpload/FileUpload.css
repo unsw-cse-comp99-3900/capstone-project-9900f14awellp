@@ -1,0 +1,100 @@
+.upload-container {
+	width: 27vw;
+	height: 49vh;
+	margin-top: 2vh;
+	padding-top: 40px;
+	padding-left: 40px;
+	padding-right: 40px;
+	padding-bottom: 12px;
+	background-color: white;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	box-shadow: 0px 8px 10px 10px rgba(0, 0, 0, 0.2);
+	display: flex;
+	justify-content: start;
+	align-items: center;
+	flex-direction: column;
+}
+
+.upload-title-container {
+	width: 100%;
+	font-size: calc(1.2vw + 1.2vh);
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-weight: 500;
+}
+
+.dropZone {
+	margin-top: 3vh;
+	border: 2px dashed #ccc;
+	border-radius: 6px;
+	width: 90%;
+	height: 28%;
+	padding: 20px;
+	text-align: center;
+	cursor: pointer;
+	margin-bottom: 20px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: calc(0.55vw + 0.5vh);
+}
+.upload-icon {
+	color: #333;
+}
+
+.drop-text {
+	font-size: calc(0.6vw + 0.6vh);
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-weight: 400;
+	color: #333;
+}
+
+.remind-info-container {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-direction: row;
+	color: #ccc;
+	font-size: calc(0.6vw + 0.6vh);
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-weight: 400;
+	margin-top: calc(-0.5vw - 0.5vh);
+}
+
+.button:disabled {
+	background-color: #ccc;
+}
+.button-groups {
+	width: 100%;
+	display: flex;
+	flex: 1;
+	align-items: end;
+	justify-content: end;
+}
+
+.preview-button {
+	cursor: pointer;
+	width: 28%;
+	height: 72%;
+	background-color: #333;
+	border: transparent;
+	border-radius: 20px;
+	color: white;
+	font-size: calc(0.7vw + 0.7vh);
+}
+
+.preview-button:hover {
+    background-color: #494446;
+  }
+
+  .file-info.hidden {
+	visibility: hidden;
+  }
+  
+  .preview-button:disabled {
+	background-color: #cccccc;
+	color: #666666;
+	cursor: not-allowed;
+  }

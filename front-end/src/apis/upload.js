@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8000';
 
-export const uploadFile = (file, title, onUploadProgress, cancelToken) => {
+export const uploadFile = (file, title) => {
 	const userId = localStorage.getItem('userId');
 	const formData = new FormData();
 	formData.append('file', file);
@@ -15,8 +15,6 @@ export const uploadFile = (file, title, onUploadProgress, cancelToken) => {
 			headers: {
 				'Content-Type': 'multipart/form-data',
 			},
-			onUploadProgress,
-			cancelToken,
 		},
 	);
 };
