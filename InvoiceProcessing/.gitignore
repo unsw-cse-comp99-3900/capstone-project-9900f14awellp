@@ -1,0 +1,8 @@
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# 忽略 Django 特定文件
+*.sqlite3
+media/
+staticfiles/
