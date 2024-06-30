@@ -75,3 +75,15 @@ CORS_ALLOW_HEADERS = [
 
 这样前端访问这个api就不再需要在url中添加userid用来验证。
 
+# 4. 数据库用户密码哈希问题，用户将个人信息存到数据库中，为了增强数据库安全性，需要将用户密码进行哈希
+
+简单方法: 
+
+```python
+from django.contrib.auth.hashers import make_password, check_password
+ser.validated_data['password'] = make_password(ser.validated_data['password']) # 将密码哈希
+check_password(ser.validated_data['password'], instance.password) # 将用户输入的正常密码与哈希值进行比较
+```
+
+
+
