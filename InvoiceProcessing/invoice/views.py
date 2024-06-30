@@ -7,6 +7,7 @@ from django.db.models.signals import post_save # 用户已经建好了，才触�
 from django.dispatch import receiver
 from django.db import models
 from django.http import FileResponse
+from django.contrib.auth.hashers import make_password, check_password
 import uuid
 from .authentication import MyAhenAuthentication
 
@@ -29,9 +30,11 @@ class RegisterView(APIView):
     permission_classes = []
     def post(self, request):
         ser = RegisterSerializer(data=request.data)
+
         if ser.is_valid():
             ser.validated_data.pop('confirm_password')
             token =str(uuid.uuid4())
+            ser.validated_data['password'] = make_password(ser.validated_data['password'])
             ser.validated_data['token'] = token
             ser.save()
             instance = User.objects.filter(**ser.validated_data).first()
@@ -54,13 +57,15 @@ class LoginView(APIView):
         if not ser.is_valid():
             return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        instance = User.objects.filter(**ser.validated_data).first()
+
+        instance = User.objects.filter(username=ser.validated_data['username']).first()
 
         if not instance:
             return Response({'error': 'This user does not exist'}, status=status.HTTP_401_UNAUTHORIZED)
         # token, created = Token.objects.get_or_create(user=instance)
+        elif not check_password(ser.validated_data['password'], instance.password):
+            return Response({'error': 'Password does not match'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        
         return Response({"state":"Login success",
                          'userid':instance.id,
                         'token': instance.token}, 
