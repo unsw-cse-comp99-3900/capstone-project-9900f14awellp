@@ -1,7 +1,7 @@
 from django.shortcuts import render
 import json
 from django.http import JsonResponse
-from .models import Company, User, UpFile
+from .models import Company, User, UpFile, GUIFile
 from django.conf import settings
 from django.db.models.signals import post_save # 用户已经建好了，才触发generate_token函数生成token
 from django.dispatch import receiver
@@ -20,7 +20,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer, FileUploadSerializer
+from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer, FileUploadSerializer, FileGUISerializer
 # Create your views here.
 
 
@@ -145,13 +145,76 @@ class UpFileAPIView(APIView):
     def post(self, request, userid):
         file_serializer = FileUploadSerializer(data=request.data)
         if file_serializer.is_valid():
-            title = file_serializer.validated_data.get('title')
-            if UpFile.objects.filter(userid=request.user, title=title).exists():
+            uuid = file_serializer.validated_data.get('uuid')
+            if UpFile.objects.filter(userid=request.user, uuid=uuid).exists():
                 return Response({
                     "code": 400,
-                    "msg": "Title already exists for this user",
+                    "msg": "ID exists for this user",
                 }, status=status.HTTP_400_BAD_REQUEST)
             file_serializer.save(userid=request.user)
+            return Response({
+                                "code": 0,
+                                "msg": "success!",
+                                "data": file_serializer.data
+                            },
+                            status=status.HTTP_200_OK
+                            )
+        else:
+            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # 返回文件的目录
+    def get(self,request,userid):
+        uuid = request.GET.get('uuid')
+        if not uuid:
+            return Response({
+                                "code": 400,
+                                "msg": "title is required",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        file = UpFile.objects.filter(userid=userid, uuid=uuid).first()
+        if file is None or file.file is None :
+            return Response({
+                                "code": 404,
+                                "msg": "file not found",
+                            },
+                            status=status.HTTP_404_NOT_FOUND
+                            )
+        file_url = file.file.url
+        # 把pdf内容当成乱码返回
+        """response = FileResponse(file_iterator(str(file.file)))
+        response['Content-Type'] = 'application/octet-stream'
+        # Content-Disposition就是当用户想把请求所得的内容存为一个文件的时候提供一个默认的文件名
+        response['Content-Disposition'] = f'attachment; filename="{file.file.name}"'"""
+        return JsonResponse({'file_url': file_url})
+        """return Response({
+            "code":200,
+            "msg":"success",
+        })"""
+        
+class GUIFileAPIView(APIView):
+    authentication_classes = [MyAhenAuthentication]
+    
+    def post(self, request, userid):
+        file_serializer = FileGUISerializer(data=request.data)
+        if file_serializer.is_valid():
+            title = file_serializer.validated_data.get('title')
+            if GUIFile.objects.filter(userid=request.user, title=title).exists():
+                    return Response({
+                    "code": 400,
+                    "msg": "Title already exists for this user",
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                    
+            # 将数据保存在数据库的同时，创建json文件并保存进去
+            file_instance = file_serializer.save(userid=request.user)
+            file_data = FileGUISerializer(file_instance).data
+            # 把title和userid pop掉，存到文件中
+            file_data.pop('id', None)
+            file_data.pop('title', None)
+            file_data.pop('userid', None)
+            
+            with open(f"invoices_files/{title}.json", "w", encoding='utf-8') as f:
+                json.dump(file_data, f, ensure_ascii=False, indent=4)
+                
             return Response({
                                 "code": 0,
                                 "msg": "success!",
@@ -166,33 +229,6 @@ class UpFileAPIView(APIView):
                                 "data": file_serializer.errors
                             },
                             status=status.HTTP_400_BAD_REQUEST)
+        
     
-    def get(self,request,userid):
-        title = request.GET.get('title')
-        if not title:
-            return Response({
-                                "code": 400,
-                                "msg": "title is required",
-                            },
-                            status=status.HTTP_400_BAD_REQUEST)
-        
-        file = UpFile.objects.filter(userid=userid, title=title).first()
-        if file is None or file.file is None :
-            return Response({
-                                "code": 404,
-                                "msg": "file not found",
-                            },
-                            status=status.HTTP_404_NOT_FOUND
-                            )
-
-        response = FileResponse(file_iterator(str(file.file)))
-        response['Content-Type'] = 'application/octet-stream'
-        # Content-Disposition就是当用户想把请求所得的内容存为一个文件的时候提供一个默认的文件名
-        response['Content-Disposition'] = f'attachment; filename="{file.file.name}"'
-        return response
-        """return Response({
-            "code":200,
-            "msg":"success",
-        })"""
-        
     
