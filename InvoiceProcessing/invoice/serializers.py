@@ -1,5 +1,5 @@
 from rest_framework import serializers,exceptions
-from .models import Company, User, UpFile
+from .models import Company, User, UpFile, GUIFile
 from django import forms
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -57,3 +57,9 @@ class FileUploadSerializer(serializers.ModelSerializer):
     class Meta():
         model = UpFile
         fields = ('file', 'title', 'timestamp')
+        
+class FileGUISerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required=True)
+    class Meta():
+        model = GUIFile
+        fields = '__all__'
