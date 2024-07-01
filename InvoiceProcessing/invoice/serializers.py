@@ -53,13 +53,12 @@ class CompanySerializer(serializers.ModelSerializer):
 
 # only data of uploading files need to be serialized
 class FileUploadSerializer(serializers.ModelSerializer):
-    timestamp = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
-    class Meta():
+    class Meta:
         model = UpFile
-        fields = ('file', 'title', 'timestamp')
+        fields = '__all__'
         
 class FileGUISerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
-    class Meta():
+    class Meta:
         model = GUIFile
         fields = '__all__'

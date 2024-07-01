@@ -145,11 +145,11 @@ class UpFileAPIView(APIView):
     def post(self, request, userid):
         file_serializer = FileUploadSerializer(data=request.data)
         if file_serializer.is_valid():
-            title = file_serializer.validated_data.get('title')
-            if UpFile.objects.filter(userid=request.user, title=title).exists():
+            uuid = file_serializer.validated_data.get('uuid')
+            if UpFile.objects.filter(userid=request.user, uuid=uuid).exists():
                 return Response({
                     "code": 400,
-                    "msg": "Title already exists for this user",
+                    "msg": "ID exists for this user",
                 }, status=status.HTTP_400_BAD_REQUEST)
             file_serializer.save(userid=request.user)
             return Response({
@@ -160,23 +160,18 @@ class UpFileAPIView(APIView):
                             status=status.HTTP_200_OK
                             )
         else:
-            return Response({
-                                "code": 400,
-                                "msg": "bad request",
-                                "data": file_serializer.errors
-                            },
-                            status=status.HTTP_400_BAD_REQUEST)
-    
+            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # 返回文件的目录
     def get(self,request,userid):
-        title = request.GET.get('title')
-        if not title:
+        uuid = request.GET.get('uuid')
+        if not uuid:
             return Response({
                                 "code": 400,
                                 "msg": "title is required",
                             },
                             status=status.HTTP_400_BAD_REQUEST)
         
-        file = UpFile.objects.filter(userid=userid, title=title).first()
+        file = UpFile.objects.filter(userid=userid, uuid=uuid).first()
         if file is None or file.file is None :
             return Response({
                                 "code": 404,
@@ -184,12 +179,13 @@ class UpFileAPIView(APIView):
                             },
                             status=status.HTTP_404_NOT_FOUND
                             )
-
-        response = FileResponse(file_iterator(str(file.file)))
+        file_url = file.file.url
+        # 把pdf内容当成乱码返回
+        """response = FileResponse(file_iterator(str(file.file)))
         response['Content-Type'] = 'application/octet-stream'
         # Content-Disposition就是当用户想把请求所得的内容存为一个文件的时候提供一个默认的文件名
-        response['Content-Disposition'] = f'attachment; filename="{file.file.name}"'
-        return response
+        response['Content-Disposition'] = f'attachment; filename="{file.file.name}"'"""
+        return JsonResponse({'file_url': file_url})
         """return Response({
             "code":200,
             "msg":"success",
