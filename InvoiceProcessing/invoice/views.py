@@ -281,7 +281,7 @@ class PasswordResetConfirmView(APIView):
             if not new_password:
                 return Response({"error": "New password is required"}, status=status.HTTP_400_BAD_REQUEST)
             
-            user.set_password(new_password)
+            user.set_password(new_password) # set_password 方法会自动对提供的密码进行哈希处理并存储哈希值
             user.reset_password_token = None
             user.reset_password_sent_at = None
             user.save()

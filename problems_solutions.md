@@ -87,3 +87,83 @@ check_password(ser.validated_data['password'], instance.password) # 将用户输
 
 
 
+# 5. 用户忘记密码功能实现-Django
+
+models.py: User表添加两行field
+
+```python
+reset_password_token = models.CharField(max_length=255, null=True, blank=True, verbose_name='Reset Password Token')
+reset_password_sent_at = models.DateTimeField(null=True, blank=True, verbose_name='Reset Password Sent At')
+```
+
+views.py
+
+```python
+class PasswordResetRequestView(APIView):
+    authentication_classes = []  # 禁用认证
+    permission_classes = []
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "User with this email does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        reset_url = request.build_absolute_uri(reverse('password_reset_confirm', args=[uid, token]))
+
+        user.reset_password_token = token
+        user.reset_password_sent_at = now()
+        user.save()
+
+        send_mail(
+            'Password Reset',
+            f'Use the link to reset your password: {reset_url}',
+            'from@example.com',
+            [email],
+            fail_silently=False,
+        )
+        
+        return Response({"message": "Password reset link sent"}, status=status.HTTP_200_OK)
+    
+class PasswordResetConfirmView(APIView):
+    authentication_classes = []  # 禁用认证
+    permission_classes = []
+
+    def post(self, request, uidb64, token):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user is not None and default_token_generator.check_token(user, token):
+            new_password = request.data.get('new_password')
+            if not new_password:
+                return Response({"error": "New password is required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            user.set_password(new_password) # set_password 方法会自动对提供的密码进行哈希处理并存储哈希值
+            user.reset_password_token = None
+            user.reset_password_sent_at = None
+            user.save()
+            return Response({"message": "Password has been reset"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Invalid token or user ID"}, status=status.HTTP_400_BAD_REQUEST)
+```
+
+settings.py
+
+```python
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'ikezhao123@gmail.com' # google设置两步验证 后添加 应用专用密码
+EMAIL_HOST_PASSWORD = 'kxirrbrpliuldrjz'  # 不包括空格
+```
+
