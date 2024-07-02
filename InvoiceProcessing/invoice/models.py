@@ -25,6 +25,8 @@ class User(AbstractBaseUser):
     email = models.EmailField(unique=True, verbose_name='Email')
     is_admin = models.BooleanField(default=False, verbose_name='Admin')
     token = models.CharField(max_length=255, verbose_name='Token',null=True, blank=True)
+    reset_password_token = models.CharField(max_length=255, null=True, blank=True, verbose_name='Reset Password Token')
+    reset_password_sent_at = models.DateTimeField(null=True, blank=True, verbose_name='Reset Password Sent At')
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
     update_date = models.DateTimeField(auto_now=True, verbose_name='Update Date')
 
@@ -76,5 +78,3 @@ class GUIFile(models.Model):
     tracking = models.CharField(max_length=255, verbose_name='Tracking') # 跟踪号码，当前为空。
     tracking_option = models.CharField(max_length=255, verbose_name='Tracking Option') # 跟踪号码选项，当前为空。
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFiles")
-
-    pass

@@ -15,5 +15,8 @@ urlpatterns = [
     path('join-company/<int:userid>/',views.JoinCompanyView.as_view(), name='join-company'),
     path('invoice-creation-upload/<int:userid>/',views.UpFileAPIView.as_view(), name='invoice-creation-upload'),
     path('invoice-creation-gui/<int:userid>/',views.GUIFileAPIView.as_view(), name='invoice-creation-gui'),
+    path('password_reset/', views.PasswordResetRequestView.as_view(), name='password_reset'),
+    path('password_reset_confirm/<uidb64>/<token>/', views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     ]
+path
 
