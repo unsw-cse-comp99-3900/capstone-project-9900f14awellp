@@ -167,3 +167,53 @@ EMAIL_HOST_USER = 'ikezhao123@gmail.com' # google设置两步验证 后添加 �
 EMAIL_HOST_PASSWORD = 'kxirrbrpliuldrjz'  # 不包括空格
 ```
 
+# 6. API文档的优化
+
+**安装`drf-yasg`**： 你需要安装`drf-yasg`库。可以使用以下命令：
+
+```python
+pip install drf-yasg
+```
+
+**修改`settings.py`**： 在你的`settings.py`文件中，确保你已经安装了`rest_framework`和`drf_yasg`，并配置了它们：
+
+```python
+INSTALLED_APPS = [
+    ...
+    'rest_framework',
+    'drf_yasg',
+]
+```
+
+**创建Swagger文档视图**： 在你的项目的urls文件中，添加Swagger的视图配置。例如，在`urls.py`中：
+
+```
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from django.urls import path, re_path
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Invoice System API",
+        default_version='v1',
+        description="API documentation for the Invoice System",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@local.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
+urlpatterns = [
+    ...
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+]
+```
+
+接口细节：
+
+https://zoejoyuliao.medium.com/%E8%87%AA%E5%AE%9A%E7%BE%A9-drf-yasg-%E7%9A%84-swagger-%E6%96%87%E6%AA%94-%E4%BB%A5-get-post-%E6%AA%94%E6%A1%88%E4%B8%8A%E5%82%B3%E7%82%BA%E4%BE%8B-eeecd922059b
