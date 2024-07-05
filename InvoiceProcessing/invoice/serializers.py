@@ -55,6 +55,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 
+
 # only data of uploading files need to be serialized
 class FileUploadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -62,7 +63,12 @@ class FileUploadSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class FileGUISerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required=True)
+    filename = serializers.CharField(required=True)
+    uuid = serializers.CharField(required=True)
     class Meta:
         model = GUIFile
         fields = '__all__'
+
+class FileDeletionSerializer(serializers.Serializer):
+    file_name = serializers.CharField(required=True)
+    uuid = serializers.CharField(required=True)

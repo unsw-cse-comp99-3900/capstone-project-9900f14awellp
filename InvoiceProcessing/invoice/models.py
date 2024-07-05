@@ -39,7 +39,8 @@ class UpFile(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     
 class GUIFile(models.Model):
-    title = models.CharField(max_length=30)
+    filename = models.CharField(max_length=30)
+    uuid = models.CharField(max_length=30)
     abn = models.CharField(max_length=20, verbose_name='ABN')
     additional_request = models.CharField(max_length=255, verbose_name='Additional Request')
     approver = models.CharField(max_length=255, verbose_name='Additional Request') # 审批人，当前为空，表示没有指定审批人。

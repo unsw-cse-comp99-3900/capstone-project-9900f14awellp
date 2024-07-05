@@ -1,5 +1,6 @@
 from django.shortcuts import render
 import json
+import os
 from django.http import JsonResponse
 from .models import Company, User, UpFile, GUIFile
 from django.conf import settings
@@ -25,7 +26,8 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer, FileUploadSerializer, FileGUISerializer, PasswordResetSerializer
+from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer,\
+                        FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, FileDeletionSerializer
 # Create your views here.
 
 
@@ -349,20 +351,6 @@ class JoinCompanyView(APIView):
         request.user.company = company
         request.user.save()
         return Response({'success': 'Joined the company successfully'}, status=status.HTTP_200_OK)
-        
-    
-def file_iterator(file_path, chunk_size=512):
-    """
-    文件读取迭代器
-    :return:
-    """
-    with open(file_path, 'rb') as target_file:
-        while True:
-            chunk = target_file.read(chunk_size)
-            if chunk:
-                yield chunk
-            else:
-                break
 
 # for uploading and downloading files
 class UpFileAPIView(APIView):
@@ -509,9 +497,13 @@ class GUIFileAPIView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'title': openapi.Schema(
+                'filename': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='Invoice Title'
+                ),
+                'uuid':openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='Invoice ID'
                 ),
                 'abn': openapi.Schema(
                     type=openapi.TYPE_STRING,
@@ -731,24 +723,33 @@ class GUIFileAPIView(APIView):
     def post(self, request, userid):
         file_serializer = FileGUISerializer(data=request.data)
         if file_serializer.is_valid():
-            title = file_serializer.validated_data.get('title')
-            if GUIFile.objects.filter(userid=request.user, title=title).exists():
+            filename = file_serializer.validated_data.get('filename')
+            if GUIFile.objects.filter(userid=request.user, filename=filename).exists():
                     return Response({
                     "code": 400,
-                    "msg": "Title already exists for this user",
+                    "msg": "File with the same name exists for this user",
                     }, status=status.HTTP_400_BAD_REQUEST)
                     
             # 将数据保存在数据库的同时，创建json文件并保存进去
             file_instance = file_serializer.save(userid=request.user)
+            file_path = f"invoices_files/{file_instance.filename}.json"
+            # 将数据保存到 Invoice_upfile 表中
+            UpFile.objects.create(
+                file=file_path,
+                uuid=file_instance.uuid,
+                userid=file_instance.userid,
+            )
+            
             file_data = FileGUISerializer(file_instance).data
             # 把title和userid pop掉，存到文件中
             file_data.pop('id', None)
-            file_data.pop('title', None)
+            file_data.pop('filename', None)
+            file_data.pop('uuid', None)
             file_data.pop('userid', None)
             
-            with open(f"invoices_files/{title}.json", "w", encoding='utf-8') as f:
+            with open(f"invoices_files/{filename}.json", "w", encoding='utf-8') as f:
                 json.dump(file_data, f, ensure_ascii=False, indent=4)
-                
+            
             return Response({
                                 "code": 0,
                                 "msg": "success!",
@@ -763,7 +764,78 @@ class GUIFileAPIView(APIView):
                                 "data": file_serializer.errors
                             },
                             status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteFileAPIView(APIView):
+    authentication_classes = [MyAhenAuthentication]
+    
+    @swagger_auto_schema(
+        operation_summary='删除发票文件',
+        manual_parameters=[
+            openapi.Parameter('uuid', openapi.IN_QUERY, description="File UUID", type=openapi.TYPE_STRING)
+        ],
+        responses={
+            200: openapi.Response(
+                description="Invoice file has been successfully removed",
+                examples={
+                    "application/json": {
+                        "code": 200,
+                        "msg": "Invoice file has been successfully removed!"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="File ID is required",
+                examples={
+                    "application/json": {
+                        "code": 400,
+                        "msg": "File ID is required"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="File not found",
+                examples={
+                    "application/json": {
+                        "code": 404,
+                        "msg": "file not found"
+                    }
+                }
+            )
+        }
+    )
+    def post(self,request,userid):
+        uuid = request.query_params.get('uuid')
+        if not uuid:
+            return Response({
+                                "code": 400,
+                                "msg": "File ID is required",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
+        print(file)
+        if file is None:
+            return Response({
+                                "code": 404,
+                                "msg": "file not found",
+                            },
+                            status=status.HTTP_404_NOT_FOUND
+                            )
+        file_gui = GUIFile.objects.filter(userid=request.user, uuid=file.uuid).first()
+        if file_gui is not None:
+            file_gui.delete()
+        if os.path.isfile(str(file.file)):
+                os.remove(str(file.file))
+        file.delete()
+        return Response({
+                            "code": 200,
+                            "msg": "Invoice file has been successfly removed!",
+                        },
+                        status=status.HTTP_200_OK
+                        )
             
+    
+        
 class PasswordResetRequestView(APIView):
     authentication_classes = []  # 禁用认证
     permission_classes = []
