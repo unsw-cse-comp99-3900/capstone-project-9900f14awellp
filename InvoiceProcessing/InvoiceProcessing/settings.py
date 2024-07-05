@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",  # DRF自带的token认证
     'corsheaders',
     "invoice",
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [

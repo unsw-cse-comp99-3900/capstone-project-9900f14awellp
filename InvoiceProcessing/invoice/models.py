@@ -77,4 +77,4 @@ class GUIFile(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Total', default=0.0)
     tracking = models.CharField(max_length=255, verbose_name='Tracking') # 跟踪号码，当前为空。
     tracking_option = models.CharField(max_length=255, verbose_name='Tracking Option') # 跟踪号码选项，当前为空。
-    userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFiles")
+    userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFiles",null=True, blank=True)

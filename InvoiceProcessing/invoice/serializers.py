@@ -43,7 +43,11 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(write_only=True, required=True)
     
-
+class PasswordResetSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    
+    
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
