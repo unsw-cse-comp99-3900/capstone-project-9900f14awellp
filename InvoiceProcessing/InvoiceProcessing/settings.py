@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",  # DRF自带的token认证
     'corsheaders',
     "invoice",
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -192,3 +193,10 @@ REST_FRAMEWORK = {
         1. 使用Django manage.py 生成token
         2. 通过Django的信号机制生成Token (创建用户的时候出发一个函数，这个函数能赋予该用户一个token)
 """
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'ikezhao123@gmail.com'
+EMAIL_HOST_PASSWORD = 'kxirrbrpliuldrjz'  # 不包括空格
