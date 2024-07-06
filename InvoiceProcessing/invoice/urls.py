@@ -32,6 +32,7 @@ urlpatterns = [
     path('invoice-creation-upload/<int:userid>/',views.UpFileAPIView.as_view(), name='invoice-creation-upload'),
     path('invoice-creation-gui/<int:userid>/',views.GUIFileAPIView.as_view(), name='invoice-creation-gui'),
     path('invoice-deletion/<int:userid>/',views.DeleteFileAPIView.as_view(),name='invoice-deletion'),
+    path('invoice-validation/<int:userid>',views.FileValidationsAPIView.as_view(),name='invoice-validation'),
     path('password_reset/', views.PasswordResetRequestView.as_view(), name='password_reset'),
     path('password_reset_confirm/<uidb64>/<token>/', views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

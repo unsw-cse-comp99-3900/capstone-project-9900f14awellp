@@ -1,6 +1,11 @@
 from django.shortcuts import render
 import json
 import os
+import base64
+import hashlib
+import requests
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 from django.http import JsonResponse
 from .models import Company, User, UpFile, GUIFile
 from django.conf import settings
@@ -824,8 +829,15 @@ class DeleteFileAPIView(APIView):
         file_gui = GUIFile.objects.filter(userid=request.user, uuid=file.uuid).first()
         if file_gui is not None:
             file_gui.delete()
+        # 删除发票目录下的该发票，防止下次上传时文件重复存在
         if os.path.isfile(str(file.file)):
                 os.remove(str(file.file))
+                
+        # 如果文件被validate过，也需要删掉对应的xml文件
+        file_name = os.path.basename(file.file)
+        file_stem = os.path.splitext(file_name)[0]
+        if os.path.isfile(f"invoices_xml/{file_stem}.xml"):
+            os.remove(f"invoices_xml/{file_stem}.xml")
         file.delete()
         return Response({
                             "code": 200,
@@ -833,8 +845,232 @@ class DeleteFileAPIView(APIView):
                         },
                         status=status.HTTP_200_OK
                         )
-            
+
+def json_to_xml(json_obj, line_padding=""):
+    elem = ET.Element('root')
     
+    def build_element(parent, key, value):
+        if isinstance(value, dict):
+            subelem = ET.SubElement(parent, key)
+            for subkey, subvalue in value.items():
+                build_element(subelem, subkey, subvalue)
+        elif isinstance(value, list):
+            for subvalue in value:
+                subelem = ET.SubElement(parent, key)
+                build_element(subelem, 'item', subvalue)
+        else:
+            subelem = ET.SubElement(parent, key)
+            subelem.text = str(value) if value is not None else ''
+
+    for key, value in json_obj.items():
+        build_element(elem, key, value)
+    
+    return elem
+
+def prettify(elem):
+    rough_string = ET.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")
+
+class FileValidationsAPIView(APIView):
+    authentication_classes = [MyAhenAuthentication]
+    @swagger_auto_schema(
+        operation_summary="发票文件验证",
+        operation_description="Validate uploaded JSON or PDF file against specific rules",
+        manual_parameters=[
+            openapi.Parameter('uuid', openapi.IN_QUERY, description="File UUID", type=openapi.TYPE_STRING),
+            openapi.Parameter(
+                'rules', 
+                openapi.IN_QUERY, 
+                description="Validation Rules",
+                type=openapi.TYPE_STRING,
+                enum=[  # 定义下拉框的选项
+                    "AUNZ_PEPPOL_1_0_10",
+                    "AUNZ_PEPPOL_SB_1_0_10",
+                    "AUNZ_UBL_1_0_10",
+                    "FR_EN16931_CII_1_3_11",
+                    "FR_EN16931_UBL_1_3_11",
+                    "RO_RO16931_UBL_1_0_8_EN16931",
+                    "RO_RO16931_UBL_1_0_8_CIUS_RO",
+                ]
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Validation success!",
+                examples={
+                    "application/json": {
+                        "code": 200,
+                        "msg": "Validation success!",
+                        "validation_report": {
+                            # Example validation report data here
+                        }
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                examples={
+                    "application/json": {
+                        "code": 400,
+                        "msg": "File ID and Validation Rule is required"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="File not found",
+                examples={
+                    "application/json": {
+                        "code": 404,
+                        "msg": "file not found"
+                    }
+                }
+            ),
+            500: openapi.Response(
+                description="Internal Server Error",
+                examples={
+                    "application/json": {
+                        "code": 500,
+                        "msg": "Validation failed",
+                        "details": "Error details here"
+                    }
+                }
+            )
+        }
+    )
+    def post(self, request, userid):
+        uuid = request.query_params.get('uuid')
+        rule = request.query_params.get('rules')
+        if not uuid or not rule:
+            return Response({
+                                "code": 400,
+                                "msg": "File ID and Validation Rule is required",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
+        if file is None:
+            return Response({
+                                "code": 404,
+                                "msg": "file not found",
+                            },
+                            status=status.HTTP_404_NOT_FOUND
+                            )
+        # 提取出文件名字，不带pdf和json后缀
+        # invoices_files/retrospective_A.pdf = retrospective_A
+        file_name = os.path.basename(str(file.file))
+        file_stem = os.path.splitext(file_name)[0]
+        
+        # 1.将json文件转化为xml，for Later validation
+        if str(file.file).endswith('.json'):
+                with open(str(file.file), 'r') as f:
+                    data = json.load(f)
+                    # json -> xml
+                    xml_elem = json_to_xml(data)
+                    xml_str = prettify(xml_elem)
+                with open(f"invoices_xml/{file_stem}.xml", "w", encoding="utf-8") as f:
+                    f.write(xml_str)
+        elif str(file.file).endswith('.pdf'):
+            # 如果这里有问题看一下free trail是否过期了
+            
+            # 1.1 登录ezzydoc
+            url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
+            api_key = {'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
+            payload = {'user': 'LianqiangZhao',
+                    'pwd': 'Zlq641737796',
+                    'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
+            # 保留cookie
+            r = requests.get(url + '/Login', params=payload)
+            
+            # 1.2 上传pdf文件
+            with open(str(file.file), 'rb') as img_file:
+                img_name = f"{file_stem}.pdf"
+                data = img_file.read()
+                b = bytearray(data)
+                li = []
+                for i in b:
+                    li.append(i)
+                raw_data = {"PictureName": img_name, "PictureStream": li}
+                json_data = json.dumps(raw_data)
+                r2 = requests.post("https://app.ezzydoc.com/EzzyService.svc/Rest/uploadInvoiceImage",
+                                data=json_data,
+                                cookies=r.cookies,
+                                params=api_key,
+                                headers={'Content-Type': 'application/json'})
+                invoiceID = r2.json().get("invoice_id")
+            
+            # 1.3 获得传回的json数据
+            payload2 = {'invoiceid':invoiceID,
+                        'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
+            
+            r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
+            if r3.status_code == 200:
+                data = r3.json()
+                xml_elem = json_to_xml(data)
+                xml_str = prettify(xml_elem)
+                with open(f"invoices_xml/{file_stem}.xml", "w", encoding="utf-8") as f:
+                    f.write(xml_str)
+                      
+        # 2. 将xml内容转化为base64的content
+        with open(f'invoices_xml/{file_stem}.xml', 'rb') as file:
+            xml_bytes = file.read()
+            # 使用Base64编码字节
+        base64_bytes = base64.b64encode(xml_bytes)
+
+            # 将Base64编码的字节转换为字符串
+        content = base64_bytes.decode('utf-8')
+        
+        # 3. 计算content的checksum
+        checkSum = hashlib.md5(content.encode()).hexdigest()
+        
+        # 4. 获得token
+        def token():
+            url = 'https://dev-eat.auth.eu-central-1.amazoncognito.com/oauth2/token'
+            headers = {
+                'content-type': 'application/x-www-form-urlencoded'
+            }
+            data = {
+                'grant_type': 'client_credentials',
+                'client_id': '7d30bi87iptegbrf2bp37p42gg',
+                'client_secret': '880tema3rvh3h63j4nquvgoh0lgts11n09bq8597fgrkvvd62su',
+                'scope': 'eat/read'
+            }
+
+            response = requests.post(url, headers=headers, data=data)
+            response_data = response.json()
+            access_token = response_data.get('access_token')
+            return access_token
+        
+        # https://services.ebusiness-cloud.com/ess-schematron/v1/api/validate?rules=AUNZ_UBL_1_0_10&customer=COMPANY
+        # 请求api做validation
+        url = "https://services.ebusiness-cloud.com/ess-schematron/v1/api/validate"
+        payload = {"rules":rule,
+                   "customer":request.user.username}
+        body_data = {"filename":f"{file_stem}.xml",
+                     "content":content,
+                     "checksum":checkSum}
+        validation_response = requests.post(url, json=body_data, 
+                                            params=payload, 
+                                            headers={"Authorization": f"Bearer {token()}", "Accept-Language":"en"})
+        # 处理验证响应
+        if validation_response.status_code == 200:
+            validate_data = validation_response.json()
+            return Response({
+                                "code": 200,
+                                "msg": "Validation success!",
+                                "validation_report": validate_data
+                            },
+                            status=status.HTTP_200_OK)
+        else:
+            return Response({
+                                "code": validation_response.status_code,
+                                "msg": "Validation failed",
+                                "details": validation_response.text
+                            },
+                            status=validation_response.status_code)
+
+
         
 class PasswordResetRequestView(APIView):
     authentication_classes = []  # 禁用认证
