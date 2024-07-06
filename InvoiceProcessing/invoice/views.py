@@ -7,6 +7,7 @@ import requests
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from django.http import JsonResponse
+from django.core.mail import EmailMessage
 from .models import Company, User, UpFile, GUIFile
 from django.conf import settings
 from django.db.models.signals import post_save # 用户已经建好了，才触发generate_token函数生成token
@@ -1071,6 +1072,104 @@ class FileValidationsAPIView(APIView):
                             status=validation_response.status_code)
 
 
+class SendInvoiceEmailAPIView(APIView):
+    authentication_classes = [MyAhenAuthentication]
+    
+    @swagger_auto_schema(
+        operation_summary="发票邮件发送功能",
+        operation_description="Send the invoice file to the client's email",
+        manual_parameters=[
+            openapi.Parameter('uuid', openapi.IN_QUERY, description="File UUID", type=openapi.TYPE_STRING),
+            openapi.Parameter('email', openapi.IN_QUERY, description="Client Email", type=openapi.TYPE_STRING)
+        ],
+        responses={
+            200: openapi.Response(
+                description="Email sent successfully",
+                examples={
+                    "application/json": {
+                        "code": 200,
+                        "msg": "Email sent successfully"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                examples={
+                    "application/json": {
+                        "code": 400,
+                        "msg": "File ID and client email are required"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="File not found",
+                examples={
+                    "application/json": {
+                        "code": 404,
+                        "msg": "file not found"
+                    },
+                    "application/json": {
+                        "code": 404,
+                        "msg": "file not found on server"
+                    }
+                }
+            ),
+            500: openapi.Response(
+                description="Internal Server Error",
+                examples={
+                    "application/json": {
+                        "code": 500,
+                        "msg": "Failed to send email: error message"
+                    }
+                }
+            )
+        }
+    )
+    def post(self, request, userid):
+        uuid = request.query_params.get('uuid')
+        client_email = request.query_params.get('email')
+        if not uuid or not client_email:
+            return Response({
+                                "code": 400,
+                                "msg": "File ID and client email are required",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
+        if file is None:
+            return Response({
+                                "code": 404,
+                                "msg": "file not found",
+                            },
+                            status=status.HTTP_404_NOT_FOUND)
+            
+        email = EmailMessage(
+            'Your Invoice',
+            'Please find attached your invoice.',
+            to=[client_email]
+        )
+        file_path = str(file.file)
+        if os.path.exists(file_path):
+            email.attach_file(file_path)
+        else:
+            return Response({
+                                "code": 404,
+                                "msg": "file not found on server",
+                            },
+                            status=status.HTTP_404_NOT_FOUND)
+        try:
+            email.send()
+            return Response({
+                                "code": 200,
+                                "msg": "Email sent successfully",
+                            },
+                            status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                                "code": 500,
+                                "msg": f"Failed to send email: {str(e)}",
+                            },
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class PasswordResetRequestView(APIView):
     authentication_classes = []  # 禁用认证
