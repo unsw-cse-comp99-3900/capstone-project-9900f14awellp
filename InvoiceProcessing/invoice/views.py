@@ -16,9 +16,11 @@ from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import authenticate
 from django.urls import reverse
 from django.utils.timezone import now
 import uuid
+
 from .authentication import MyAhenAuthentication
 
 from drf_yasg.utils import swagger_auto_schema
@@ -26,15 +28,19 @@ from drf_yasg import openapi
 
 #from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
-from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import CompanySerializer,RegisterSerializer,LoginSerializer,\
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import CompanySerializer,RegisterSerializer,\
                         FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, FileDeletionSerializer
+
+
+
 # Create your views here.
+
 
 
 # 用户注册
@@ -100,16 +106,16 @@ class RegisterView(APIView):
 
         if ser.is_valid():
             ser.validated_data.pop('confirm_password')
-            token =str(uuid.uuid4())
             ser.validated_data['password'] = make_password(ser.validated_data['password'])
-            ser.validated_data['token'] = token
             ser.save()
             instance = User.objects.filter(**ser.validated_data).first()
+            refresh = RefreshToken.for_user(instance)
             return Response({"state":"Register success",
                             'username':instance.username,
                             'password':instance.password,
                             'userid':instance.id,
-                            'token': token}, 
+                            'refresh': str(refresh),
+                            'access': str(refresh.access_token)}, 
                             status=status.HTTP_201_CREATED)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -118,7 +124,6 @@ class RegisterView(APIView):
 class LoginView(APIView):
     authentication_classes = []  # 禁用认证
     permission_classes = []
-    ser = LoginSerializer
     
     @swagger_auto_schema(
         operation_summary='用户登录说明',
@@ -169,28 +174,25 @@ class LoginView(APIView):
         }
     )
     def post(self, request):
-        ser = LoginSerializer(data=request.data)
-
-        if not ser.is_valid():
-            return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+        username = request.query_params.get('username')
+        password = request.query_params.get('password')
+        if not username or not password:
+            return Response({'username': ['This field is required.'], 'password': ['This field is required.']}, status=status.HTTP_400_BAD_REQUEST)
+        user = authenticate(username=username, password=password)
         
-
-        instance = User.objects.filter(username=ser.validated_data['username']).first()
-
-        if not instance:
-            return Response({'error': 'This user does not exist'}, status=status.HTTP_401_UNAUTHORIZED)
-        # token, created = Token.objects.get_or_create(user=instance)
-        elif not check_password(ser.validated_data['password'], instance.password):
-            return Response({'error': 'Password does not match'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        return Response({"state":"Login success",
-                         'userid':instance.id,
-                        'token': instance.token}, 
-                        status=status.HTTP_200_OK)
+        if user is not None:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'state':"Login success",
+                'userid':user.id,
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
+        return Response({'detail': 'User not exists or password is wrong, please check your input.'}, status=status.HTTP_401_UNAUTHORIZED)
     
 class CreateCompanyView(APIView):
-    # permission_classes = [IsAuthenticated]
-    authentication_classes = [MyAhenAuthentication]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     @swagger_auto_schema(
         operation_summary='用户创建公司说明',
         request_body=openapi.Schema(
@@ -268,10 +270,8 @@ class CreateCompanyView(APIView):
 
 
 class JoinCompanyView(APIView):
-    # permission_classes = [IsAuthenticated]
-
-    
-    authentication_classes = [MyAhenAuthentication]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     
     @swagger_auto_schema(
         operation_summary='得到加入公司的详细信息',
@@ -344,7 +344,7 @@ class JoinCompanyView(APIView):
         }
     )
     def post(self, request, userid):
-
+        print(request.headers)
         company_name = request.data.get('company_name')
         if not company_name:
             return Response({'error': 'company_name field is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -360,7 +360,8 @@ class JoinCompanyView(APIView):
 
 # for uploading and downloading files
 class UpFileAPIView(APIView):
-    authentication_classes = [MyAhenAuthentication]
+    # authentication_classes = [MyAhenAuthentication]
+    authentication_classes = [JWTAuthentication]
     #parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(
@@ -497,7 +498,8 @@ class UpFileAPIView(APIView):
         })"""
         
 class GUIFileAPIView(APIView):
-    authentication_classes = [MyAhenAuthentication]
+    # authentication_classes = [MyAhenAuthentication]
+    authentication_classes = [JWTAuthentication]
     @swagger_auto_schema(
         operation_summary='用户发票GUI说明',
         request_body=openapi.Schema(
@@ -772,8 +774,7 @@ class GUIFileAPIView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 class DeleteFileAPIView(APIView):
-    authentication_classes = [MyAhenAuthentication]
-    
+    authentication_classes = [JWTAuthentication]
     @swagger_auto_schema(
         operation_summary='删除发票文件',
         manual_parameters=[
@@ -819,7 +820,6 @@ class DeleteFileAPIView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
         
         file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
-        print(file)
         if file is None:
             return Response({
                                 "code": 404,
@@ -835,7 +835,7 @@ class DeleteFileAPIView(APIView):
                 os.remove(str(file.file))
                 
         # 如果文件被validate过，也需要删掉对应的xml文件
-        file_name = os.path.basename(file.file)
+        file_name = os.path.basename(str(file.file))
         file_stem = os.path.splitext(file_name)[0]
         if os.path.isfile(f"invoices_xml/{file_stem}.xml"):
             os.remove(f"invoices_xml/{file_stem}.xml")
@@ -874,7 +874,8 @@ def prettify(elem):
     return reparsed.toprettyxml(indent="  ")
 
 class FileValidationsAPIView(APIView):
-    authentication_classes = [MyAhenAuthentication]
+    # authentication_classes = [MyAhenAuthentication]
+    authentication_classes = [JWTAuthentication]
     @swagger_auto_schema(
         operation_summary="发票文件验证",
         operation_description="Validate uploaded JSON or PDF file against specific rules",
@@ -1073,8 +1074,8 @@ class FileValidationsAPIView(APIView):
 
 
 class SendInvoiceEmailAPIView(APIView):
-    authentication_classes = [MyAhenAuthentication]
-    
+    # authentication_classes = [MyAhenAuthentication]
+    authentication_classes = [JWTAuthentication]
     @swagger_auto_schema(
         operation_summary="发票邮件发送功能",
         operation_description="Send the invoice file to the client's email",
