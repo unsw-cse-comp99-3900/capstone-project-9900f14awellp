@@ -30,7 +30,7 @@ from drf_yasg import openapi
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -262,7 +262,7 @@ class CreateCompanyView(APIView):
             )
             company.save()
             request.user.company = company
-            request.user.is_admin = True
+            request.user.is_staff = True
             request.user.save()
 
             return Response(ser.data, status=status.HTTP_201_CREATED)
@@ -270,7 +270,8 @@ class CreateCompanyView(APIView):
 
 
 class JoinCompanyView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,]
+    # permission_classes = [IsAdminUser] # 判断 is_staff 是不是1
     authentication_classes = [JWTAuthentication]
     
     @swagger_auto_schema(
@@ -354,6 +355,10 @@ class JoinCompanyView(APIView):
         except Company.DoesNotExist:
             return Response({'error': 'Company does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
+        if request.user.is_staff:
+            return Response({'error': 'You have created a company, you cannot join another company.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 暂时先不处理[重复加入公司的情况，用户退出公司选择新的公司],后面再加上
         request.user.company = company
         request.user.save()
         return Response({'success': 'Joined the company successfully'}, status=status.HTTP_200_OK)

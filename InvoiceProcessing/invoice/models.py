@@ -46,7 +46,7 @@ class User(AbstractBaseUser):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="employees",verbose_name='Company',null=True, blank=True)
     avatar = models.ImageField(upload_to='avatar/', verbose_name='Avatar',null=True, blank=True)
     email = models.EmailField(unique=True, verbose_name='Email')
-    is_admin = models.BooleanField(default=False, verbose_name='Admin')
+    is_staff = models.BooleanField(default=False, verbose_name='Admin')
     reset_password_token = models.CharField(max_length=255, null=True, blank=True, verbose_name='Reset Password Token')
     reset_password_sent_at = models.DateTimeField(null=True, blank=True, verbose_name='Reset Password Sent At')
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
