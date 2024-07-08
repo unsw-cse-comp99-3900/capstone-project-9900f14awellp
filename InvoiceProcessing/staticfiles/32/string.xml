@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<root>
+  <abn>string</abn>
+  <additional_request>string</additional_request>
+  <approver>string</approver>
+  <approver_email>123@qq.com</approver_email>
+  <bPayRef>string</bPayRef>
+  <bPaycode>string</bPaycode>
+  <bankAccount>string</bankAccount>
+  <bankBranch>string</bankBranch>
+  <bank_details>string</bank_details>
+  <changed>True</changed>
+  <charge>0.00</charge>
+  <company_invoiced>string</company_invoiced>
+  <delivery_to>string</delivery_to>
+  <delivery_to_address>string</delivery_to_address>
+  <description>string</description>
+  <document_subtype>0</document_subtype>
+  <email>123@qq.com</email>
+  <email_to>123@qq.com</email_to>
+  <expense_claim>string</expense_claim>
+  <from_email>123@qq.com</from_email>
+  <glcode_option>string</glcode_option>
+  <glcode_text>string</glcode_text>
+  <invoiceDate>2022-01-22 23:12:00</invoiceDate>
+  <invoiceNumber>string</invoiceNumber>
+  <invoice_to>string</invoice_to>
+  <invoice_to_address>string</invoice_to_address>
+  <location>string</location>
+  <purchaseOrder>string</purchaseOrder>
+  <require_bank_details>True</require_bank_details>
+  <require_email>True</require_email>
+  <supplier>string</supplier>
+  <supplier_address>string</supplier_address>
+  <supplier_id>string</supplier_id>
+  <tax>0.00</tax>
+  <total>0.00</total>
+  <tracking>string</tracking>
+  <tracking_option>string</tracking_option>
+</root>
