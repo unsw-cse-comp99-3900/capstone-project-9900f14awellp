@@ -1,6 +1,5 @@
 from rest_framework import serializers,exceptions
 from .models import Company, User, UpFile, GUIFile
-from django import forms
 
 class CompanySerializer(serializers.ModelSerializer):
     
@@ -39,9 +38,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise exceptions.ValidationError("Passwords do not match")
         return value
     
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    password = serializers.CharField(write_only=True, required=True)
+
     
 class PasswordResetSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
@@ -55,14 +52,21 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 
+
 # only data of uploading files need to be serialized
 class FileUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = UpFile
-        fields = '__all__'
+        fields = ['file','uuid']
         
 class FileGUISerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required=True)
+    filename = serializers.CharField(required=True)
+    uuid = serializers.CharField(required=True)
+    userid = serializers.PrimaryKeyRelatedField(read_only=True)  # 设置为只读
     class Meta:
         model = GUIFile
         fields = '__all__'
+
+class FileDeletionSerializer(serializers.Serializer):
+    file_name = serializers.CharField(required=True)
+    uuid = serializers.CharField(required=True)

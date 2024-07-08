@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
+
+    
 # Create your models here.
 class Company(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name='Company Name')
@@ -12,9 +15,29 @@ class Company(models.Model):
     address = models.CharField(max_length=255, verbose_name='Company Address')
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
     update_date = models.DateTimeField(auto_now=True, verbose_name='Update Date')
+    
 
     def __str__(self) -> str:
         return self.name
+    
+class UserManager(BaseUserManager):
+    def create_user(self, username, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        return self.create_user(username, email, password, **extra_fields)
+
+    def get_by_natural_key(self, username):
+        return self.get(**{self.model.USERNAME_FIELD: username})
     
 class User(AbstractBaseUser):
     username = models.CharField(max_length=255, unique=True, verbose_name='Username')
@@ -23,23 +46,35 @@ class User(AbstractBaseUser):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="employees",verbose_name='Company',null=True, blank=True)
     avatar = models.ImageField(upload_to='avatar/', verbose_name='Avatar',null=True, blank=True)
     email = models.EmailField(unique=True, verbose_name='Email')
-    is_admin = models.BooleanField(default=False, verbose_name='Admin')
-    token = models.CharField(max_length=255, verbose_name='Token',null=True, blank=True)
+    is_staff = models.BooleanField(default=False, verbose_name='Admin')
     reset_password_token = models.CharField(max_length=255, null=True, blank=True, verbose_name='Reset Password Token')
     reset_password_sent_at = models.DateTimeField(null=True, blank=True, verbose_name='Reset Password Sent At')
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
     update_date = models.DateTimeField(auto_now=True, verbose_name='Update Date')
 
+    objects = UserManager()
+    
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
 
+def user_directory_path(instance, filename):
+    # 文件将上传到 MEDIA_ROOT/user_<id>/<filename>
+    return 'staticfiles/{0}/{1}'.format(instance.userid.id, filename)
 # use userid to bind user and file
 class UpFile(models.Model):
-    file = models.FileField(upload_to="invoices_files/")
+    file = models.FileField(upload_to=user_directory_path)
     uuid = models.CharField(max_length=30)
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="UserFiles",null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     
+    
+    class Meta:
+        unique_together = ('userid', 'file')
+
+    
 class GUIFile(models.Model):
-    title = models.CharField(max_length=30)
+    filename = models.CharField(max_length=30)
+    uuid = models.CharField(max_length=30)
     abn = models.CharField(max_length=20, verbose_name='ABN')
     additional_request = models.CharField(max_length=255, verbose_name='Additional Request')
     approver = models.CharField(max_length=255, verbose_name='Additional Request') # 审批人，当前为空，表示没有指定审批人。
@@ -78,3 +113,8 @@ class GUIFile(models.Model):
     tracking = models.CharField(max_length=255, verbose_name='Tracking') # 跟踪号码，当前为空。
     tracking_option = models.CharField(max_length=255, verbose_name='Tracking Option') # 跟踪号码选项，当前为空。
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFiles",null=True, blank=True)
+    
+    
+    class Meta:
+        unique_together = ('userid', 'filename')
+

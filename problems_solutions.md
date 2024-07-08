@@ -167,3 +167,126 @@ EMAIL_HOST_USER = 'ikezhao123@gmail.com' # google设置两步验证 后添加 �
 EMAIL_HOST_PASSWORD = 'kxirrbrpliuldrjz'  # 不包括空格
 ```
 
+# 6. API文档的优化
+
+**安装`drf-yasg`**： 你需要安装`drf-yasg`库。可以使用以下命令：
+
+```python
+pip install drf-yasg
+```
+
+**修改`settings.py`**： 在你的`settings.py`文件中，确保你已经安装了`rest_framework`和`drf_yasg`，并配置了它们：
+
+```python
+INSTALLED_APPS = [
+    ...
+    'rest_framework',
+    'drf_yasg',
+]
+```
+
+**创建Swagger文档视图**： 在你的项目的urls文件中，添加Swagger的视图配置。例如，在`urls.py`中：
+
+```python
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from django.urls import path, re_path
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Invoice System API",
+        default_version='v1',
+        description="API documentation for the Invoice System",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@local.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
+urlpatterns = [
+    ...
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+]
+```
+
+接口细节：
+
+https://zoejoyuliao.medium.com/%E8%87%AA%E5%AE%9A%E7%BE%A9-drf-yasg-%E7%9A%84-swagger-%E6%96%87%E6%AA%94-%E4%BB%A5-get-post-%E6%AA%94%E6%A1%88%E4%B8%8A%E5%82%B3%E7%82%BA%E4%BE%8B-eeecd922059b
+
+# 7. 使用 Json Web Token (JWT) 实现用户登录验证 
+
+### 1. 首先如果是自定义的表，
+
+```python
+class User(AbstractBaseUser): # 或者AbstractUser，自行查看
+```
+
+### 要在setting里设置为django系统表
+
+```python
+AUTH_USER_MODEL = 'invoice.User'
+```
+
+### 2. 第二步，在setting里添加jwt定义
+
+```python
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5), # 设置访问令牌的有效期。在这个配置中，访问令牌的有效期是 5 分钟。
+  
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1), # 设置刷新令牌的有效期。在这个配置中，刷新令牌的有效期是 1 天。 
+  
+    'ROTATE_REFRESH_TOKENS': False, # 如果设置为 True，每次使用刷新令牌获取新的访问令牌时，刷新令牌本身也会被刷新并返回一个新的刷新令牌。在这个配置中，设置为 False，表示刷新令牌不会被轮换。
+  
+    'BLACKLIST_AFTER_ROTATION': True, # 旧的刷新令牌在轮换后将被列入黑名单。在这个配置中，由于 ROTATE_REFRESH_TOKENS 是 False，这个设置的效果是当刷新令牌使用后它会被列入黑名单。
+  
+    'ALGORITHM': 'HS256', # 用于签名 JWT 的算法。在这个配置中，使用 HS256 算法（HMAC using SHA-256）。
+  
+    'SIGNING_KEY': SECRET_KEY, # 用于签名 JWT 的密钥。在这个配置中，使用 SECRET_KEY 作为签名密钥。
+  	# SECRET_KEY = "django-insecure-e))(m#!c5i+w=ww@pxno12!vt*&qbes$@oeh#r$u)0g^%qp7hd"(好像是初始化django时自带的) 
+  
+    'VERIFYING_KEY': None, #用于验证 JWT 的密钥。在这个配置中，设置为 None，意味着不需要额外的验证密钥。
+    'AUTH_HEADER_TYPES': ('Bearer',), # 定义授权头的类型。在这个配置中，设置为 ('Bearer',)，表示使用 Bearer Token。swagger每次输入token时要添加 Bearer <your-user-token>
+  
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+  # 指定使用的令牌类。在这个配置中，使用 rest_framework_simplejwt.tokens.AccessToken 作为访问令牌类。
+}
+
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+      # 定义 API 的安全性设置。在这个配置中，定义了一个类型为 apiKey 的安全方案，名称为 Authorization，位置在 HTTP 请求头中。
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'USE_SESSION_AUTH': False, # 当设为False时，Swagger UI不会尝试使用Django的会话认证方式，而是依赖于我们定义的JWT token认证方式。
+  
+    'JSON_EDITOR': True, # 设置是否启用 JSON 编辑器。在这个配置中，设置为 True，表示启用 JSON 编辑器。用户可以在swaggerUI中编辑token值
+}
+
+```
+
+### 3. 在views.py中对于需要jwt用户认证的视图类添加
+
+```python
+authentication_classes = [JWTAuthentication]
+```
+
+### 4. 问题：
+
+* 用户登录或注册时会给出refresh token和access token，用户凭借access token访问接口，如果access token有效期过期了怎么办？
+
+  * refresh token的有效期时间更长，其存在的意义是当access token过期时，可以通过访问refresh token来获取该用户新的access token。所以前端可以通过阶段性的访问该接口来获取新的access token
+
+    ```python
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # url.py
+    ```
+
+* 如果access token还没有过期，用户已经log out了，理论上不能再使用该access token访问接口了，也不能再使用refresh token获取新的token了，如何解决？(**unsolved**)
