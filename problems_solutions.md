@@ -290,3 +290,7 @@ authentication_classes = [JWTAuthentication]
     ```
 
 * 如果access token还没有过期，用户已经log out了，理论上不能再使用该access token访问接口了，也不能再使用refresh token获取新的token了，如何解决？(**unsolved**)
+
+
+
+# 8. 使用 parser_classes 处理不同类型的数据 （untouched)

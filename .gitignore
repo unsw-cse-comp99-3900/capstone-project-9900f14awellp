@@ -9,4 +9,3 @@ __pycache__/
 # 忽略数据库文件
 db.sqlite3
 media/
-staticfiles/
