@@ -1330,10 +1330,5 @@ class PasswordResetConfirmView(APIView):
         return render(request, 'password_reset_confirm.html', {'uid': uidb64, 'token': token})
 
         
-        
-    def get(self, request, uidb64, token):
-        return render(request, 'password_reset_confirm.html', {'uid': uidb64, 'token': token})
-
-        
     
     
