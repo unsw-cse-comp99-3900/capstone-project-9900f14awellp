@@ -57,12 +57,20 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 
+def user_directory_path(instance, filename):
+    # 文件将上传到 MEDIA_ROOT/user_<id>/<filename>
+    return 'staticfiles/{0}/{1}'.format(instance.userid.id, filename)
 # use userid to bind user and file
 class UpFile(models.Model):
-    file = models.FileField(upload_to="invoices_files/")
+    file = models.FileField(upload_to=user_directory_path)
     uuid = models.CharField(max_length=30)
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="UserFiles",null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    
+    
+    class Meta:
+        unique_together = ('userid', 'file')
+
     
 class GUIFile(models.Model):
     filename = models.CharField(max_length=30)
@@ -105,3 +113,8 @@ class GUIFile(models.Model):
     tracking = models.CharField(max_length=255, verbose_name='Tracking') # 跟踪号码，当前为空。
     tracking_option = models.CharField(max_length=255, verbose_name='Tracking Option') # 跟踪号码选项，当前为空。
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFiles",null=True, blank=True)
+    
+    
+    class Meta:
+        unique_together = ('userid', 'filename')
+

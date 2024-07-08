@@ -1,6 +1,5 @@
 from rest_framework import serializers,exceptions
 from .models import Company, User, UpFile, GUIFile
-from django import forms
 
 class CompanySerializer(serializers.ModelSerializer):
     
@@ -58,11 +57,12 @@ class CompanySerializer(serializers.ModelSerializer):
 class FileUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = UpFile
-        fields = '__all__'
+        fields = ['file','uuid']
         
 class FileGUISerializer(serializers.ModelSerializer):
     filename = serializers.CharField(required=True)
     uuid = serializers.CharField(required=True)
+    userid = serializers.PrimaryKeyRelatedField(read_only=True)  # 设置为只读
     class Meta:
         model = GUIFile
         fields = '__all__'

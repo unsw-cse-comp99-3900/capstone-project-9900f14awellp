@@ -19,7 +19,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import authenticate
 from django.urls import reverse
 from django.utils.timezone import now
-import uuid
 
 from .authentication import MyAhenAuthentication
 
@@ -40,7 +39,7 @@ from .serializers import CompanySerializer,RegisterSerializer,\
 
 
 # Create your views here.
-
+user_directory = os.path.join(settings.STATICFILES_DIRS[0])
 
 
 # 用户注册
@@ -110,6 +109,7 @@ class RegisterView(APIView):
             ser.save()
             instance = User.objects.filter(**ser.validated_data).first()
             refresh = RefreshToken.for_user(instance)
+            os.makedirs(os.path.join(user_directory,str(instance.id)), exist_ok=True)
             return Response({"state":"Register success",
                             'username':instance.username,
                             'password':instance.password,
@@ -127,19 +127,14 @@ class LoginView(APIView):
     
     @swagger_auto_schema(
         operation_summary='用户登录说明',
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'username': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='User Name'
-                ),
-                'password': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='User Password'
-                )
-            }
-        ),
+        manual_parameters=[
+            openapi.Parameter(
+                'username', openapi.IN_QUERY, description="User Name", type=openapi.TYPE_STRING, required=True
+            ),
+            openapi.Parameter(
+                'password', openapi.IN_QUERY, description="User Password", type=openapi.TYPE_STRING, required=True
+            )
+        ],
         responses={
             200: openapi.Response(
                 description="Login success",
@@ -194,7 +189,7 @@ class CreateCompanyView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     @swagger_auto_schema(
-        operation_summary='用户创建公司说明',
+        operation_summary='用户创建公司说明(因为swagger无法上传file，这里建议使用postman测试)',
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -248,7 +243,7 @@ class CreateCompanyView(APIView):
         }
     )
 
-    def post(self, request, userid):
+    def post(self, request):
         ser = CompanySerializer(data=request.data)
         if ser.is_valid() and not Company.objects.filter(name=request.data.get('name')).first():
             validated_data = ser.validated_data
@@ -265,7 +260,7 @@ class CreateCompanyView(APIView):
             request.user.is_staff = True
             request.user.save()
 
-            return Response(ser.data, status=status.HTTP_201_CREATED)
+            return Response({"success": "Company created successfully"}, status=status.HTTP_201_CREATED)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -300,7 +295,7 @@ class JoinCompanyView(APIView):
             )
         }
     )
-    def get(self,request,userid):
+    def get(self,request):
 
         companies = Company.objects.all()
         return Response(companies.values('name', 'phone_number', 'email', 'ABN', 'address'), status=status.HTTP_200_OK)
@@ -344,7 +339,7 @@ class JoinCompanyView(APIView):
             )
         }
     )
-    def post(self, request, userid):
+    def post(self, request):
         print(request.headers)
         company_name = request.data.get('company_name')
         if not company_name:
@@ -357,8 +352,7 @@ class JoinCompanyView(APIView):
 
         if request.user.is_staff:
             return Response({'error': 'You have created a company, you cannot join another company.'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # 暂时先不处理[重复加入公司的情况，用户退出公司选择新的公司],后面再加上
+        # 暂时先不处理[重复加入公司的情况，用户后面再加上
         request.user.company = company
         request.user.save()
         return Response({'success': 'Joined the company successfully'}, status=status.HTTP_200_OK)
@@ -414,10 +408,17 @@ class UpFileAPIView(APIView):
             )
         }
     )
-    def post(self, request, userid):
+    def post(self, request):
         file_serializer = FileUploadSerializer(data=request.data)
         if file_serializer.is_valid():
             uuid = file_serializer.validated_data.get('uuid')
+            filename = file_serializer.validated_data.get('file')
+            if UpFile.objects.filter(userid=request.user.id, file=f"staticfiles/{request.user.id}/{filename}").exists():
+                return Response({
+                    "code": 400,
+                    "msg": "File name exists for this user",
+                }, status=status.HTTP_400_BAD_REQUEST)
+
             if UpFile.objects.filter(uuid=uuid).exists():
                 return Response({
                     "code": 400,
@@ -473,7 +474,7 @@ class UpFileAPIView(APIView):
             )
         }
     )
-    def get(self,request,userid):
+    def get(self,request):
         uuid = request.GET.get('uuid')
         if not uuid:
             return Response({
@@ -482,7 +483,7 @@ class UpFileAPIView(APIView):
                             },
                             status=status.HTTP_400_BAD_REQUEST)
         
-        file = UpFile.objects.filter(userid=userid, uuid=uuid).first()
+        file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
         if file is None or file.file is None :
             return Response({
                                 "code": 404,
@@ -733,19 +734,28 @@ class GUIFileAPIView(APIView):
             )
         }
     )
-    def post(self, request, userid):
+    def post(self, request):
         file_serializer = FileGUISerializer(data=request.data)
         if file_serializer.is_valid():
+            file_serializer.validated_data['userid'] = request.user
             filename = file_serializer.validated_data.get('filename')
-            if GUIFile.objects.filter(userid=request.user, filename=filename).exists():
-                    return Response({
+            uuid = file_serializer.validated_data.get('uuid')
+            # 检查同一个用户下filename是否一样
+            if GUIFile.objects.filter(userid=request.user, filename=filename).exists() or UpFile.objects.filter(userid=request.user, file=filename).exists():
+                return Response({
                     "code": 400,
-                    "msg": "File with the same name exists for this user",
-                    }, status=status.HTTP_400_BAD_REQUEST)
+                    "msg": "File name exists for this user",
+                }, status=status.HTTP_400_BAD_REQUEST)
+            # 检查uuid是否已存在
+            if UpFile.objects.filter(uuid=uuid).exists() or GUIFile.objects.filter(uuid=uuid).exists():
+                return Response({
+                    "code": 400,
+                    "msg": "File ID exists",
+                }, status=status.HTTP_400_BAD_REQUEST)
                     
             # 将数据保存在数据库的同时，创建json文件并保存进去
             file_instance = file_serializer.save(userid=request.user)
-            file_path = f"invoices_files/{file_instance.filename}.json"
+            file_path = f"staticfiles/{request.user.id}/{file_instance.filename}.json"
             # 将数据保存到 Invoice_upfile 表中
             UpFile.objects.create(
                 file=file_path,
@@ -760,7 +770,7 @@ class GUIFileAPIView(APIView):
             file_data.pop('uuid', None)
             file_data.pop('userid', None)
             
-            with open(f"invoices_files/{filename}.json", "w", encoding='utf-8') as f:
+            with open(f"staticfiles/{request.user.id}/{filename}.json", "w", encoding='utf-8') as f:
                 json.dump(file_data, f, ensure_ascii=False, indent=4)
             
             return Response({
@@ -815,7 +825,7 @@ class DeleteFileAPIView(APIView):
             )
         }
     )
-    def post(self,request,userid):
+    def post(self,request):
         uuid = request.query_params.get('uuid')
         if not uuid:
             return Response({
@@ -842,8 +852,8 @@ class DeleteFileAPIView(APIView):
         # 如果文件被validate过，也需要删掉对应的xml文件
         file_name = os.path.basename(str(file.file))
         file_stem = os.path.splitext(file_name)[0]
-        if os.path.isfile(f"invoices_xml/{file_stem}.xml"):
-            os.remove(f"invoices_xml/{file_stem}.xml")
+        if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}.xml"):
+            os.remove(f"staticfiles/{request.user.id}/{file_stem}.xml")
         file.delete()
         return Response({
                             "code": 200,
@@ -945,7 +955,7 @@ class FileValidationsAPIView(APIView):
             )
         }
     )
-    def post(self, request, userid):
+    def post(self, request):
         uuid = request.query_params.get('uuid')
         rule = request.query_params.get('rules')
         if not uuid or not rule:
@@ -976,7 +986,7 @@ class FileValidationsAPIView(APIView):
                     # json -> xml
                     xml_elem = json_to_xml(data)
                     xml_str = prettify(xml_elem)
-                with open(f"invoices_xml/{file_stem}.xml", "w", encoding="utf-8") as f:
+                with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
                     f.write(xml_str)
         elif str(file.file).endswith('.pdf'):
             # 如果这里有问题看一下free trail是否过期了
@@ -1016,11 +1026,11 @@ class FileValidationsAPIView(APIView):
                 data = r3.json()
                 xml_elem = json_to_xml(data)
                 xml_str = prettify(xml_elem)
-                with open(f"invoices_xml/{file_stem}.xml", "w", encoding="utf-8") as f:
+                with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
                     f.write(xml_str)
                       
         # 2. 将xml内容转化为base64的content
-        with open(f'invoices_xml/{file_stem}.xml', 'rb') as file:
+        with open(f'staticfiles/{request.user.id}/{file_stem}.xml', 'rb') as file:
             xml_bytes = file.read()
             # 使用Base64编码字节
         base64_bytes = base64.b64encode(xml_bytes)
@@ -1131,7 +1141,7 @@ class SendInvoiceEmailAPIView(APIView):
             )
         }
     )
-    def post(self, request, userid):
+    def post(self, request):
         uuid = request.query_params.get('uuid')
         client_email = request.query_params.get('email')
         if not uuid or not client_email:
@@ -1253,10 +1263,10 @@ class PasswordResetRequestView(APIView):
         )
         
         return Response({"message": "Password reset link sent"}, status=status.HTTP_200_OK)
-    
 class PasswordResetConfirmView(APIView):
     authentication_classes = []  # 禁用认证
     permission_classes = []
+
     @swagger_auto_schema(
         operation_summary='用户密码重置确认说明',
         request_body=openapi.Schema(
@@ -1300,15 +1310,29 @@ class PasswordResetConfirmView(APIView):
         if user is not None and default_token_generator.check_token(user, token):
             new_password = request.data.get('new_password')
             if not new_password:
-                return Response({"error": "New password is required"}, status=status.HTTP_400_BAD_REQUEST)
-            
-            user.set_password(new_password) # set_password 方法会自动对提供的密码进行哈希处理并存储哈希值
+                return render(request, 'password_reset_confirm.html', {
+                    'uid': uidb64, 'token': token, 'error': 'New password is required'
+                })
+
+            user.set_password(new_password)
             user.reset_password_token = None
             user.reset_password_sent_at = None
             user.save()
-            return Response({"message": "Password has been reset"}, status=status.HTTP_200_OK)
+            return render(request, 'password_reset_confirm.html', {
+                'message': 'Password has been reset successfully'
+            })
         else:
-            return Response({"error": "Invalid token or user ID"}, status=status.HTTP_400_BAD_REQUEST)
+            return render(request, 'password_reset_confirm.html', {
+                'uid': uidb64, 'token': token, 'error': 'Invalid token or user ID'
+            })
+        
+    def get(self, request, uidb64, token):
+        return render(request, 'password_reset_confirm.html', {'uid': uidb64, 'token': token})
+
+        
+        
+    def get(self, request, uidb64, token):
+        return render(request, 'password_reset_confirm.html', {'uid': uidb64, 'token': token})
 
         
     

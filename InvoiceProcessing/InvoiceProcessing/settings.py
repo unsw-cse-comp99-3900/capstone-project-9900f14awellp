@@ -84,7 +84,7 @@ ROOT_URLCONF = "InvoiceProcessing.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        'DIRS': [os.path.join(BASE_DIR, 'staticfiles')],  # 添加这个配置
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -206,8 +206,8 @@ EMAIL_HOST_USER = 'ikezhao123@gmail.com'
 EMAIL_HOST_PASSWORD = 'kxirrbrpliuldrjz'  # 不包括空格
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
