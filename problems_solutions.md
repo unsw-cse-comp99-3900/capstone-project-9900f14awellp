@@ -293,4 +293,28 @@ authentication_classes = [JWTAuthentication]
 
 
 
-# 8. 使用 parser_classes 处理不同类型的数据 （untouched)
+# 8. 使用 parser_classes 处理不同类型的数据 (untouched)
+
+
+
+# 9. 用户忘记密码功能实现
+
+### 问题：
+
+用户收到link后 http://127.0.0.1:8000/invoice/password_reset_confirm/MzI/c9ugeg-55a48d9cc3a698a143ed97dc512709ce/ 若直接打开link，会像该接口发送一个get请求，但实际上需要向该接口发送post请求，携带新密码json请求体。
+
+### 解决措施：
+
+```python
+class PasswordResetConfirmView(APIView):
+```
+
+在该视图中添加处理get请求的接口
+
+```python
+    def get(self, request, uidb64, token):
+        return render(request, 'password_reset_confirm.html', {'uid': uidb64, 'token': token})
+```
+
+会render一个html文件，该文件会发送post请求携带请求体重新到该url，实现用户密码更改
+
