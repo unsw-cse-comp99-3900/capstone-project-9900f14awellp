@@ -33,6 +33,7 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.parsers import MultiPartParser
 from .serializers import CompanySerializer,RegisterSerializer,\
                         FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, FileDeletionSerializer
 
@@ -369,8 +370,7 @@ class UpFileAPIView(APIView):
             type=openapi.TYPE_OBJECT,
             properties={
                 'file': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    format='binary',
+                    type=openapi.TYPE_FILE,
                     description='File Upload'
                 ),
                 'uuid': openapi.Schema(
@@ -899,17 +899,20 @@ class FileValidationsAPIView(APIView):
             openapi.Parameter(
                 'rules', 
                 openapi.IN_QUERY, 
-                description="Validation Rules",
-                type=openapi.TYPE_STRING,
-                enum=[  # 定义下拉框的选项
-                    "AUNZ_PEPPOL_1_0_10",
-                    "AUNZ_PEPPOL_SB_1_0_10",
-                    "AUNZ_UBL_1_0_10",
-                    "FR_EN16931_CII_1_3_11",
-                    "FR_EN16931_UBL_1_3_11",
-                    "RO_RO16931_UBL_1_0_8_EN16931",
-                    "RO_RO16931_UBL_1_0_8_CIUS_RO",
-                ]
+                description="Validation Rules (comma-separated values for multiple selections)",
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(
+                    type=openapi.TYPE_STRING,
+                    enum=[
+                        "AUNZ_PEPPOL_1_0_10",
+                        "AUNZ_PEPPOL_SB_1_0_10",
+                        "AUNZ_UBL_1_0_10",
+                        "FR_EN16931_CII_1_3_11",
+                        "FR_EN16931_UBL_1_3_11",
+                        "RO_RO16931_UBL_1_0_8_EN16931",
+                        "RO_RO16931_UBL_1_0_8_CIUS_RO",
+                    ]
+                )
             )
         ],
         responses={
@@ -957,7 +960,7 @@ class FileValidationsAPIView(APIView):
     )
     def post(self, request):
         uuid = request.query_params.get('uuid')
-        rule = request.query_params.get('rules')
+        rule = request.query_params.getlist('rules')
         if not uuid or not rule:
             return Response({
                                 "code": 400,
