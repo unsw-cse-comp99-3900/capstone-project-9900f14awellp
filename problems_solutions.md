@@ -293,4 +293,106 @@ authentication_classes = [JWTAuthentication]
 
 
 
-# 8. 使用 parser_classes 处理不同类型的数据 （untouched)
+# 8. 使用 parser_classes 处理不同类型的数据 (untouched)
+
+
+
+# 9. 用户忘记密码功能实现
+
+### 问题：
+
+用户收到link后 http://127.0.0.1:8000/invoice/password_reset_confirm/MzI/c9ugeg-55a48d9cc3a698a143ed97dc512709ce/ 若直接打开link，会像该接口发送一个get请求，但实际上需要向该接口发送post请求，携带新密码json请求体。
+
+### 解决措施：
+
+```python
+class PasswordResetConfirmView(APIView):
+```
+
+在该视图中添加处理get请求的接口
+
+```python
+    def get(self, request, uidb64, token):
+        return render(request, 'password_reset_confirm.html', {'uid': uidb64, 'token': token})
+```
+
+会render一个html文件，该文件会发送post请求携带请求体重新到该url，实现用户密码更改
+
+# 10. 一次性拿到所有发票的基本信息的接口(具体返回信息的处理)
+
+```python
+class FileInfoAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    def get(self, request):
+        invoices = UpFile.objects.filter(userid=request.user.id)
+        # 把所有过滤出来的发票传入serializer
+        serializer = InvoiceUpfileSerializer(invoices, many=True)
+        return Response(serializer.data)
+```
+
+
+
+## 1. 供应商名字+金额
+
+```python
+# 拿到对应的json数据
+def get_file_data(self, obj):
+        file_name = os.path.basename(str(obj.file))
+        file_stem = os.path.splitext(file_name)[0]
+        try:
+            with open(f"staticfiles/{obj.userid.id}/{file_stem}.json", 'r') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return {}
+# 使用.get函数拿到supplier对应的数据
+def get_supplier(self, obj):
+        data = self.get_file_data(obj)
+        return data.get('supplier', 'N/A')
+    
+def get_total(self, obj):
+        data = self.get_file_data(obj)
+        return data.get('total', 'N/A')
+```
+
+## 2. 发票状态	(未验证\未通过\已通过)
+
+* ```python
+  class UpFile(models.Model):
+      file = models.FileField(upload_to=user_directory_path)
+      uuid = models.CharField(max_length=30)
+      userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="UserFiles",null=True, blank=True)
+      timestamp = models.DateTimeField(auto_now_add=True)
+      
+      # 添加这两列fields到invoice_upfile数据表中
+      is_validated = models.BooleanField(default=False)
+      is_correct = models.BooleanField(default=False)
+      
+      class Meta:
+          unique_together = ('userid', 'file')
+  ```
+
+* 当前端调用
+
+  ```python
+  class FileValidationsAPIView(APIView):
+  ```
+
+  ```python
+  # 首先因为调用函数可以设置file.is_validated = True
+  # 其次根据返回的report里的successful字段，看其对应的值是true还是false来判断file.is_correct
+  if validation_response.status_code == 200:
+      validate_data = validation_response.json()
+      file.is_validated = True
+      if validate_data.get('successful'):
+          file.is_correct = True
+  ```
+
+### 3. 区分发票创建方式
+
+```python
+def get_creation_method(self, obj):
+    if GUIFile.objects.filter(userid=obj.userid, uuid=obj.uuid).exists():
+        return "gui"
+    return "upload"
+```
+
