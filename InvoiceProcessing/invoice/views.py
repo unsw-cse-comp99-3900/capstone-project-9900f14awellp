@@ -35,7 +35,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser
 from .serializers import CompanySerializer,RegisterSerializer,\
-                        FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, FileDeletionSerializer
+                        FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, InvoiceUpfileSerializer
 
 
 
@@ -409,6 +409,8 @@ class UpFileAPIView(APIView):
         }
     )
     def post(self, request):
+        if request.user.company == None:
+            return Response({"code": 400, "msg": "Please create a company or join a company first."}, status=status.HTTP_400_BAD_REQUEST)
         file_serializer = FileUploadSerializer(data=request.data)
         if file_serializer.is_valid():
             uuid = file_serializer.validated_data.get('uuid')
@@ -425,6 +427,62 @@ class UpFileAPIView(APIView):
                     "msg": "File ID exists",
                 }, status=status.HTTP_400_BAD_REQUEST)
             file_serializer.save(userid=request.user)
+            
+            # 上传的pdf文件直接转化为json和xml文件
+            file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
+            
+            
+            file_name = os.path.basename(str(file.file))
+            file_stem = os.path.splitext(file_name)[0]
+            
+            # 1.将json文件转化为xml，for Later validation
+            if str(file.file).endswith('.json'):
+                    with open(str(file.file), 'r') as f:
+                        data = json.load(f)
+                        # json -> xml
+                        xml_elem = json_to_xml(data)
+                        xml_str = prettify(xml_elem)
+                    with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
+                        f.write(xml_str)
+            elif str(file.file).endswith('.pdf'):
+                url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
+                api_key = {'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
+                payload = {'user': 'LianqiangZhao',
+                        'pwd': 'Zlq641737796',
+                        'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
+                # 保留cookie
+                r = requests.get(url + '/Login', params=payload)
+                
+                # 1.2 上传pdf文件
+                with open(str(file.file), 'rb') as img_file:
+                    img_name = f"{file_stem}.pdf"
+                    data = img_file.read()
+                    b = bytearray(data)
+                    li = []
+                    for i in b:
+                        li.append(i)
+                    raw_data = {"PictureName": img_name, "PictureStream": li}
+                    json_data = json.dumps(raw_data)
+                    r2 = requests.post("https://app.ezzydoc.com/EzzyService.svc/Rest/uploadInvoiceImage",
+                                    data=json_data,
+                                    cookies=r.cookies,
+                                    params=api_key,
+                                    headers={'Content-Type': 'application/json'})
+                    invoiceID = r2.json().get("invoice_id")
+                
+                # 1.3 获得传回的json数据
+                payload2 = {'invoiceid':invoiceID,
+                            'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
+                
+                r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
+                if r3.status_code == 200:
+                    data = r3.json()
+                    with open(f"staticfiles/{request.user.id}/{file_stem}.json", "w", encoding="utf-8") as f:
+                        json.dump(data, f, ensure_ascii=False, indent=4)
+                    xml_elem = json_to_xml(data)
+                    xml_str = prettify(xml_elem)
+                    with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
+                        f.write(xml_str)
             return Response({
                                 "code": 0,
                                 "msg": "success!",
@@ -639,9 +697,9 @@ class GUIFileAPIView(APIView):
                     type=openapi.TYPE_BOOLEAN,
                     description='Require Email'
                 ),
-            'supplier': openapi.Schema(
+            'supplier_name': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Supplier'
+                    description='SupplierName'
                 ),
             'supplier_address': openapi.Schema(
                     type=openapi.TYPE_STRING,
@@ -755,7 +813,7 @@ class GUIFileAPIView(APIView):
                     
             # 将数据保存在数据库的同时，创建json文件并保存进去
             file_instance = file_serializer.save(userid=request.user)
-            file_path = f"staticfiles/{request.user.id}/{file_instance.filename}.json"
+            file_path = f"staticfiles/{request.user.id}/{filename}.json"
             # 将数据保存到 Invoice_upfile 表中
             UpFile.objects.create(
                 file=file_path,
@@ -772,6 +830,10 @@ class GUIFileAPIView(APIView):
             
             with open(f"staticfiles/{request.user.id}/{filename}.json", "w", encoding='utf-8') as f:
                 json.dump(file_data, f, ensure_ascii=False, indent=4)
+            xml_elem = json_to_xml(file_data)
+            xml_str = prettify(xml_elem)
+            with open(f"staticfiles/{request.user.id}/{filename}.xml", "w", encoding="utf-8") as f:
+                f.write(xml_str)
             
             return Response({
                                 "code": 0,
@@ -845,15 +907,18 @@ class DeleteFileAPIView(APIView):
         file_gui = GUIFile.objects.filter(userid=request.user, uuid=file.uuid).first()
         if file_gui is not None:
             file_gui.delete()
-        # 删除发票目录下的该发票，防止下次上传时文件重复存在
-        if os.path.isfile(str(file.file)):
-                os.remove(str(file.file))
+
                 
-        # 如果文件被validate过，也需要删掉对应的xml文件
+        # 删除发票目录下的该发票，防止下次上传时文件重复存在
         file_name = os.path.basename(str(file.file))
         file_stem = os.path.splitext(file_name)[0]
+        if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}.pdf"):
+            os.remove(f"staticfiles/{request.user.id}/{file_stem}.pdf")
+        if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}.json"):
+            os.remove(f"staticfiles/{request.user.id}/{file_stem}.json")
         if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}.xml"):
             os.remove(f"staticfiles/{request.user.id}/{file_stem}.xml")
+            
         file.delete()
         return Response({
                             "code": 200,
@@ -861,6 +926,65 @@ class DeleteFileAPIView(APIView):
                         },
                         status=status.HTTP_200_OK
                         )
+
+class FileInfoAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    @swagger_auto_schema(
+        operation_summary="获取用户的发票文件信息",
+        operation_description="获取当前登录用户的所有发票文件信息",
+        responses={
+            200: openapi.Response(
+                description="成功返回发票文件信息",
+                examples={
+                    "application/json": [
+                        {
+                            "id": 1,
+                            "timestamp": "2024-07-10T12:34:56Z",
+                            "userid": 1,
+                            "uuid": "some-uuid",
+                            "file": "path/to/file.pdf",
+                            "supplier": "Supplier Name",
+                            "total": 100.0,
+                            "state": "已通过",
+                            "creation_method": "upload"
+                        },
+                        {
+                            "id": 2,
+                            "timestamp": "2024-07-11T12:34:56Z",
+                            "userid": 1,
+                            "uuid": "another-uuid",
+                            "file": "path/to/another_file.pdf",
+                            "supplier": "Another Supplier",
+                            "total": 200.0,
+                            "state": "未验证",
+                            "creation_method": "gui"
+                        }
+                    ]
+                }
+            ),
+            401: openapi.Response(
+                description="未授权",
+                examples={
+                    "application/json": {
+                        "detail": "Authentication credentials were not provided."
+                    }
+                }
+            ),
+            500: openapi.Response(
+                description="服务器内部错误",
+                examples={
+                    "application/json": {
+                        "detail": "Internal server error."
+                    }
+                }
+            )
+        }
+    )
+    def get(self, request):
+        invoices = UpFile.objects.filter(userid=request.user.id)
+        serializer = InvoiceUpfileSerializer(invoices, many=True)
+        return Response(serializer.data)
+
 
 def json_to_xml(json_obj, line_padding=""):
     elem = ET.Element('root')
@@ -981,60 +1105,10 @@ class FileValidationsAPIView(APIView):
         # invoices_files/retrospective_A.pdf = retrospective_A
         file_name = os.path.basename(str(file.file))
         file_stem = os.path.splitext(file_name)[0]
-        
-        # 1.将json文件转化为xml，for Later validation
-        if str(file.file).endswith('.json'):
-                with open(str(file.file), 'r') as f:
-                    data = json.load(f)
-                    # json -> xml
-                    xml_elem = json_to_xml(data)
-                    xml_str = prettify(xml_elem)
-                with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
-                    f.write(xml_str)
-        elif str(file.file).endswith('.pdf'):
-            # 如果这里有问题看一下free trail是否过期了
-            
-            # 1.1 登录ezzydoc
-            url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
-            api_key = {'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
-            payload = {'user': 'LianqiangZhao',
-                    'pwd': 'Zlq641737796',
-                    'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
-            # 保留cookie
-            r = requests.get(url + '/Login', params=payload)
-            
-            # 1.2 上传pdf文件
-            with open(str(file.file), 'rb') as img_file:
-                img_name = f"{file_stem}.pdf"
-                data = img_file.read()
-                b = bytearray(data)
-                li = []
-                for i in b:
-                    li.append(i)
-                raw_data = {"PictureName": img_name, "PictureStream": li}
-                json_data = json.dumps(raw_data)
-                r2 = requests.post("https://app.ezzydoc.com/EzzyService.svc/Rest/uploadInvoiceImage",
-                                data=json_data,
-                                cookies=r.cookies,
-                                params=api_key,
-                                headers={'Content-Type': 'application/json'})
-                invoiceID = r2.json().get("invoice_id")
-            
-            # 1.3 获得传回的json数据
-            payload2 = {'invoiceid':invoiceID,
-                        'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
-            
-            r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
-            if r3.status_code == 200:
-                data = r3.json()
-                xml_elem = json_to_xml(data)
-                xml_str = prettify(xml_elem)
-                with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
-                    f.write(xml_str)
                       
         # 2. 将xml内容转化为base64的content
-        with open(f'staticfiles/{request.user.id}/{file_stem}.xml', 'rb') as file:
-            xml_bytes = file.read()
+        with open(f'staticfiles/{request.user.id}/{file_stem}.xml', 'rb') as xml_file:
+            xml_bytes = xml_file.read()
             # 使用Base64编码字节
         base64_bytes = base64.b64encode(xml_bytes)
 
@@ -1061,7 +1135,7 @@ class FileValidationsAPIView(APIView):
             response_data = response.json()
             access_token = response_data.get('access_token')
             return access_token
-        
+
         # https://services.ebusiness-cloud.com/ess-schematron/v1/api/validate?rules=AUNZ_UBL_1_0_10&customer=COMPANY
         # 请求api做validation
         url = "https://services.ebusiness-cloud.com/ess-schematron/v1/api/validate"
@@ -1076,6 +1150,10 @@ class FileValidationsAPIView(APIView):
         # 处理验证响应
         if validation_response.status_code == 200:
             validate_data = validation_response.json()
+            file.is_validated = True
+            if validate_data.get('successful'):
+                file.is_correct = True
+            file.save()
             return Response({
                                 "code": 200,
                                 "msg": "Validation success!",
@@ -1089,7 +1167,6 @@ class FileValidationsAPIView(APIView):
                                 "details": validation_response.text
                             },
                             status=validation_response.status_code)
-
 
 class SendInvoiceEmailAPIView(APIView):
     # authentication_classes = [MyAhenAuthentication]
@@ -1332,6 +1409,6 @@ class PasswordResetConfirmView(APIView):
     def get(self, request, uidb64, token):
         return render(request, 'password_reset_confirm.html', {'uid': uidb64, 'token': token})
 
-        
+
     
     

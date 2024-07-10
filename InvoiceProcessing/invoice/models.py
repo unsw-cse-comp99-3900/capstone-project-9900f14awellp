@@ -66,6 +66,8 @@ class UpFile(models.Model):
     uuid = models.CharField(max_length=30)
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="UserFiles",null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    is_validated = models.BooleanField(default=False)
+    is_correct = models.BooleanField(default=False)
     
     
     class Meta:
@@ -105,7 +107,7 @@ class GUIFile(models.Model):
     purchaseOrder = models.CharField(max_length=255, verbose_name='Purchase Order') # 采购订单，当前为空。
     require_bank_details = models.BooleanField(default=False, verbose_name='Require Bank Details')
     require_email = models.BooleanField(default=False, verbose_name='Require Email')
-    supplier = models.CharField(max_length=255, verbose_name='Supplier') # 供应商，当前为空。
+    supplier_name = models.CharField(max_length=255, verbose_name='Supplier') # 供应商，当前为空。
     supplier_address = models.CharField(max_length=255, verbose_name='Supplier Address') # 供应商地址，当前为空。
     supplier_id = models.CharField(max_length=255, verbose_name='Supplier ID') # 供应商ID，当前为空。
     tax = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Tax', default=0.0)

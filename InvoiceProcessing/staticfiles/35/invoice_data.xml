@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<root>
+  <bankAccount/>
+  <bankBranch/>
+  <blob_url>https://ezzydoc.blob.core.windows.net/docs/29365250.pdf?sv=2014-02-14&amp;sr=b&amp;sig=YOHmkDRtbdmdneWvM07tAhghPOFaq%2FZJpqobG453fsg%3D&amp;st=2024-07-01T10%3A10%3A00Z&amp;se=2124-07-01T10%3A15%3A00Z&amp;sp=r</blob_url>
+  <charge>0.0</charge>
+  <classification>1</classification>
+  <form_data>
+    <abn>2345678901</abn>
+    <additional_request/>
+    <approver/>
+    <approver_email/>
+    <bPayRef/>
+    <bPaycode/>
+    <bankAccount/>
+    <bankBranch/>
+    <bank_details/>
+    <changed>True</changed>
+    <charge>0.0</charge>
+    <company_invoiced/>
+    <customField1/>
+    <customField2/>
+    <customField3/>
+    <customField4/>
+    <customValues/>
+    <delivery_to/>
+    <delivery_to_address>JOHN DOE
+456 CLIENTRD
+MELBOURNE, VIC 3000
+</delivery_to_address>
+    <description/>
+    <document_subtype>1</document_subtype>
+    <email/>
+    <email_to/>
+    <expense_claim/>
+    <from_email/>
+    <glcode_option/>
+    <glcode_text/>
+    <invoiceDate>/Date(1719705600000+0000)/</invoiceDate>
+    <invoiceNumber>INV-2024-0001</invoiceNumber>
+    <invoice_to/>
+    <invoice_to_address>JOHN DOE
+456 CLIENTRD
+MELBOURNE, VIC 3000
+</invoice_to_address>
+    <location/>
+    <purchaseOrder/>
+    <require_bank_details>False</require_bank_details>
+    <require_email>False</require_email>
+    <supplier>CARDIAC DIMENSI</supplier>
+    <supplier_address>ABC PTY LTD
+ABN 12 345 678 901
+123 BUSINESSST
+SYDNEY,NSW 2000
+</supplier_address>
+    <supplier_id/>
+    <tax>125.0</tax>
+    <total>1375.0</total>
+    <tracking/>
+    <tracking_option/>
+  </form_data>
+  <gst_total>125.0</gst_total>
+  <invoice_number>INV-2024-0001</invoice_number>
+  <locale>3</locale>
+  <pdf_url>https://ezzydoc.blob.core.windows.net/docs/29365250_link.pdf?sv=2014-02-14&amp;sr=b&amp;sig=yEgLagW%2BGzndJTrC0s%2BUr%2FW2eNEvK4dvSWjkyJTk%2FPs%3D&amp;st=2024-07-01T10%3A10%3A00Z&amp;se=2124-07-01T10%3A15%3A00Z&amp;sp=r</pdf_url>
+  <service_status>
+    <invoice_id>0</invoice_id>
+    <message/>
+    <status>0</status>
+  </service_status>
+  <supplier_name>CARDIAC DIMENSI</supplier_name>
+  <thumb_url>https://ezzydoc.blob.core.windows.net/docs/thumb_29365250.png?sv=2014-02-14&amp;sr=b&amp;sig=%2BDf3luOEIyXxzmC2Gw%2BBZgoP%2FvdEHDCaymexYlBAVGs%3D&amp;st=2024-07-01T10%3A10%3A00Z&amp;se=2124-07-01T10%3A15%3A00Z&amp;sp=r</thumb_url>
+  <total>1375.0</total>
+</root>

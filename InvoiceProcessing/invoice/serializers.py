@@ -1,6 +1,47 @@
 from rest_framework import serializers,exceptions
 from .models import Company, User, UpFile, GUIFile
+import json
+import os
 
+class InvoiceUpfileSerializer(serializers.ModelSerializer):
+    supplier = serializers.SerializerMethodField()
+    total = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+    creation_method = serializers.SerializerMethodField()
+    class Meta:
+        model = UpFile
+        fields = ['id', 'timestamp', 'userid', 'uuid', 'file','supplier',"total","state","creation_method"]
+        
+    def get_file_data(self, obj):
+        file_name = os.path.basename(str(obj.file))
+        file_stem = os.path.splitext(file_name)[0]
+        try:
+            with open(f"staticfiles/{obj.userid.id}/{file_stem}.json", 'r') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return {}
+
+    def get_supplier(self, obj):
+        data = self.get_file_data(obj)
+        return data.get('supplier_name', 'N/A')
+    
+    def get_total(self, obj):
+        data = self.get_file_data(obj)
+        return data.get('total', 'N/A')
+    def get_state(self, obj):
+        if not obj.is_validated:
+            return "unvalidated"
+        if obj.is_validated and not obj.is_correct:
+            return "Failed"
+        if obj.is_validated and obj.is_correct:
+            return "Passed"
+        return "Unknown"  # 如果有其他状态可以添加此行作为默认值
+
+    def get_creation_method(self, obj):
+        if GUIFile.objects.filter(userid=obj.userid, uuid=obj.uuid).exists():
+            return "gui"
+        return "upload"
+    
 class CompanySerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -58,6 +99,10 @@ class FileUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = UpFile
         fields = ['file','uuid']
+"""    def create(self, validated_data):
+        # Set is_validated to True when creating a new UpFile instance
+        validated_data['is_validated'] = True
+        return super().create(validated_data)"""
         
 class FileGUISerializer(serializers.ModelSerializer):
     filename = serializers.CharField(required=True)
