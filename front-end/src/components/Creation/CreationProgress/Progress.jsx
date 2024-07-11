@@ -6,7 +6,9 @@ const ProgressIndicator = ({ steps, currentStep, onContinue, onBack }) => {
       <div className='button-and-progess'>
         <div className='button-row'>
         <button className='back-button' style={{visibility: currentStep === 0 ? 'hidden' : 'visible'}} onClick={onBack}>Back</button>
-        <button className='continue-button' onClick={onContinue} style={{visibility: currentStep === 3 ? 'hidden' : 'visible'}}>Continue</button>
+        <button className='continue-button' onClick={onContinue} style={{visibility: currentStep === 3 ? 'hidden' : 'visible'}}>
+          {currentStep === 1 ? 'Submit' : 'Continue'}
+        </button>
         </div>
         <div className="progress-indicator">
           <div className="steps-container">

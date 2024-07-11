@@ -2,9 +2,8 @@
     background-color: #F2F5F7;
     display: flex;
     flex-direction: column;
-    width: 28vw;
+    width: 27vw;
     height: 10vh;
-    max-width: 400px;
     border-radius: 7px;
     margin-top: 1vh;
     justify-content: center;

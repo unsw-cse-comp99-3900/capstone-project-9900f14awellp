@@ -1,5 +1,11 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import {
+	BrowserRouter,
+	Routes,
+	Route,
+	Navigate,
+	useOutletContext,
+} from 'react-router-dom';
 
 import Welcome from './views/Welcome';
 import Dashboard from './views/Dashboard';
@@ -35,7 +41,10 @@ export default function App() {
 				<Route path="/choice" element={<Choice></Choice>} />
 				<Route path="/draft" element={<Draft></Draft>} />
 				<Route path="/profile" element={<Profile></Profile>} />
-				<Route path="/company-details" element={<CompanyDetails></CompanyDetails>} />
+				<Route
+					path="/company-details"
+					element={<CompanyDetails></CompanyDetails>}
+				/>
 				<Route path="/404" element={<NotFound></NotFound>} />
 				<Route path="*" element={<Navigate to="/404" />} />
 			</Routes>
