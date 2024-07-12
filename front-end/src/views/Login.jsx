@@ -15,18 +15,23 @@ export default function Login() {
     const goDashboard = () => {
         navigate("/home");
     }
-
+    
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const handleLogin = () => {
-        axios.post('http://localhost:8000/invoice/login/', {
-        username: username,
-        password: password
-        })
+        axios.post('http://127.0.0.1:8000/invoice/login/', null, {
+            params: {
+                username: username,
+                password: password
+            }, // Query parameters
+            headers: {
+              'Accept': 'application/json' // Setting the Accept header
+            }
+          })
         .then(response => {
         console.log(response.data);
         // const token = response.data.token;
-        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('token', response.data.access);
         localStorage.setItem('userid', response.data.userid);
         alert(response.data.state);
         goDashboard();
@@ -35,7 +40,7 @@ export default function Login() {
         if (error.response) {
             alert(error.response.data.detail || 'Login failed');
             console.log(username, password)
-            console.log(error.response.data.detail);
+            console.log(error.response);
 
         } else {
             alert(error.message);
