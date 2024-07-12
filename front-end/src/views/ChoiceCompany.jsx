@@ -8,7 +8,8 @@ import axios from 'axios';
 
 export default function Choice() {
     //const userid = '9'; // Replace with the actual user ID
-    const userid = localStorage.getItem('userid'); // 从 localStorage 获取 userid
+    // const userid = localStorage.getItem('userid'); // 从 localStorage 获取 userid
+    const token = localStorage.getItem('token');
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [openCreateForm, setOpenCreateForm] = useState(false);
@@ -16,10 +17,15 @@ export default function Choice() {
 
   
     const handleOpen = () => {
-        axios.get(`http://localhost:8000/invoice/join-company/${userid}/`)
+        axios.get(`http://127.0.0.1:8000/invoice/join-company/`,{
+            headers: {
+                'Accept': 'application/json', // Setting the Accept header
+                'Authorization': `Bearer ${token}`
+            }
+        })
         .then(response => {
-            console.log(response.data.companies);
-            setNames(response.data.companies); // 确保响应数据是一个数组
+            console.log(response.data);
+            setNames(response.data); // 确保响应数据是一个数组
             // handleSubmitCreateForm();
             setOpen(true);
         })
@@ -35,7 +41,12 @@ export default function Choice() {
     };
 
     const handleSubmit = (personName) => {
-        axios.post(`http://localhost:8000/invoice/join-company/${userid}/`, {
+        axios.post(`http://127.0.0.1:8000/invoice/join-company/`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             company_name: personName
         })
         .then(response => {
@@ -86,7 +97,13 @@ export default function Choice() {
       };
 
     const handleChioceCompany = () =>{
-        axios.post(`http://localhost:8000/invoice/create-company/${userid}/`, formData)
+        axios.post(`http://127.0.0.1:8000/invoice/create-company/`, formData, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
         .then(response => {
             console.log('Response:', response.data);
             console.log(formData);

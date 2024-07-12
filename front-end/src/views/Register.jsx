@@ -29,15 +29,20 @@ export default function Register() {
             return;
         }
         // console.log(username,password,confirmPassword,name,email)
-        axios.post('http://localhost:8000/invoice/register/', {
-            username: username,
-            password: password,
-            name: name,
-            email: email,
-            confirm_password: confirmPassword,
-        })
+        axios.post('http://127.0.0.1:8000/invoice/register/', {    
+                username: username,
+                password: password,
+                name: name,
+                email: email,
+                confirm_password: confirmPassword,
+            }, // Query parameters
+            {headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+            }
+          })
         .then(response => {
-            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('token', response.data.access);
             localStorage.setItem('userid', response.data.userid);
             console.log(response.data);
             goChoice();
