@@ -1,11 +1,12 @@
-import React from "react";
-import { ResponsiveAppBar } from "../components/Navbar";
+import React from 'react';
+import { ResponsiveAppBar } from '../components/Navbar';
+import { ManageTable } from '../components/ManageTable/Table';
 
 export default function InvoiceManagement() {
-    return (
-        <div>
-            <ResponsiveAppBar />
-            <h1>Invoice Management Page</h1>
-        </div>
-    );
+	return (
+		<div>
+			<ResponsiveAppBar />
+			<ManageTable />
+		</div>
+	);
 }

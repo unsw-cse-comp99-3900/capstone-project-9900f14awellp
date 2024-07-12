@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-	BrowserRouter,
-	Routes,
-	Route,
-	Navigate,
-	useOutletContext,
-} from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import Welcome from './views/Welcome';
 import Dashboard from './views/Dashboard';

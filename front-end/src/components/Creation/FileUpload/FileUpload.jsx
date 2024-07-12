@@ -80,6 +80,7 @@ export default function FileUploader({ showAlert }) {
 		return () => {
 			window.removeEventListener('uploadFile', handleUploadEvent);
 		};
+		// eslint-disable-next-line
 	}, [file, uuid]);
 
 	return (
