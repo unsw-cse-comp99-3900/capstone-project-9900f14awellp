@@ -271,37 +271,42 @@ class JoinCompanyView(APIView):
     authentication_classes = [JWTAuthentication]
     
     @swagger_auto_schema(
-        operation_summary='得到加入公司的详细信息',
+        operation_summary="获取所有公司的名称",
+        operation_description="返回一个包含所有公司名称的列表",
         responses={
             200: openapi.Response(
-                description="成功获取公司详细信息",
+                description="成功返回公司名称列表",
                 examples={
                     "application/json": [
-                        {
-                            "name": "Example Company",
-                            "phone_number": "123456789",
-                            "email": "example@company.com",
-                            "ABN": "12345678901",
-                            "address": "123 Example Street"
-                        },
-                        {
-                            "name": "Another Company",
-                            "phone_number": "987654321",
-                            "email": "another@company.com",
-                            "ABN": "10987654321",
-                            "address": "456 Another Street"
-                        }
+                        "Company A",
+                        "Company B",
+                        "Company C"
                     ]
+                }
+            ),
+            401: openapi.Response(
+                description="未授权",
+                examples={
+                    "application/json": {
+                        "detail": "Authentication credentials were not provided."
+                    }
+                }
+            ),
+            500: openapi.Response(
+                description="服务器内部错误",
+                examples={
+                    "application/json": {
+                        "detail": "Internal server error."
+                    }
                 }
             )
         }
     )
     def get(self,request):
 
-        companies = Company.objects.all()
-        return Response(companies.values('name', 'phone_number', 'email', 'ABN', 'address'), status=status.HTTP_200_OK)
-        
-        
+        company_names = Company.objects.values_list('name', flat=True)
+        return Response(list(company_names), status=status.HTTP_200_OK)
+    
     @swagger_auto_schema(
         operation_summary='用户加入公司说明',
         request_body=openapi.Schema(
