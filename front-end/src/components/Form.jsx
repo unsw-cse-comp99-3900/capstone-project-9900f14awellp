@@ -50,15 +50,6 @@ export const ChoiceCompanyForm = ({ open, handleClose , handleSubmit, names}) =>
   const theme = useTheme();
   const [personName, setPersonName] = React.useState('');
 
-  // const handleChange = (event) => {
-  //   const {
-  //     target: { value },
-  //   } = event;
-  //   setPersonName(
-  //     // On autofill we get a stringified value.
-  //     typeof value === 'string' ? value.split(',') : value,
-  //   );
-  // };
   const handleChange = (event) => {
     setPersonName(event.target.value); // 确保选中的值是一个字符串
   };
