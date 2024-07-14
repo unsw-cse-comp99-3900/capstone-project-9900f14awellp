@@ -77,24 +77,24 @@
 .preview-button {
 	cursor: pointer;
 	width: 28%;
-	height: 72%;
+	height: 60%;
 	background-color: #333;
 	border: transparent;
-	border-radius: 20px;
+	border-radius: 15px;
 	color: white;
-	font-size: calc(0.7vw + 0.7vh);
+	font-size: calc(0.65vw + 0.65vh);
 }
 
 .preview-button:hover {
     background-color: #494446;
-  }
+}
 
-  .file-info.hidden {
+.file-info.hidden {
 	visibility: hidden;
-  }
-  
-  .preview-button:disabled {
+}
+
+.preview-button:disabled {
 	background-color: #cccccc;
 	color: #666666;
 	cursor: not-allowed;
-  }
+}
