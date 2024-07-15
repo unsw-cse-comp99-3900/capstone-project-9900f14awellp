@@ -61,17 +61,20 @@ export default function Sending() {
     }, [token]);
     const handleSend = () =>{
         const uuids = selectedInvoices.map(invoice => invoiceUuidMap[invoice]);
+        const fullMessage = `${firstName} ${lastName}: ${message}`;
         if (!uuids) {
             alert('Please select an invoice');
             return;
         }
-        axios.post('http://127.0.0.1:8000/invoice/invoice-validation/',null, {
+        console.log(uuids.join(','),message,email, fullMessage);
+        axios.post('http://127.0.0.1:8000/invoice/invoice-sending/',  { fullMessage } , {
             params: {
-              uuid: uuids,
+              uuid: uuids.join(','),
               email: email 
             }, 
             headers: {
               'Accept': 'application/json',
+              'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             }
           })
