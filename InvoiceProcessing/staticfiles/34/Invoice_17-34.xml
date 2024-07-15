@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:ID>17-34</cbc:ID>
+  <cbc:IssueDate>2024-07-12</cbc:IssueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>AUD</cbc:DocumentCurrencyCode>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cbc:EndpointID/>
+      <cac:PartyName>
+        <cbc:Name/>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>123 BUSINESSST</cbc:StreetName>
+        <cbc:CityName>SYDNEY</cbc:CityName>
+        <cbc:PostalZone>2000</cbc:PostalZone>
+        <cbc:CountrySubentity>NSW</cbc:CountrySubentity>
+        <cac:Country>
+          <cbc:IdentificationCode>AU</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>12345678901</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID>GST</cbc:ID>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyName>
+        <cbc:Name>JOHN DOE</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>456 CLIENTRD</cbc:StreetName>
+        <cbc:CityName>MELBOURNE</cbc:CityName>
+        <cbc:PostalZone>3000</cbc:PostalZone>
+        <cbc:CountrySubentity>VIC</cbc:CountrySubentity>
+        <cac:Country>
+          <cbc:IdentificationCode>AU</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="AUD">2.18</cbc:TaxAmount>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:PayableAmount currencyID="AUD">24.0</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="EA">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="AUD">24.0</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Description>Example item description</cbc:Description>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="AUD">24.0</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

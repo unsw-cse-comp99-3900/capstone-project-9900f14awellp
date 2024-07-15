@@ -4,6 +4,7 @@ import os
 import base64
 import hashlib
 import requests
+from time import sleep
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from django.http import JsonResponse
@@ -34,7 +35,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser
 from .serializers import CompanySerializer,RegisterSerializer,\
                         FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, InvoiceUpfileSerializer
-
+from .converter import converter_xml
 # Create your views here.
 user_directory = os.path.join(settings.STATICFILES_DIRS[0])
 
@@ -444,12 +445,13 @@ class UpFileAPIView(APIView):
                         xml_str = prettify(xml_elem)
                     with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
                         f.write(xml_str)
+                    converter_xml(f"staticfiles/{request.user.id}/{file_stem}.xml")
             elif str(file.file).endswith('.pdf'):
                 url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
-                api_key = {'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
-                payload = {'user': 'LianqiangZhao',
+                api_key = {'APIKey': '953d6538-b373-4ebb-8109-15040694f23b'}
+                payload = {'user': 'LianqiangZZZ',
                         'pwd': 'Zlq641737796',
-                        'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
+                        'APIKey': '953d6538-b373-4ebb-8109-15040694f23b'}
                 # 保留cookie
                 r = requests.get(url + '/Login', params=payload)
                 
@@ -469,20 +471,22 @@ class UpFileAPIView(APIView):
                                     params=api_key,
                                     headers={'Content-Type': 'application/json'})
                     invoiceID = str(r2.json().get("invoice_id"))
-                
                 # 1.3 获得传回的json数据
                 payload2 = {'invoiceid':invoiceID,
-                            'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
-                
+                            'APIKey': '953d6538-b373-4ebb-8109-15040694f23b'}
+            
+                sleep(15)
                 r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
                 if r3.status_code == 200:
                     data = r3.json()
+
                     with open(f"staticfiles/{request.user.id}/{file_stem}.json", "w", encoding="utf-8") as f:
                         json.dump(data, f, ensure_ascii=False, indent=4)
                     xml_elem = json_to_xml(data)
                     xml_str = prettify(xml_elem)
                     with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
                         f.write(xml_str)
+                    converter_xml(f"staticfiles/{request.user.id}/{file_stem}.xml")
             return Response({
                                 "code": 0,
                                 "msg": "success!",
