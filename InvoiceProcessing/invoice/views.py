@@ -1193,7 +1193,12 @@ class SendInvoiceEmailAPIView(APIView):
         operation_summary="发票邮件发送功能",
         operation_description="Send the invoice file to the client's email",
         manual_parameters=[
-            openapi.Parameter('uuid', openapi.IN_QUERY, description="File UUID", type=openapi.TYPE_STRING),
+            openapi.Parameter(
+                'uuids', openapi.IN_QUERY, 
+                description="File UUIDs", 
+                type=openapi.TYPE_ARRAY, 
+                items=openapi.Items(type=openapi.TYPE_STRING)
+            ),
             openapi.Parameter('email', openapi.IN_QUERY, description="Client Email", type=openapi.TYPE_STRING),
             
         ],
@@ -1247,23 +1252,28 @@ class SendInvoiceEmailAPIView(APIView):
         }
     )
     def post(self, request):
-        uuid = request.query_params.get('uuid')
+        uuids = request.query_params.getlist('uuids')
         client_email = request.query_params.get('email')
         custom_message = request.data.get('message') 
-        if not uuid or not client_email:
+        if not uuids or not client_email:
             return Response({
                                 "code": 400,
                                 "msg": "File ID and client email are required",
                             },
                             status=status.HTTP_400_BAD_REQUEST)
-        
-        file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
-        if file is None:
+            
+            
+        uuids = uuids[0].split(',')
+        # 格式化 UUID 列表
+        uuids = [str(uuid).strip() for uuid in uuids]
+        files = UpFile.objects.filter(userid=request.user.id, uuid__in=uuids)
+        if not files.exists():
             return Response({
                                 "code": 404,
-                                "msg": "file not found",
+                                "msg": "No files found",
                             },
                             status=status.HTTP_404_NOT_FOUND)
+
 
         email_body = f"Please find attached your invoice.\n\n{custom_message}"  # 将自定义消息添加到邮件正文中
         email = EmailMessage(
@@ -1271,27 +1281,29 @@ class SendInvoiceEmailAPIView(APIView):
             email_body,
             to=[client_email]
         )
-        file_name = os.path.basename(str(file.file))
-        file_stem = os.path.splitext(file_name)[0]
-        
-        file_path = str(file.file)
-        if os.path.exists(file_path):
-            # 未验证
-            if not file.is_validated:
-                email.attach_file(file_path)
-            # 验证通过
-            elif file.is_correct:
-                email.attach_file(file_path)
-                email.attach_file(f"staticfiles/{request.user.id}/{file_stem}_report.json")
-            # 验证失败
-            elif not file.is_correct:
-                email.attach_file(f"staticfiles/{request.user.id}/{file_stem}_report.json")
-        else:
-            return Response({
-                                "code": 404,
-                                "msg": "file not found on server",
-                            },
-                            status=status.HTTP_404_NOT_FOUND)
+        for file in files:
+            file_name = os.path.basename(str(file.file))
+            file_stem = os.path.splitext(file_name)[0]
+            
+            file_path = str(file.file)
+
+            if os.path.exists(file_path):
+                # 未验证
+                if not file.is_validated:
+                    email.attach_file(file_path)
+                # 验证通过
+                elif file.is_correct:
+                    email.attach_file(file_path)
+                    email.attach_file(f"staticfiles/{request.user.id}/{file_stem}_report.json")
+                # 验证失败
+                elif not file.is_correct:
+                    email.attach_file(f"staticfiles/{request.user.id}/{file_stem}_report.json")
+            else:
+                return Response({
+                                    "code": 404,
+                                    "msg": "file not found on server",
+                                },
+                                status=status.HTTP_404_NOT_FOUND)
         try:
             email.send()
             return Response({
