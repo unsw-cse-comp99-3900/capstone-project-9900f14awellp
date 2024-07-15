@@ -16,12 +16,18 @@ export default function Sending() {
     const [lastName, setlastName] = useState('');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
+    const [passedList, setPassedList] = useState([]);
+    const [failedList, setFailedList] = useState([]);
+    const [unvalidatedList, setUnvalidatedList] = useState([]);
+    const [invoiceUuidMap, setInvoiceUuidMap] = useState({});
+    const [selectedInvoices, setSelectedInvoices] = useState([]);
 
     const handleClear = () =>{
         setFirstName('');
         setlastName('');
         setEmail('');
         setMessage('');
+        setSelectedInvoices([]);
     }
 
     useEffect(() => {
@@ -38,16 +44,15 @@ export default function Sending() {
             const failedData = response.data.filter(entry => entry.state === "Failed");
             const unvalidatedData = response.data.filter(entry => entry.state === "unvalidated");
             // 三种类型的list
-            const passedList = passedData.map(entry => entry.file.split('/').pop());
-            const failedList = failedData.map(entry => entry.file.split('/').pop());
-            const unvalidatedList = unvalidatedData.map(entry => entry.file.split('/').pop());
+            setPassedList(passedData.map(entry => entry.file.split('/').pop()));
+            setFailedList(failedData.map(entry => entry.file.split('/').pop()));
+            setUnvalidatedList(unvalidatedData.map(entry => entry.file.split('/').pop()));
             // 理论上是所有发票的uuid--filename
             const uuidMap = response.data.reduce((acc, entry) => {
                 acc[entry.file.split('/').pop()] = entry.uuid;
                 return acc;
             }, {});
-            // setInvoices(invoiceList);
-            // setInvoiceUuidMap(uuidMap);
+            setInvoiceUuidMap(uuidMap);
         })
         .catch(error => {
             console.log(error.message);
@@ -55,9 +60,14 @@ export default function Sending() {
         });
     }, [token]);
     const handleSend = () =>{
+        const uuids = selectedInvoices.map(invoice => invoiceUuidMap[invoice]);
+        if (!uuids) {
+            alert('Please select an invoice');
+            return;
+        }
         axios.post('http://127.0.0.1:8000/invoice/invoice-validation/',null, {
             params: {
-              uuid: '00',
+              uuid: uuids,
               email: email 
             }, 
             headers: {
@@ -78,6 +88,14 @@ export default function Sending() {
         }
         });
     }
+
+    const handleInvoiceSelection = (invoice) => {
+        setSelectedInvoices(prevSelected => 
+            prevSelected.includes(invoice)
+            ? prevSelected.filter(item => item !== invoice)
+            : [...prevSelected, invoice]
+        );
+    };
 
     return (
         <div>
@@ -100,7 +118,13 @@ export default function Sending() {
             >
             <div style={{ margin: '30px'}}>
             <h1  style={{ fontSize: '45px', marginBottom: '50px', fontWeight: 'bold'}}>Choice  Invoice</h1>
-            <NestedList></NestedList>
+            <NestedList  
+            passedList={passedList} 
+            failedList={failedList} 
+            unvalidatedList={unvalidatedList} 
+            onInvoiceSelect={handleInvoiceSelection}
+            selectedInvoices={selectedInvoices}
+            ></NestedList>
             </div>
             <Divider orientation="vertical" variant="middle" flexItem />
             <div style={{ margin: '30px'}}>

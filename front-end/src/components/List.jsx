@@ -67,9 +67,9 @@ export const VirtualizedList = ({ height }) => {
 }
 
 
-const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
+// const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export const NestedList = () =>{
+export const NestedList = ({ passedList, failedList, unvalidatedList, onInvoiceSelect, selectedInvoices }) =>{
   const [openValidatedPass, setOpenValidatedPass] = React.useState(true);
   const [openValidatedFail, setOpenValidatedFail] = React.useState(true);
   const [openUnvalidated, setOpenUnvalidated] = React.useState(true);
@@ -84,6 +84,9 @@ export const NestedList = () =>{
     setOpenUnvalidated(!openUnvalidated);
   };
 
+  const handleCheckboxChange = (invoice) => {
+    onInvoiceSelect(invoice);
+ };
   return (
     <List
       sx={{ width: '100%', maxWidth: 360 }}
@@ -104,10 +107,16 @@ export const NestedList = () =>{
       </ListItemButton>
       <Collapse in={openValidatedPass} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <ListItemButton sx={{ pl: 4 }}>
-             <Checkbox {...label}  color="default" />
-            <ListItemText primary="passed-invoice-1" />
-          </ListItemButton>
+        {passedList.map((invoice, index) => (
+            <ListItemButton key={index} sx={{ pl: 4 }}>
+              <Checkbox 
+              color="default" 
+              checked={selectedInvoices.includes(invoice)}
+              onChange={() => handleCheckboxChange(invoice)}
+              />
+              <ListItemText primary={invoice} />
+            </ListItemButton>
+          ))}
         </List>
       </Collapse>
       <ListItemButton onClick={failClick}>
@@ -119,10 +128,16 @@ export const NestedList = () =>{
       </ListItemButton>
       <Collapse in={openValidatedFail} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <ListItemButton sx={{ pl: 4 }}>
-             <Checkbox {...label}  color="default" />
-            <ListItemText primary="failed-invoice-1" />
-          </ListItemButton>
+        {failedList.map((invoice, index) => (
+            <ListItemButton key={index} sx={{ pl: 4 }}>
+              <Checkbox 
+              color="default" 
+              checked={selectedInvoices.includes(invoice)}
+              onChange={() => handleCheckboxChange(invoice)}
+              />
+              <ListItemText primary={invoice} />
+            </ListItemButton>
+          ))}
         </List>
       </Collapse>
       <ListItemButton onClick={unClick}>
@@ -134,10 +149,16 @@ export const NestedList = () =>{
       </ListItemButton>
       <Collapse in={openUnvalidated} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <ListItemButton sx={{ pl: 4 }}>
-             <Checkbox {...label}  color="default" />
-            <ListItemText primary="unvalidated-invoice-1" />
-          </ListItemButton>
+        {unvalidatedList.map((invoice, index) => (
+            <ListItemButton key={index} sx={{ pl: 4 }}>
+              <Checkbox 
+              color="default" 
+              checked={selectedInvoices.includes(invoice)}
+              onChange={() => handleCheckboxChange(invoice)}
+              />
+              <ListItemText primary={invoice} />
+            </ListItemButton>
+          ))}
         </List>
       </Collapse>
     </List>
