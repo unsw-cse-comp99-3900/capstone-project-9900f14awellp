@@ -1,0 +1,20 @@
+{
+    "successful": true,
+    "summary": "Schematron validation completed successfully",
+    "filename": "string.xml",
+    "reports": {
+        "AUNZ_PEPPOL_1_0_10": {
+            "rules": "AUNZ_PEPPOL_1_0_10",
+            "successful": true,
+            "summary": "Validation result for AUNZ_PEPPOL_1_0_10: Successful. No assertion errors fired.Schematron Reports fired: no schematron reports fired. ",
+            "firedAssertionErrors": [],
+            "firedSuccessfulReports": [],
+            "firedSuccessfulReportsCount": 0,
+            "firedAssertionErrorsCount": 0,
+            "firedAssertionErrorCodes": []
+        }
+    },
+    "allAssertionErrorCodes": [],
+    "firedSuccessfulReportsCount": 0,
+    "firedAssertionErrorsCount": 0
+}
