@@ -8,10 +8,19 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     total = serializers.SerializerMethodField()
     state = serializers.SerializerMethodField()
     creation_method = serializers.SerializerMethodField()
+    files_name = serializers.SerializerMethodField()
     class Meta:
         model = UpFile
-        fields = ['id', 'timestamp', 'userid', 'uuid', 'file','supplier',"total","state","creation_method"]
-        
+        fields = ['id', 'timestamp', 'userid', 'uuid', 'file','files_name','supplier',"total","state","creation_method"]
+    
+    
+    def get_files_name(self, obj):
+        # 返回自定义的 file 字段
+        # 这里你可以根据需求返回你想要的内容，例如文件的 URL，文件内容的哈希，或其他自定义数据
+        file_name = os.path.basename(str(obj.file))
+        file_stem = os.path.splitext(file_name)[0]
+        return file_stem
+    
     def get_file_data(self, obj):
         file_name = os.path.basename(str(obj.file))
         file_stem = os.path.splitext(file_name)[0]
