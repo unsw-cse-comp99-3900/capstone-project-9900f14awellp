@@ -4,6 +4,16 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { FixedSizeList } from 'react-window';
+//import ListSubheader from '@mui/material/ListSubheader';
+import List from '@mui/material/List';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Collapse from '@mui/material/Collapse';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import DoneIcon from '@mui/icons-material/Done';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
+import Checkbox from '@mui/material/Checkbox';
 
 function renderRow(props) {
   const { index, style } = props;
@@ -53,5 +63,83 @@ export const VirtualizedList = ({ height }) => {
         {renderRow}
       </FixedSizeList>
     </Box>
+  );
+}
+
+
+const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
+
+export const NestedList = () =>{
+  const [openValidatedPass, setOpenValidatedPass] = React.useState(true);
+  const [openValidatedFail, setOpenValidatedFail] = React.useState(true);
+  const [openUnvalidated, setOpenUnvalidated] = React.useState(true);
+
+  const passClick = () => {
+    setOpenValidatedPass(!openValidatedPass);
+  };
+  const failClick = () => {
+    setOpenValidatedFail(!openValidatedFail);
+  };
+  const unClick = () => {
+    setOpenUnvalidated(!openUnvalidated);
+  };
+
+  return (
+    <List
+      sx={{ width: '100%', maxWidth: 360 }}
+      component="nav"
+      aria-labelledby="nested-list-subheader"
+      // subheader={
+      //   <ListSubheader component="div" id="nested-list-subheader">
+      //     Choice your invoices
+      //   </ListSubheader>
+      // }
+    >
+      <ListItemButton onClick={passClick}>
+        <ListItemIcon>
+          <DoneIcon />
+        </ListItemIcon>
+        <ListItemText primary="Verification Success" />
+        {openValidatedPass ? <ExpandLess /> : <ExpandMore />}
+      </ListItemButton>
+      <Collapse in={openValidatedPass} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          <ListItemButton sx={{ pl: 4 }}>
+             <Checkbox {...label}  color="default" />
+            <ListItemText primary="passed-invoice-1" />
+          </ListItemButton>
+        </List>
+      </Collapse>
+      <ListItemButton onClick={failClick}>
+        <ListItemIcon>
+          <ErrorOutlineIcon />
+        </ListItemIcon>
+        <ListItemText primary="Verification Failed" />
+        {openValidatedFail ? <ExpandLess /> : <ExpandMore />}
+      </ListItemButton>
+      <Collapse in={openValidatedFail} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          <ListItemButton sx={{ pl: 4 }}>
+             <Checkbox {...label}  color="default" />
+            <ListItemText primary="failed-invoice-1" />
+          </ListItemButton>
+        </List>
+      </Collapse>
+      <ListItemButton onClick={unClick}>
+        <ListItemIcon>
+          <QuestionMarkIcon />
+        </ListItemIcon>
+        <ListItemText primary="Unvalidated" />
+        {openUnvalidated ? <ExpandLess /> : <ExpandMore />}
+      </ListItemButton>
+      <Collapse in={openUnvalidated} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          <ListItemButton sx={{ pl: 4 }}>
+             <Checkbox {...label}  color="default" />
+            <ListItemText primary="unvalidated-invoice-1" />
+          </ListItemButton>
+        </List>
+      </Collapse>
+    </List>
   );
 }
