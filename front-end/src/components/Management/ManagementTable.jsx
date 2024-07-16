@@ -1,4 +1,6 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
+
+import { invoiceBasicInfo } from '../../apis/management';
 
 import {
 	createColumnHelper,
@@ -89,6 +91,11 @@ const columns = [
 			return dateA.getTime() - dateB.getTime();
 		},
 	}),
+	columnHelper.accessor('payDate', {
+		header: 'Payment Due',
+		enableSorting: true,
+		enableColumnFilter: false,
+	}),
 	columnHelper.accessor('total', {
 		header: 'Price',
 		enableSorting: true,
@@ -97,9 +104,19 @@ const columns = [
 ];
 
 export function ManageTable() {
-	const data = defaultData;
-	// const [data, _setData] = React.useState(() => [...defaultData]);
+	// const data = defaultData;
+	const [data, _setData] = React.useState([]);
 	const rerender = React.useReducer(() => ({}), {})[1];
+
+	useEffect(() => {
+		invoiceBasicInfo()
+			.then((response) => {
+				_setData(response.data);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+	}, []);
 
 	const table = useReactTable({
 		data,

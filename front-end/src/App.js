@@ -9,7 +9,7 @@ import Create from './views/Creation/Create';
 import Upload from './views/Creation/Upload';
 import GUI from './views/Creation/GUI';
 import Sending from './views/sending';
-import InvoiceManagement from './views/InvoiceManagement';
+import InvoiceManagement from './views/Management/InvoiceManagement';
 import Draft from './views/Draft';
 import Profile from './views/Profile';
 import Validation from './views/Validation';
@@ -35,7 +35,10 @@ export default function App() {
 				<Route path="/choice" element={<Choice></Choice>} />
 				<Route path="/draft" element={<Draft></Draft>} />
 				<Route path="/profile" element={<Profile></Profile>} />
-				<Route path="/company-details" element={<CompanyDetails></CompanyDetails>} />
+				<Route
+					path="/company-details"
+					element={<CompanyDetails></CompanyDetails>}
+				/>
 				<Route path="/404" element={<NotFound></NotFound>} />
 				<Route path="*" element={<Navigate to="/404" />} />
 			</Routes>
