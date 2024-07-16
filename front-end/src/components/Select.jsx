@@ -14,28 +14,22 @@ function getStyles(name, personName, theme) {
           : theme.typography.fontWeightMedium,
     };
   }
-const invoices = [
-  'Oliver Hansen',
-  'Van Henry',
-  'April Tucker',
-  'Ralph Hubbard',
-  'Omar Alexander',
-  'Carlos Abbott',
-  'Miriam Wagner',
-  'Bradley Wilkerson',
-  'Virginia Andrews',
-  'Kelly Snyder',
-];
-export const SelectSmall = ()=>{
+// const invoices = [
+//   'invoice_INV-2024-0001.pdf',
+//   'string.json',
+//   'invoice_data.json'
+// ];
+export const SelectSmall = ({ invoices, onChange })=>{
     const theme = useTheme();
     const [personName, setPersonName] = React.useState('');
 
     const handleChange = (event) => {
         setPersonName(event.target.value); // 确保选中的值是一个字符串
+        onChange(event); // 调用父组件传递的onChange处理函数
     };
 
   return (
-    <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+    <FormControl sx={{ m: 1, minWidth: 300 }} size="small">
       <InputLabel id="demo-select-small-label">Invoice</InputLabel>
       <Select
         labelId="demo-select-small-label"
@@ -43,6 +37,7 @@ export const SelectSmall = ()=>{
         value={personName}
         label="invoice"
         onChange={handleChange}
+        //onClick={onclick}
       >
         <MenuItem disabled value="">
             <em>choice a invoice</em>
@@ -78,7 +73,7 @@ const MenuProps = {
 
 
 
-export const MultipleSelect = ({lists}) => {
+export const MultipleSelect = ({lists, onChange}) => {
   const theme = useTheme();
   const [personName, setPersonName] = React.useState([]);
 
@@ -90,11 +85,13 @@ export const MultipleSelect = ({lists}) => {
       // On autofill we get a stringified value.
       typeof value === 'string' ? value.split(',') : value,
     );
+    onChange(value); // 调用父组件传递的onChange处理函数
   };
+
 
   return (
     <div>
-      <FormControl sx={{ m: 1, width: 300 }}>
+      <FormControl sx={{ m: 1, width: 300 }} size="small">
         <InputLabel id="demo-multiple-name-label">Rules</InputLabel>
         <Select
           labelId="demo-multiple-name-label"

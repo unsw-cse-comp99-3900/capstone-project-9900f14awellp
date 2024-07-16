@@ -16,23 +16,51 @@ export const InputTextField = ({ label, id, variant, value, onChange }) => {
     <Box
       component="form"
       sx={{
-        '& .MuiTextField-root': { m: 1, width: '25ch' },
+        '& .MuiTextField-root': {  width: '50', maxWidth: '100%' },
       }}
       noValidate
       autoComplete="off"
     >
       <div>
         <TextField 
+        fullWidth
           id={id} 
           label={label} 
           variant={variant} 
           value={value}
           onChange={onChange}
+          margin="normal"
         />
     </div>
     </Box>
   );
 };
+
+export const MultilineTextFields = ({ label, id, variant, value, onChange }) =>{
+return (
+    <Box
+      component="form"
+      sx={{
+        '& .MuiTextField-root': {  width: '50', maxWidth: '100%' },
+      }}
+      noValidate
+      autoComplete="off"
+    >
+        <TextField
+         fullWidth
+          id={id} 
+          label={label} 
+          variant={variant} 
+          value={value}
+          onChange={onChange}
+          multiline
+          rows={4}
+          
+        />   
+    </Box>
+  );
+
+}
 
 export const PasswordTextField = ({ id, label, value, onChange }) => {
   const [showPassword, setShowPassword] = React.useState(false);
