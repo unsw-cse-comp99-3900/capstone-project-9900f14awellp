@@ -1,14 +1,14 @@
 <?xml version="1.0" ?>
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-  <cbc:ID>17-34</cbc:ID>
-  <cbc:IssueDate>2024-07-12</cbc:IssueDate>
+  <cbc:ID>000000</cbc:ID>
+  <cbc:IssueDate>1970-01-01</cbc:IssueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>AUD</cbc:DocumentCurrencyCode>
   <cac:AccountingSupplierParty>
     <cac:Party>
-      <cbc:EndpointID/>
+      <cbc:EndpointID>00000000000</cbc:EndpointID>
       <cac:PartyName>
-        <cbc:Name/>
+        <cbc:Name>Default Supplier</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>123 BUSINESSST</cbc:StreetName>
@@ -44,20 +44,20 @@
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="AUD">2.18</cbc:TaxAmount>
+    <cbc:TaxAmount currencyID="AUD">0.00</cbc:TaxAmount>
   </cac:TaxTotal>
   <cac:LegalMonetaryTotal>
-    <cbc:PayableAmount currencyID="AUD">24.0</cbc:PayableAmount>
+    <cbc:PayableAmount currencyID="AUD">0.00</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>
   <cac:InvoiceLine>
     <cbc:ID>1</cbc:ID>
     <cbc:InvoicedQuantity unitCode="EA">1</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="AUD">24.0</cbc:LineExtensionAmount>
+    <cbc:LineExtensionAmount currencyID="AUD">0.00</cbc:LineExtensionAmount>
     <cac:Item>
       <cbc:Description>Example item description</cbc:Description>
     </cac:Item>
     <cac:Price>
-      <cbc:PriceAmount currencyID="AUD">24.0</cbc:PriceAmount>
+      <cbc:PriceAmount currencyID="AUD">0.00</cbc:PriceAmount>
     </cac:Price>
   </cac:InvoiceLine>
 </Invoice>

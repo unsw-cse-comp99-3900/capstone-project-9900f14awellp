@@ -3,7 +3,8 @@ from xml.dom import minidom
 from datetime import datetime
 
 def parse_date(date_string):
-    # Convert /Date(1719705600000+0000)/ to datetime
+    if date_string is None:
+        return '1970-01-01'  # 默认日期
     timestamp = int(date_string[6:19]) // 1000
     return datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d')
 
@@ -11,6 +12,15 @@ def converter_xml(input_file):
     # 解析原始XML文件
     tree = ET.parse(input_file)
     root = tree.getroot()
+
+    # 获取必要的字段并设置默认值
+    invoice_number = root.findtext('invoice_number') or '000000'
+    invoice_date = root.find('form_data/invoiceDate')
+    invoice_date_text = parse_date(invoice_date.text if invoice_date is not None else None)
+    abn = root.findtext('form_data/abn') or '00000000000'
+    supplier_name = root.findtext('supplier_name') or 'Default Supplier'
+    gst_total = root.findtext('gst_total') or '0.00'
+    total = root.findtext('total') or '0.00'
 
     # 创建UBL发票XML结构
     invoice = ET.Element('Invoice', {
@@ -20,17 +30,17 @@ def converter_xml(input_file):
     })
 
     # 添加发票基本信息
-    ET.SubElement(invoice, 'cbc:ID').text = root.findtext('invoice_number')
-    ET.SubElement(invoice, 'cbc:IssueDate').text = parse_date(root.find('form_data/invoiceDate').text)
+    ET.SubElement(invoice, 'cbc:ID').text = invoice_number
+    ET.SubElement(invoice, 'cbc:IssueDate').text = invoice_date_text
     ET.SubElement(invoice, 'cbc:InvoiceTypeCode').text = '380'  # 380表示普通发票
     ET.SubElement(invoice, 'cbc:DocumentCurrencyCode').text = 'AUD'
 
     # 添加供应商信息
     supplier_party = ET.SubElement(invoice, 'cac:AccountingSupplierParty')
     supplier = ET.SubElement(supplier_party, 'cac:Party')
-    ET.SubElement(supplier, 'cbc:EndpointID').text = root.findtext('form_data/abn')
-    supplier_name = ET.SubElement(supplier, 'cac:PartyName')
-    ET.SubElement(supplier_name, 'cbc:Name').text = root.findtext('supplier_name')
+    ET.SubElement(supplier, 'cbc:EndpointID').text = abn
+    supplier_name_elem = ET.SubElement(supplier, 'cac:PartyName')
+    ET.SubElement(supplier_name_elem, 'cbc:Name').text = supplier_name
     supplier_address = ET.SubElement(supplier, 'cac:PostalAddress')
     ET.SubElement(supplier_address, 'cbc:StreetName').text = '123 BUSINESSST'
     ET.SubElement(supplier_address, 'cbc:CityName').text = 'SYDNEY'
@@ -58,21 +68,21 @@ def converter_xml(input_file):
 
     # 添加税金信息
     tax_total = ET.SubElement(invoice, 'cac:TaxTotal')
-    ET.SubElement(tax_total, 'cbc:TaxAmount', currencyID='AUD').text = root.findtext('gst_total')
+    ET.SubElement(tax_total, 'cbc:TaxAmount', currencyID='AUD').text = gst_total
 
     # 添加总金额
     legal_monetary_total = ET.SubElement(invoice, 'cac:LegalMonetaryTotal')
-    ET.SubElement(legal_monetary_total, 'cbc:PayableAmount', currencyID='AUD').text = root.findtext('total')
+    ET.SubElement(legal_monetary_total, 'cbc:PayableAmount', currencyID='AUD').text = total
 
     # 添加发票行项目
     invoice_line = ET.SubElement(invoice, 'cac:InvoiceLine')
     ET.SubElement(invoice_line, 'cbc:ID').text = '1'
     ET.SubElement(invoice_line, 'cbc:InvoicedQuantity', unitCode='EA').text = '1'
-    ET.SubElement(invoice_line, 'cbc:LineExtensionAmount', currencyID='AUD').text = root.findtext('total')
+    ET.SubElement(invoice_line, 'cbc:LineExtensionAmount', currencyID='AUD').text = total
     item = ET.SubElement(invoice_line, 'cac:Item')
     ET.SubElement(item, 'cbc:Description').text = 'Example item description'
     price = ET.SubElement(invoice_line, 'cac:Price')
-    ET.SubElement(price, 'cbc:PriceAmount', currencyID='AUD').text = root.findtext('total')
+    ET.SubElement(price, 'cbc:PriceAmount', currencyID='AUD').text = total
 
     # 格式化输出XML
     xml_str = ET.tostring(invoice, encoding='utf-8')
@@ -81,3 +91,5 @@ def converter_xml(input_file):
     # 将格式化后的XML写入文件
     with open(input_file, 'w', encoding='utf-8') as f:
         f.write(parsed_str)
+
+
