@@ -21,8 +21,8 @@ export default function InvoiceManagement() {
 						<Tooltip title="Export as Excel" arrow>
 							<Button className="second-button">Export</Button>
 						</Tooltip>
-						<Tooltip title="Print as PDF" arrow>
-							<Button className="second-button">Print</Button>
+						<Tooltip title="Download PDFs" arrow>
+							<Button className="second-button">Download</Button>
 						</Tooltip>
 						<Tooltip title="Create a new invoice" arrow>
 							<Button
