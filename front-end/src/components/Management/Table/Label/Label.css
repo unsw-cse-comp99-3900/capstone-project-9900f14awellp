@@ -1,0 +1,16 @@
+.full-box {
+	width: 20px;
+    height: 15px;
+}
+
+.full-box.success {
+	background-color: green;
+}
+
+.full-box.rejected {
+	background-color: red;
+}
+
+.full-box.unvalidated {
+	background-color: grey;
+}
