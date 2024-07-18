@@ -37,8 +37,8 @@ export default function Register() {
                 confirm_password: confirmPassword,
             }, // Query parameters
             {headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
             }
           })
         .then(response => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Alert from '@mui/material/Alert';
 
-export function CustomAlert({ message, severity, onClose, duration = 3000 }) {
+export const CustomAlert = ({ message, severity, onClose, duration = 3000 })=>{
 	const [visible, setVisible] = useState(true);
 
 	useEffect(() => {
