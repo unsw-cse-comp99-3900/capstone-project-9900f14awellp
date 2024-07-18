@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { invoiceBasicInfo } from '../../../apis/management';
-import { ActionDropdown } from '../DropdownButton/ActionDropdown';
-import { Label } from './Label/Label';
+import { StatusTag, StatusClosableTag } from '../StatusTag/StatusTag';
 
 import {
 	createColumnHelper,
@@ -14,169 +13,19 @@ import {
 	useReactTable,
 } from '@tanstack/react-table';
 import { Checkbox } from '@mui/material';
-import { DatePicker, Select, Input, Tag } from 'antd';
+import { DatePicker, Select, Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 
 import './global.css';
 
-const defaultData = [
-	{
-		id: 44,
-		timestamp: '2024-07-10 16:16:24',
-		userid: 34,
-		uuid: 'htghaqdfdgfsd',
-		file: '/staticfiles/34/string.json',
-		files_name: 'string',
-		supplier: 'ABC company',
-		total: '1367.00',
-		state: 'unverified',
-		payDate: '2024-07-10',
-		creation_method: 'gui',
-	},
-	{
-		id: 45,
-		timestamp: '2024-07-10 16:47:19',
-		userid: 34,
-		uuid: 'dgrwhsehrhr',
-		file: '/staticfiles/34/invoice_data.json',
-		files_name: 'invoice_data',
-		supplier: 'Cardiac dimensi',
-		total: '1375.20',
-		state: 'unverified',
-		payDate: '2024-07-11',
-		creation_method: 'upload',
-	},
-	{
-		id: 46,
-		timestamp: '2024-07-19 16:16:24',
-		userid: 34,
-		uuid: 'ssfafafweg',
-		file: '/staticfiles/34/bcd.json',
-		files_name: 'bcd',
-		supplier: 'EFG company',
-		total: '397.60',
-		state: 'success',
-		payDate: '2024-09-02',
-		creation_method: 'gui',
-	},
-	{
-		id: 76,
-		timestamp: '2024-07-10 16:18:24',
-		userid: 34,
-		uuid: 'abcd123',
-		file: '/staticfiles/34/bcd.json',
-		files_name: 'b222',
-		supplier: 'qwe company',
-		total: '388.20',
-		state: 'rejected',
-		payDate: '2024-07-10',
-		creation_method: 'gui',
-	},
-	{
-		id: 77,
-		timestamp: '2024-07-11 16:18:24',
-		userid: 34,
-		uuid: '123adcer',
-		file: '/staticfiles/34/bcd.json',
-		files_name: 'b22343',
-		supplier: 'qwewe company',
-		total: '382.90',
-		state: 'success',
-		payDate: '2024-07-30',
-		creation_method: 'gui',
-	},
-	{
-		id: 78,
-		timestamp: '2024-01-11 16:18:24',
-		userid: 34,
-		uuid: '123adcedfsdfsdr',
-		file: '/staticfiles/34/bweq.json',
-		files_name: '343wqee',
-		supplier: 'qwe company',
-		total: '342.50',
-		state: 'unverified',
-		payDate: '2024-02-30',
-		creation_method: 'gui',
-	},
-	{
-		id: 79,
-		timestamp: '2024-03-11 16:18:24',
-		userid: 34,
-		uuid: '123fasfasfgdsfdsr',
-		file: '/staticfiles/34/bcde343.json',
-		files_name: 'feg43',
-		supplier: 'qwewe company',
-		total: '582.00',
-		state: 'rejected',
-		payDate: '2024-04-30',
-		creation_method: 'gui',
-	},
-	{
-		id: 80,
-		timestamp: '2024-05-11 16:18:24',
-		userid: 34,
-		uuid: '123adc32r34er',
-		file: '/staticfiles/34/bcd3434.json',
-		files_name: 'dgsda',
-		supplier: 'qwewesafg company',
-		total: '452.00',
-		state: 'rejected',
-		payDate: '2024-07-30',
-		creation_method: 'gui',
-	},
-	{
-		id: 80,
-		timestamp: '2024-05-11 16:18:24',
-		userid: 34,
-		uuid: '123adc32r34er',
-		file: '/staticfiles/34/bcd3434.json',
-		files_name: 'dgwesda',
-		supplier: 'qwewesafg company',
-		total: '452.20',
-		state: 'unverified',
-		payDate: '2024-07-30',
-		creation_method: 'gui',
-	},
-	{
-		id: 81,
-		timestamp: '2024-05-11 16:18:24',
-		userid: 34,
-		uuid: '123adc32r34er',
-		file: '/staticfiles/34/bcd3434.json',
-		files_name: 'dgwrsda',
-		supplier: 'qwewesafg company',
-		total: '496.80',
-		state: 'unverified',
-		payDate: '2024-07-30',
-		creation_method: 'gui',
-	},
-	{
-		id: 82,
-		timestamp: '2023-12-11 16:18:24',
-		userid: 34,
-		uuid: '123adc32rsffd34er',
-		file: '/staticfiles/34/bcd3434.json',
-		files_name: 'dgstryda',
-		supplier: 'qwewesafg company',
-		total: '452',
-		state: 'unverified',
-		payDate: '2024-01-20',
-		creation_method: 'gui',
-	},
-	{
-		id: 83,
-		timestamp: '2023-12-11 16:18:24',
-		userid: 34,
-		uuid: '123adc32rsffd3wrqw4er',
-		file: '/staticfiles/34/bcd3434.json',
-		files_name: '34tryda',
-		supplier: 'qweafg company',
-		total: '423.50',
-		state: 'rejected',
-		payDate: '2024-01-20',
-		creation_method: 'gui',
-	},
-];
+const statusMapping = {
+	Failed: 'Rejected',
+	unvalidated: 'Unvalidated',
+	success: 'Success',
+};
+const reverseStatusMapping = Object.fromEntries(
+	Object.entries(statusMapping).map(([key, value]) => [value, key]),
+);
 
 const columnHelper = createColumnHelper();
 
@@ -220,12 +69,19 @@ const columns = [
 		enableColumnFilter: false,
 	}),
 	columnHelper.accessor('state', {
-		header: 'State',
+		header: 'Status',
 		enableSorting: false,
 		enableColumnFilter: true,
 		filterFn: (row, columnId, filterValue) => {
 			if (!filterValue || filterValue.length === 0) return true;
-			return filterValue.includes(row.getValue(columnId));
+			const originalValue = row.getValue(columnId);
+			const mappedValue = statusMapping[originalValue] || originalValue;
+			return filterValue.includes(mappedValue);
+		},
+		cell: ({ getValue }) => {
+			const originalValue = getValue();
+			const displayValue = statusMapping[originalValue] || originalValue;
+			return <StatusTag value={displayValue} label={displayValue} />;
 		},
 	}),
 	columnHelper.accessor('timestamp', {
@@ -260,42 +116,21 @@ const columns = [
 	}),
 ];
 
-const tagColors = {
-	success: '#D5F9F0',
-	rejected: '#FFD4D4',
-	unverified: '#E9E9ED',
-};
-
-const textColors = {
-	success: '#006D5B',
-	rejected: '#C06167',
-	unverified: '#344054',
-};
-
 const tagRender = (props) => {
 	const { label, value, closable, onClose } = props;
-	const backgroundColor = tagColors[value];
-	const textColor = textColors[value];
-
 	return (
-		<Tag
+		<StatusClosableTag
+			value={value}
+			label={label}
 			closable={closable}
 			onClose={onClose}
-			style={{
-				marginRight: 3,
-				backgroundColor: backgroundColor,
-				color: textColor,
-				border: 'none',
-			}}
-		>
-			{label}
-		</Tag>
+		/>
 	);
 };
 
 export function ManageTable() {
-	const data = defaultData;
-	// const [data, _setData] = React.useState([]);
+	// const data = defaultData;
+	const [data, _setData] = React.useState([]);
 	// const rerender = React.useReducer(() => ({}), {})[1];
 	const [searchValue, setSearchValue] = useState('');
 	const [selectedDate, setSelectedDate] = useState(null);
@@ -303,18 +138,18 @@ export function ManageTable() {
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [pagination, setPagination] = useState({
 		pageIndex: 0,
-		pageSize: 8,
+		pageSize: 7,
 	});
 
-	// useEffect(() => {
-	// 	invoiceBasicInfo()
-	// 		.then((response) => {
-	// 			_setData(response.data);
-	// 		})
-	// 		.catch((error) => {
-	// 			console.log(error);
-	// 		});
-	// }, []);
+	useEffect(() => {
+		invoiceBasicInfo()
+			.then((response) => {
+				_setData(response.data);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+	}, []);
 
 	const table = useReactTable({
 		data,
@@ -341,11 +176,12 @@ export function ManageTable() {
 		},
 	});
 
-	const handleDateChange = (date, dateString) => {
+	const handleCreateDateChange = (date, dateString) => {
 		// console.log('Selected date:', dateString);
 		setSelectedDate(dateString);
 		table.getColumn('timestamp').setFilterValue(dateString);
 	};
+
 	const handleStateChange = (value) => {
 		setSelectedState(value);
 		table.getColumn('state').setFilterValue(value);
@@ -369,26 +205,27 @@ export function ManageTable() {
 					/>
 				</div>
 				<div className="second-search">
-					<DatePicker onChange={handleDateChange} className="date-picker" />
+					<DatePicker
+						onChange={handleCreateDateChange}
+						className="date-picker"
+						placeholder="Select Create Date"
+					/>
 					<Select
 						placeholder="State"
 						mode="multiple"
 						tagRender={tagRender}
 						options={[
 							{
-								value: 'success',
-								label: 'success',
-								className: 'tag-success',
+								value: 'Success',
+								label: 'Success',
 							},
 							{
-								value: 'rejected',
-								label: 'rejected',
-								className: 'tag-rejected',
+								value: 'Rejected',
+								label: 'Rejected',
 							},
 							{
-								value: 'unverified',
-								label: 'unverified',
-								className: 'tag-unverified',
+								value: 'Unvalidated',
+								label: 'Unvalidated',
 							},
 						]}
 						onChange={handleStateChange}
