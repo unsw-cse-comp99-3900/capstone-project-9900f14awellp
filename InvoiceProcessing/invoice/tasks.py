@@ -36,7 +36,7 @@ def prettify(elem):
 
 @shared_task
 def extract_pdf_data(file_path,userid):
-    
+
     file_name = os.path.basename(str(file_path))
     file_stem = os.path.splitext(file_name)[0]
     
@@ -97,6 +97,7 @@ def extract_pdf_data(file_path,userid):
                 
             xml_elem = json_to_xml(combined_data)
             xml_str = prettify(xml_elem)
+
             with open(f"staticfiles/{userid}/{file_stem}.xml", "w", encoding="utf-8") as f:
                 f.write(xml_str)
             converter_xml(f"staticfiles/{userid}/{file_stem}.xml")

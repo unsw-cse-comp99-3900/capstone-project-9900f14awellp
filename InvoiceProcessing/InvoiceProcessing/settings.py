@@ -206,7 +206,8 @@ EMAIL_HOST_USER = 'ikezhao123@gmail.com'
 EMAIL_HOST_PASSWORD = 'kxirrbrpliuldrjz'  # 不包括空格
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    #'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,

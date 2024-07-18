@@ -432,9 +432,8 @@ class UpFileAPIView(APIView):
             
             # 上传的pdf文件直接转化为json和xml文件
             file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
-            
+            # 异步处理pdf文件
             extract_pdf_data.delay(str(file.file),request.user.id)
-
             return Response({
                                 "code": 0,
                                 "msg": "success!",
