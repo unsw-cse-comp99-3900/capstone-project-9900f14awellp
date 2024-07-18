@@ -28,7 +28,6 @@
 }
 
 .button-group{
-    height: 100%;
     display: flex;
     flex-direction: row;
     align-items: end;
@@ -43,13 +42,12 @@
 
 .second-button {
     padding: 7px;
-    width: 70px;
     background-color: transparent;
     color: #333;
     border: 1px solid #333;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .second-button:hover {
@@ -64,13 +62,13 @@
 
 
 .primary-button {
-    padding: 7px;
-    width: 110px;
+    padding: 10px,10px;
     color: white;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     box-shadow: none !important;
+    
 }
 
 .primary-button:hover {
