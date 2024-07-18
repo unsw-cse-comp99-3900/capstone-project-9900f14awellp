@@ -117,7 +117,7 @@ export default function FileUploader({ showAlert }) {
 			</div>
 			<div className="button-groups">
 				<button className="preview-button" disabled={!file}>
-					Prieview
+					Preview
 				</button>
 			</div>
 		</div>
