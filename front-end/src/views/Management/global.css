@@ -53,7 +53,7 @@
 }
 
 .second-button:hover {
-    background-color: #EAEAEA;
+    background-color: #EAEAEA !important;
 }
 
 .second-button:disabled {
@@ -66,16 +66,15 @@
 .primary-button {
     padding: 7px;
     width: 110px;
-    background-color: #333;
     color: white;
-    border: 1px solid #333;
     border-radius: 10px;
     cursor: pointer;
     font-size: 16px;
+    box-shadow: none !important;
 }
 
 .primary-button:hover {
-    background-color: #494446;
+    background-color: #494446 !important;
 }
 
 .full-table{

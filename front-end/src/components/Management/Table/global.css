@@ -143,7 +143,7 @@
 /*Invoice Date*/
 .table-container table th:nth-child(6),
 .table-container table td:nth-child(6) {
-	width: 12%;
+	width: 11%;
 }
 /*PayDue*/
 .table-container table th:nth-child(7),
@@ -158,7 +158,7 @@
 /*Actions*/
 .table-container table th:nth-child(9),
 .table-container table td:nth-child(9) {
-	width: 13%;
+	width: 17%;
 }
 
 .actions-button-group {
@@ -200,58 +200,4 @@
 	font-weight: bold !important;
 }
 
-/* 修改输入框边框颜色 */
-.ant-input-affix-wrapper:focus,
-.ant-input-affix-wrapper-focused {
-  border-color: #333 !important;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
-}
 
-/* 修改悬停时的边框颜色 */
-.ant-input-affix-wrapper:hover {
-  border-color: #333 !important;
-}
-
-/* 确保输入过程中保持黑色边框 */
-.ant-input-affix-wrapper:focus-within {
-  border-color: #333 !important;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Select 样式 */
-.ant-select:not(.ant-select-disabled):not(.ant-select-customize-input)
-	.ant-select-selector {
-	border-color: #d9d9d9 !important;
-}
-
-.ant-select-focused:not(.ant-select-disabled).ant-select:not(
-		.ant-select-customize-input
-	)
-	.ant-select-selector {
-	border-color: #333 !important;
-	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* DatePicker 样式 */
-.ant-picker-focused {
-	border-color: #333 !important;
-	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* 通用悬停样式 */
-.ant-input:hover,
-.ant-select:not(.ant-select-disabled):not(.ant-select-customize-input)
-	.ant-select-selector:hover,
-.ant-picker:hover {
-	border-color: #333 !important;
-}
-
-/* 确保 Select 下拉框中的选项在悬停和选中时也使用黑色 */
-.ant-select-item-option-active:not(.ant-select-item-option-disabled) {
-	background-color: rgba(0, 0, 0, 0.05) !important;
-}
-
-.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-	background-color: rgba(0, 0, 0, 0.1) !important;
-	color: #000 !important;
-}

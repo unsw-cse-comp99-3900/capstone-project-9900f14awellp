@@ -4,6 +4,7 @@ import { ManageTable } from '../../components/Management/Table/ManagementTable';
 import './global.css';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from '@mui/material';
+import { Button } from 'antd';
 
 export default function InvoiceManagement() {
 	const navigate = useNavigate();
@@ -18,15 +19,19 @@ export default function InvoiceManagement() {
 					<div className="invoice-title">Invoices</div>
 					<div className="button-group">
 						<Tooltip title="Export as Excel" arrow>
-							<button className="second-button">Export</button>
+							<Button className="second-button">Export</Button>
 						</Tooltip>
 						<Tooltip title="Print as PDF" arrow>
-							<button className="second-button">Print</button>
+							<Button className="second-button">Print</Button>
 						</Tooltip>
 						<Tooltip title="Create a new invoice" arrow>
-							<button onClick={goCreation} className="primary-button">
+							<Button
+								type="primary"
+								onClick={goCreation}
+								className="primary-button"
+							>
 								New Invoice
-							</button>
+							</Button>
 						</Tooltip>
 					</div>
 				</div>

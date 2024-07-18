@@ -10,3 +10,12 @@ export function invoiceBasicInfo() {
 		},
 	});
 }
+
+export function invoiceUrl(uuid) {
+	return axios.get(`${API_BASE_URL}/invoice-creation-upload`, {
+		headers: {
+			Accept: 'application/json',
+			Authorization: `Bearer ${localStorage.getItem('token')}`,
+		},
+	});
+}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { invoiceBasicInfo } from '../../../apis/management';
 import { StatusTag, StatusClosableTag } from '../StatusTag/StatusTag';
@@ -13,7 +14,7 @@ import {
 	useReactTable,
 } from '@tanstack/react-table';
 import { Checkbox } from '@mui/material';
-import { DatePicker, Select, Input, Pagination } from 'antd';
+import { DatePicker, Select, Input, Pagination, Button, Dropdown } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 
 import './global.css';
@@ -60,130 +61,6 @@ const TruncatedCell = ({ content, maxLength = 20 }) => {
 	);
 };
 
-const columnHelper = createColumnHelper();
-
-const columns = [
-	columnHelper.display({
-		id: 'select',
-		header: ({ table }) => (
-			<div className="checkbox-container">
-				<Checkbox
-					checked={table.getIsAllRowsSelected()}
-					indeterminate={table.getIsSomeRowsSelected()}
-					onChange={table.getToggleAllRowsSelectedHandler()}
-					sx={{
-						color: '#ACACAC',
-						'&.Mui-checked': {
-							color: '#333',
-						},
-						'&.MuiCheckbox-indeterminate': {
-							color: 'black',
-						},
-						'& .MuiSvgIcon-root': {
-							fontSize: 22,
-						},
-					}}
-				/>
-			</div>
-		),
-
-		cell: ({ row }) => (
-			<div className="checkbox-container">
-				<Checkbox
-					checked={row.getIsSelected()}
-					onChange={row.getToggleSelectedHandler()}
-					sx={{
-						color: '#ACACAC',
-						'&.Mui-checked': {
-							color: '#333',
-						},
-						'& .MuiSvgIcon-root': {
-							fontSize: 22,
-						},
-					}}
-				/>
-			</div>
-		),
-	}),
-	columnHelper.accessor('invoice_number', {
-		header: 'No.',
-		enableSorting: false,
-		enableColumnFilter: false,
-	}),
-	columnHelper.accessor('files_name', {
-		header: 'Invoice',
-		enableSorting: false,
-		enableColumnFilter: false,
-		cell: ({ getValue }) => (
-			<div className="bold-text">
-				<TruncatedCell content={getValue()} maxLength={25} />
-			</div>
-		),
-	}),
-	columnHelper.accessor('supplier', {
-		header: 'Customer',
-		enableSorting: false,
-		enableColumnFilter: false,
-		cell: (info) => (info.getValue() ? info.getValue() : 'Unknown'),
-	}),
-	columnHelper.accessor('state', {
-		header: 'Status',
-		enableSorting: false,
-		enableColumnFilter: true,
-		filterFn: (row, columnId, filterValue) => {
-			if (!filterValue || filterValue.length === 0) return true;
-			const originalValue = row.getValue(columnId);
-			const mappedValue = statusMapping[originalValue] || originalValue;
-			return filterValue.includes(mappedValue);
-		},
-		cell: ({ getValue }) => {
-			const originalValue = getValue();
-			const displayValue = statusMapping[originalValue] || originalValue;
-			return <StatusTag value={displayValue} label={displayValue} />;
-		},
-	}),
-	columnHelper.accessor('invoice_date', {
-		header: 'Invoice Date',
-		enableSorting: true,
-		enableColumnFilter: false,
-		sortingFn: (rowA, rowB, columnId) => {
-			const dateA = new Date(rowA.getValue(columnId));
-			const dateB = new Date(rowB.getValue(columnId));
-			return dateA.getTime() - dateB.getTime();
-		},
-		cell: ({ getValue }) => formatDate(getValue()),
-	}),
-	columnHelper.accessor('due_date', {
-		header: 'Payment Due',
-		enableSorting: true,
-		enableColumnFilter: false,
-		sortingFn: (rowA, rowB, columnId) => {
-			const dateA = new Date(rowA.getValue(columnId));
-			const dateB = new Date(rowB.getValue(columnId));
-			return dateA.getTime() - dateB.getTime();
-		},
-		cell: ({ getValue }) => formatDate(getValue()),
-	}),
-	columnHelper.accessor('total', {
-		header: 'Price',
-		cell: ({ getValue }) => (
-			<div className="bold-text">{formatPrice(getValue())}</div>
-		),
-		enableSorting: true,
-		enableColumnFilter: false,
-	}),
-	columnHelper.display({
-		id: 'actions',
-		header: 'Actions',
-		cell: ({ row }) => (
-			<div className="actions-button-group">
-				<button>View</button>
-				<button>Actions</button>
-			</div>
-		),
-	}),
-];
-
 const tagRender = (props) => {
 	const { label, value, closable, onClose } = props;
 	return (
@@ -212,6 +89,43 @@ export function ManageTable() {
 		pageIndex: 0,
 		pageSize: 6,
 	});
+	const navigate = useNavigate();
+	const goValidate = () => {
+		navigate('/validate');
+	};
+	const goSend = () => {
+		navigate('/send');
+	};
+
+	const items = [
+		{
+			key: '1',
+			label: 'Validate',
+			onClick: (uuid) => {
+				console.log(uuid);
+				goValidate();
+			},
+		},
+		{
+			key: '2',
+			label: 'Send',
+			onClick: (uuid) => {
+				console.log(uuid);
+				goSend();
+			},
+		},
+	];
+	//info是 Ant Design 的 Dropdown 组件在菜单项被点击时自动传递的对象
+	const onMenuClick = (info, uuid) => {
+		//const { key } = info; 这行代码使用了 JavaScript 的解构赋值（Destructuring assignment）语法。这是 ES6 （ECMAScript 2015）引入的一个特性，允许我们从对象或数组中提取值，赋给变量
+		//这行代码等同于：const key = info.key;
+		//如果 info 对象还有 label 属性，可以这样写：const { key, label } = info; 这会同时创建 key 和 label 两个变量。
+		const { key } = info;
+		const selectedAction = items.find((i) => i.key === key);
+		if (selectedAction && selectedAction.onClick) {
+			selectedAction.onClick(uuid);
+		}
+	};
 
 	useEffect(() => {
 		invoiceBasicInfo()
@@ -222,6 +136,137 @@ export function ManageTable() {
 				console.log(error);
 			});
 	}, []);
+
+	const columnHelper = createColumnHelper();
+
+	const columns = [
+		columnHelper.display({
+			id: 'select',
+			header: ({ table }) => (
+				<div className="checkbox-container">
+					<Checkbox
+						checked={table.getIsAllRowsSelected()}
+						indeterminate={table.getIsSomeRowsSelected()}
+						onChange={table.getToggleAllRowsSelectedHandler()}
+						sx={{
+							color: '#ACACAC',
+							'&.Mui-checked': {
+								color: '#333',
+							},
+							'&.MuiCheckbox-indeterminate': {
+								color: 'black',
+							},
+							'& .MuiSvgIcon-root': {
+								fontSize: 22,
+							},
+						}}
+					/>
+				</div>
+			),
+
+			cell: ({ row }) => (
+				<div className="checkbox-container">
+					<Checkbox
+						checked={row.getIsSelected()}
+						onChange={row.getToggleSelectedHandler()}
+						sx={{
+							color: '#ACACAC',
+							'&.Mui-checked': {
+								color: '#333',
+							},
+							'& .MuiSvgIcon-root': {
+								fontSize: 22,
+							},
+						}}
+					/>
+				</div>
+			),
+		}),
+		columnHelper.accessor('invoice_number', {
+			header: 'No.',
+			enableSorting: false,
+			enableColumnFilter: false,
+		}),
+		columnHelper.accessor('files_name', {
+			header: 'Invoice',
+			enableSorting: false,
+			enableColumnFilter: false,
+			cell: ({ getValue }) => (
+				<div className="bold-text">
+					<TruncatedCell content={getValue()} maxLength={25} />
+				</div>
+			),
+		}),
+		columnHelper.accessor('supplier', {
+			header: 'Customer',
+			enableSorting: false,
+			enableColumnFilter: false,
+			cell: (info) => (info.getValue() ? info.getValue() : 'Unknown'),
+		}),
+		columnHelper.accessor('state', {
+			header: 'Status',
+			enableSorting: false,
+			enableColumnFilter: true,
+			filterFn: (row, columnId, filterValue) => {
+				if (!filterValue || filterValue.length === 0) return true;
+				const originalValue = row.getValue(columnId);
+				const mappedValue = statusMapping[originalValue] || originalValue;
+				return filterValue.includes(mappedValue);
+			},
+			cell: ({ getValue }) => {
+				const originalValue = getValue();
+				const displayValue = statusMapping[originalValue] || originalValue;
+				return <StatusTag value={displayValue} label={displayValue} />;
+			},
+		}),
+		columnHelper.accessor('invoice_date', {
+			header: 'Invoice Date',
+			enableSorting: true,
+			enableColumnFilter: false,
+			sortingFn: (rowA, rowB, columnId) => {
+				const dateA = new Date(rowA.getValue(columnId));
+				const dateB = new Date(rowB.getValue(columnId));
+				return dateA.getTime() - dateB.getTime();
+			},
+			cell: ({ getValue }) => formatDate(getValue()),
+		}),
+		columnHelper.accessor('due_date', {
+			header: 'Payment Due',
+			enableSorting: true,
+			enableColumnFilter: false,
+			sortingFn: (rowA, rowB, columnId) => {
+				const dateA = new Date(rowA.getValue(columnId));
+				const dateB = new Date(rowB.getValue(columnId));
+				return dateA.getTime() - dateB.getTime();
+			},
+			cell: ({ getValue }) => formatDate(getValue()),
+		}),
+		columnHelper.accessor('total', {
+			header: 'Price',
+			cell: ({ getValue }) => (
+				<div className="bold-text">{formatPrice(getValue())}</div>
+			),
+			enableSorting: true,
+			enableColumnFilter: false,
+		}),
+		columnHelper.display({
+			id: 'actions',
+			header: 'Actions',
+			cell: ({ row }) => (
+				<div className="actions-button-group">
+					<Button>View</Button>
+					<Dropdown.Button
+						menu={{
+							items,
+							onClick: (info) => onMenuClick(info, row.original.uuid),
+						}}
+					>
+						Actions
+					</Dropdown.Button>
+				</div>
+			),
+		}),
+	];
 
 	const table = useReactTable({
 		data,
@@ -318,15 +363,15 @@ export function ManageTable() {
 					<DatePicker
 						onChange={handleInvoiceDateChange}
 						className="date-picker"
-						placeholder="Select Invoice Date"
+						placeholder="Invoice Date"
 					/>
 					<DatePicker
 						onChange={handleDueDateChange}
 						className="date-picker"
-						placeholder="Select Pay Due"
+						placeholder="Payment Due"
 					/>
 					<Select
-						placeholder="State"
+						placeholder="Status"
 						mode="multiple"
 						tagRender={tagRender}
 						options={[
