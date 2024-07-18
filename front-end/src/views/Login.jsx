@@ -29,12 +29,12 @@ export default function Login() {
             }
           })
         .then(response => {
-        console.log(response.data);
-        // const token = response.data.token;
-        localStorage.setItem('token', response.data.access);
-        localStorage.setItem('userid', response.data.userid);
-        alert(response.data.state);
-        goDashboard();
+            console.log(response.data);
+            // const token = response.data.token;
+            localStorage.setItem('token', response.data.access);
+            localStorage.setItem('userid', response.data.userid);
+            alert(response.data.state);
+            goDashboard();
         })
         .catch(error => {
         if (error.response) {

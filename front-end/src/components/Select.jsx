@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -73,9 +74,13 @@ const MenuProps = {
 
 
 
-export const MultipleSelect = ({lists, onChange}) => {
+export const MultipleSelect = ({lists, onChange, selected}) => {
   const theme = useTheme();
   const [personName, setPersonName] = React.useState([]);
+
+  useEffect(() => {
+    setPersonName(selected || []);
+}, [selected]);
 
   const handleChange = (event) => {
     const {

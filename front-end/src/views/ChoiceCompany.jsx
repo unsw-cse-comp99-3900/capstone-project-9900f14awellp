@@ -40,14 +40,18 @@ export default function Choice() {
         setOpen(false);
     };
 
-    const handleSubmit = (personName) => {
-        axios.post(`http://127.0.0.1:8000/invoice/join-company/`, {
+    const handleSubmit = (names) => {
+        axios.post(`http://127.0.0.1:8000/invoice/join-company/`,
+            {
+                company_name: names
+            },
+            {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            company_name: personName
+            
         })
         .then(response => {
             console.log(response.data);

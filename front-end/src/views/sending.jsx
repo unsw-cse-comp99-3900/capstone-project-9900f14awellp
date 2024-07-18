@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ResponsiveAppBar } from "../components/Navbar";
 import { NestedList } from "../components/List";
 import Box from '@mui/material/Box';
@@ -9,9 +9,12 @@ import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
 import axios from 'axios';
+import shipping from '../assets/shipping.gif';
+// import CustomAlert from '../components/Alert/MUIAlert'
 
 export default function Sending() {
     const token = localStorage.getItem('token');
+    const [showIcon, setShowIcon] = useState(false);
     const [firstName, setFirstName] = useState('');
     const [lastName, setlastName] = useState('');
     const [email, setEmail] = useState('');
@@ -30,24 +33,23 @@ export default function Sending() {
         setSelectedInvoices([]);
     }
 
-    useEffect(() => {
-        axios.get(`http://127.0.0.1:8000/invoice/invoice-info/`,{
+    const fetchInvoiceData = useCallback(() => {
+        axios.get(`http://127.0.0.1:8000/invoice/invoice-info/`, {
             headers: {
-                'Accept': 'application/json', // Setting the Accept header
+                'Accept': 'application/json',
                 'Authorization': `Bearer ${token}`
             }
         })
         .then(response => {
             console.log(response.data);
-            // 筛选出state为"Unvalidated"的数据
             const passedData = response.data.filter(entry => entry.state === "Passed");
             const failedData = response.data.filter(entry => entry.state === "Failed");
             const unvalidatedData = response.data.filter(entry => entry.state === "unvalidated");
-            // 三种类型的list
+
             setPassedList(passedData.map(entry => entry.file.split('/').pop()));
             setFailedList(failedData.map(entry => entry.file.split('/').pop()));
             setUnvalidatedList(unvalidatedData.map(entry => entry.file.split('/').pop()));
-            // 理论上是所有发票的uuid--filename
+
             const uuidMap = response.data.reduce((acc, entry) => {
                 acc[entry.file.split('/').pop()] = entry.uuid;
                 return acc;
@@ -59,6 +61,9 @@ export default function Sending() {
             alert(error.message);
         });
     }, [token]);
+    useEffect(() => {
+        fetchInvoiceData();
+    }, [token, fetchInvoiceData]);
     const handleSend = () =>{
         const uuids = selectedInvoices.map(invoice => invoiceUuidMap[invoice]);
         const fullMessage = `${firstName} ${lastName}: ${message}`;
@@ -66,6 +71,7 @@ export default function Sending() {
             alert('Please select an invoice');
             return;
         }
+        setShowIcon(true);
         console.log(uuids.join(','),message,email, fullMessage);
         axios.post('http://127.0.0.1:8000/invoice/invoice-sending/',  { fullMessage } , {
             params: {
@@ -81,6 +87,9 @@ export default function Sending() {
         .then(response => {
                 console.log(response.data);
                 alert(response.data.msg);
+                setShowIcon(false); // 隐藏等待图标
+                handleClear();
+                fetchInvoiceData();
         })
         .catch(error => {
         if (error.response) {
@@ -89,6 +98,7 @@ export default function Sending() {
             alert(error.message);
             console.log(error.message);
         }
+        setShowIcon(false); // 隐藏等待图标，即使出错也要隐藏
         });
     }
 
@@ -105,12 +115,14 @@ export default function Sending() {
             <ResponsiveAppBar />
             <Box
             sx={{
-                height: '80vh',    
+                height: 'calc(100vh - 80px)', 
+                // height: '80vh',    
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
                 borderColor: 'divider',
                 borderRadius: 2,
+                overflow: 'hidden',
                 // bgcolor: 'background.paper',
                 // color: 'text.secondary',
                 marginTop: '10px',
@@ -119,15 +131,16 @@ export default function Sending() {
                 },
                 }}
             >
-            <div style={{ margin: '30px'}}>
+                {/* maxHeight: 'calc(100vh - 300px)', minHeight: 'calc(100vh - 350px)' */}
+            <div style={{ margin: '30px', overflow: 'auto', height: 'calc(450px)'}}>
             <h1  style={{ fontSize: '45px', marginBottom: '50px', fontWeight: 'bold'}}>Choice  Invoice</h1>
-            <NestedList  
-            passedList={passedList} 
-            failedList={failedList} 
-            unvalidatedList={unvalidatedList} 
-            onInvoiceSelect={handleInvoiceSelection}
-            selectedInvoices={selectedInvoices}
-            ></NestedList>
+                <NestedList
+                    passedList={passedList}
+                    failedList={failedList}
+                    unvalidatedList={unvalidatedList}
+                    onInvoiceSelect={handleInvoiceSelection}
+                    selectedInvoices={selectedInvoices}
+                ></NestedList>
             </div>
             <Divider orientation="vertical" variant="middle" flexItem />
             <div style={{ margin: '30px'}}>
@@ -149,7 +162,23 @@ export default function Sending() {
                         Send
                     </Button>
                 </div>
-                
+                {showIcon && (
+                        <div style={{
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            justifyContent: 'center', 
+                            alignItems: 'center', 
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            width: '100vw',
+                            height: '100vh',
+                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                            zIndex: 9999
+                        }}>
+                            <img src={shipping} alt="icon" />
+                        </div>
+                    )}
             </div>
             
             </Box>

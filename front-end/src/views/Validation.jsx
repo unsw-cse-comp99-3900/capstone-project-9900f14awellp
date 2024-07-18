@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { ResponsiveAppBar } from "../components/Navbar";
 import { SelectSmall } from "../components/Select";
@@ -6,6 +6,21 @@ import { ButtonSizes } from "../components/Buttons";
 import { MultipleSelect } from "../components/Select";
 import { BasicModal } from "../components/Model";
 import waiting from '../assets/waiting.gif'
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import List from '@mui/material/List';
+import Collapse from '@mui/material/Collapse';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+
 
 export default function Validation() {
     // let fileName = null;
@@ -17,6 +32,11 @@ export default function Validation() {
     const [selectedInvoice, setSelectedInvoice] = useState('');
     const [selectedRules, setSelectedRules] = useState([]);
     const [invoiceUuidMap, setInvoiceUuidMap] = useState({});
+    const [open, setOpen] = React.useState(true);
+
+    const handleClick = () => {
+        setOpen(!open);
+    };
   
     const rules = [
         'AUNZ_PEPPOL_1_0_10',
@@ -28,7 +48,11 @@ export default function Validation() {
         'RO_RO16931_UBL_1_0_8_CIUS_RO',
     ];
 
-    useEffect(() => {
+    const handleClear = () =>{
+        setSelectedRules([]);
+        setSelectedInvoice('');
+    }
+    const fetchInvoiceData = useCallback(() => {
         axios.get(`http://127.0.0.1:8000/invoice/invoice-info/`,{
             headers: {
                 'Accept': 'application/json', // Setting the Accept header
@@ -56,11 +80,10 @@ export default function Validation() {
             alert(error.message);
         });
     }, [token]);
+    useEffect(() => {
+        fetchInvoiceData();
+    }, [token, fetchInvoiceData]);
 
-    // const handleClick = () =>{
-        
-        
-    // }
     const handleValidate = () => {
         const selectedUuid = invoiceUuidMap[selectedInvoice];
         if (!selectedUuid) {
@@ -68,6 +91,7 @@ export default function Validation() {
             return;
         }
         setShowIcon(true);
+        console.log(selectedUuid,selectedRules);
         axios.post('http://127.0.0.1:8000/invoice/invoice-validation/',null, {
             params: {
               uuid: selectedUuid,
@@ -83,7 +107,8 @@ export default function Validation() {
                 alert(response.data.msg);
                 setValidationReport(response.data.validation_report); // 设置验证报告内容
                 setShowIcon(false); // 隐藏等待图标
-
+                handleClear();
+                fetchInvoiceData();
         })
         .catch(error => {
         if (error.response) {
@@ -101,7 +126,7 @@ export default function Validation() {
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '80vh'}}>
                     <h1 style={{ fontSize: '45px', marginBottom: '16px', fontWeight: 'bold' }}>Validate your E-invoice</h1>
                     <h6 style={{ fontSize: '15px', marginBottom: '16px', color: 'gray'  }}>please choose your invoice and rules</h6>
-                    <MultipleSelect lists={rules} onChange={setSelectedRules} />
+                    <MultipleSelect lists={rules} onChange={setSelectedRules} selected={selectedRules}/>
                     <SelectSmall invoices={invoices} onChange={e => setSelectedInvoice(e.target.value)} />
                     <ButtonSizes onClick={handleValidate}>
                         Validate
@@ -129,12 +154,81 @@ export default function Validation() {
                             open={!!validationReport}
                             onClose={() => setValidationReport(null)}
                         >
+                            <div style={{ overflowY: 'auto', height: 'calc(400px)'}}>
                             <div>
-                                <p>Filename: {validationReport?.filename}</p>
-                                <p>Message: {validationReport?.message}</p>
-                                <p>Total Errors: {validationReport?.firedAssertionErrorsCount}</p>
-                                <p>Total Reports: {validationReport?.firedSuccessfulReportsCount}</p>
-                            </div>
+                                {/* <Typography variant="h6" gutterBottom>
+                                    Statement: failed
+                                </Typography> */}
+                                <TableContainer component={Paper}>
+                                    <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                        <TableCell>Attribute</TableCell>
+                                        <TableCell>Details</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        <TableRow>
+                                        <TableCell>Statement</TableCell>
+                                        <TableCell>
+                                            <Typography color='error' gutterBottom>
+                                            failed
+                                            </Typography>
+                                        </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                        <TableCell>Customer</TableCell>
+                                        <TableCell>{validationReport?.customer}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                        <TableCell>File Name</TableCell>
+                                        <TableCell>{validationReport?.report?.filename}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                        <TableCell>Total Errors</TableCell>
+                                        <TableCell>{validationReport?.report?.firedAssertionErrorsCount}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                        <TableCell>Total Successful Reports</TableCell>
+                                        <TableCell>{validationReport?.report?.firedSuccessfulReportsCount}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell colSpan={2}>
+                                                <ListItemButton onClick={handleClick}>
+                                                    {/* <Typography></Typography> */}
+                                                <ListItemText primary="Error Codes" />
+                                                {open ? <ExpandLess /> : <ExpandMore />}
+                                                </ListItemButton>
+                                                <Collapse in={open} timeout="auto" unmountOnExit>
+                                                <List component="div" disablePadding>
+                                                    {validationReport?.report?.allAssertionErrorCodes?.map((code, index) => (
+                                                    <ListItemButton key={index} sx={{ pl: 4 }}>
+                                                        <ListItemText primary={code} />
+                                                    </ListItemButton>
+                                                    ))}
+                                                </List>
+                                                </Collapse>
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                    </Table>
+                                </TableContainer>
+                                    </div>
+                                    
+                                    {/* <ListItemButton onClick={handleClick}>
+                                        <ListItemText primary="Error Codes" />
+                                        {open ? <ExpandLess /> : <ExpandMore />}
+                                    </ListItemButton>
+                                    <Collapse in={!open} timeout="auto" unmountOnExit>
+                                        <List component="div" disablePadding>
+                                        {validationReport.report.allAssertionErrorCodes.map((code, index) => (
+                                            <ListItemButton key={index} sx={{ pl: 4 }}>
+                                                <ListItemText primary={code} />
+                                            </ListItemButton>
+                                        ))}
+                                    </List>
+                                    </Collapse> */}
+                                </div>
                         </BasicModal>
                     )}
                 </div>
