@@ -1,6 +1,7 @@
 from rest_framework import serializers,exceptions
 from .models import Company, User, UpFile, GUIFile
 import json
+from datetime import datetime
 import os
 
 class InvoiceUpfileSerializer(serializers.ModelSerializer):
@@ -9,9 +10,12 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
     creation_method = serializers.SerializerMethodField()
     files_name = serializers.SerializerMethodField()
+    invoice_number = serializers.SerializerMethodField()
+    invoice_date = serializers.SerializerMethodField()
+    due_date = serializers.SerializerMethodField()
     class Meta:
         model = UpFile
-        fields = ['id', 'timestamp', 'userid', 'uuid', 'file','files_name','supplier',"total","state","creation_method"]
+        fields = ['id', 'timestamp', 'userid', 'uuid', 'file','files_name','supplier','invoice_date','due_date',"invoice_number","total","state","creation_method"]
     
     
     def get_files_name(self, obj):
@@ -21,6 +25,12 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         file_stem = os.path.splitext(file_name)[0]
         return file_stem
     
+    def parse_date(self, date_str):
+        # 提取时间戳
+        timestamp = int(date_str.strip('/Date()').split('+')[0])
+        # 转换为datetime对象
+        return datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d')
+    
     def get_file_data(self, obj):
         file_name = os.path.basename(str(obj.file))
         file_stem = os.path.splitext(file_name)[0]
@@ -29,14 +39,34 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
+        
+    def get_invoice_date(self, obj):
+        data = self.get_file_data(obj)
+        nested_form_data = data.get('invoiceForm', {})
+        nested_form_data2 = nested_form_data.get('invoiceForm', {})
+        return self.parse_date(nested_form_data2.get('invoiceDate', 'N/A'))
+        
+    def get_due_date(self,obj):
+        data = self.get_file_data(obj)
+        nested_form_data = data.get('invoiceForm', {})
+        nested_form_data2 = nested_form_data.get('invoiceForm', {})
+        return self.parse_date(nested_form_data2.get('paymentDate', 'N/A'))
 
+    def get_invoice_number(self, obj):
+        data = self.get_file_data(obj)
+        nested_form_data = data.get('form_data', {})
+        return nested_form_data.get('invoice_number', 'N/A') 
+    
     def get_supplier(self, obj):
         data = self.get_file_data(obj)
-        return data.get('supplier_name', 'N/A')
+        nested_form_data = data.get('form_data', {})
+        nested_form_data2 = nested_form_data.get('form_data', {})
+        return nested_form_data2.get('company_invoiced', 'N/A')
     
     def get_total(self, obj):
         data = self.get_file_data(obj)
-        return data.get('total', 'N/A')
+        nested_form_data = data.get('form_data', {})
+        return nested_form_data.get('total', 'N/A')
     def get_state(self, obj):
         if not obj.is_validated:
             return "unvalidated"
