@@ -18,13 +18,16 @@ const baseTagStyle = (value) => ({
 	backgroundColor: tagColors[value],
 	color: textColors[value],
 	border: 'none',
+	borderRadius: '10px',
 });
 
 const largerTagStyle = (value) => ({
 	...baseTagStyle(value),
-	fontSize: '14px',
+	fontSize: '13px',
+	fontWeight: 'normal',
 	padding: '4px 8px',
 	cursor: 'pointer',
+	borderRadius: '15px',
 });
 
 export function StatusTag({ value, label }) {

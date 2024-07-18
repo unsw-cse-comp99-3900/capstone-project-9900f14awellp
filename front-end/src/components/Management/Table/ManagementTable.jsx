@@ -13,19 +13,52 @@ import {
 	useReactTable,
 } from '@tanstack/react-table';
 import { Checkbox } from '@mui/material';
-import { DatePicker, Select, Input } from 'antd';
+import { DatePicker, Select, Input, Pagination } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 
 import './global.css';
 
+// 映射状态
+// Status mapping
 const statusMapping = {
 	Failed: 'Rejected',
 	unvalidated: 'Unvalidated',
 	success: 'Success',
 };
-const reverseStatusMapping = Object.fromEntries(
-	Object.entries(statusMapping).map(([key, value]) => [value, key]),
-);
+
+// 格式化日期
+// Format date
+const formatDate = (dateString) => {
+	if (!dateString) return '';
+	const date = new Date(dateString);
+	return new Intl.DateTimeFormat('en-US', {
+		month: 'short',
+		day: '2-digit',
+		year: 'numeric',
+	}).format(date);
+};
+
+// 格式化total
+// Format total
+const formatPrice = (price) => {
+	if (price === null || price === undefined) return '';
+	return `$${Number(price).toFixed(2)}`;
+};
+
+// 截断单元格
+// Truncate cell
+const TruncatedCell = ({ content, maxLength = 20 }) => {
+	if (content.length <= maxLength) return content;
+
+	const start = content.slice(0, Math.floor(maxLength / 2));
+	const end = content.slice(-Math.floor(maxLength / 2));
+
+	return (
+		<span title={content}>
+			{start}...{end}
+		</span>
+	);
+};
 
 const columnHelper = createColumnHelper();
 
@@ -38,7 +71,18 @@ const columns = [
 					checked={table.getIsAllRowsSelected()}
 					indeterminate={table.getIsSomeRowsSelected()}
 					onChange={table.getToggleAllRowsSelectedHandler()}
-					className="check-box"
+					sx={{
+						color: '#ACACAC',
+						'&.Mui-checked': {
+							color: '#333',
+						},
+						'&.MuiCheckbox-indeterminate': {
+							color: 'black',
+						},
+						'& .MuiSvgIcon-root': {
+							fontSize: 22,
+						},
+					}}
 				/>
 			</div>
 		),
@@ -48,13 +92,21 @@ const columns = [
 				<Checkbox
 					checked={row.getIsSelected()}
 					onChange={row.getToggleSelectedHandler()}
-					className="check-box"
+					sx={{
+						color: '#ACACAC',
+						'&.Mui-checked': {
+							color: '#333',
+						},
+						'& .MuiSvgIcon-root': {
+							fontSize: 22,
+						},
+					}}
 				/>
 			</div>
 		),
 	}),
-	columnHelper.accessor('id', {
-		header: 'ID NO.',
+	columnHelper.accessor('invoice_number', {
+		header: 'No.',
 		enableSorting: false,
 		enableColumnFilter: false,
 	}),
@@ -62,11 +114,17 @@ const columns = [
 		header: 'Invoice',
 		enableSorting: false,
 		enableColumnFilter: false,
+		cell: ({ getValue }) => (
+			<div className="bold-text">
+				<TruncatedCell content={getValue()} maxLength={25} />
+			</div>
+		),
 	}),
 	columnHelper.accessor('supplier', {
 		header: 'Customer',
 		enableSorting: false,
 		enableColumnFilter: false,
+		cell: (info) => (info.getValue() ? info.getValue() : 'Unknown'),
 	}),
 	columnHelper.accessor('state', {
 		header: 'Status',
@@ -84,8 +142,8 @@ const columns = [
 			return <StatusTag value={displayValue} label={displayValue} />;
 		},
 	}),
-	columnHelper.accessor('timestamp', {
-		header: 'Created At',
+	columnHelper.accessor('invoice_date', {
+		header: 'Invoice Date',
 		enableSorting: true,
 		enableColumnFilter: false,
 		sortingFn: (rowA, rowB, columnId) => {
@@ -93,14 +151,24 @@ const columns = [
 			const dateB = new Date(rowB.getValue(columnId));
 			return dateA.getTime() - dateB.getTime();
 		},
+		cell: ({ getValue }) => formatDate(getValue()),
 	}),
-	columnHelper.accessor('payDate', {
+	columnHelper.accessor('due_date', {
 		header: 'Payment Due',
 		enableSorting: true,
 		enableColumnFilter: false,
+		sortingFn: (rowA, rowB, columnId) => {
+			const dateA = new Date(rowA.getValue(columnId));
+			const dateB = new Date(rowB.getValue(columnId));
+			return dateA.getTime() - dateB.getTime();
+		},
+		cell: ({ getValue }) => formatDate(getValue()),
 	}),
 	columnHelper.accessor('total', {
 		header: 'Price',
+		cell: ({ getValue }) => (
+			<div className="bold-text">{formatPrice(getValue())}</div>
+		),
 		enableSorting: true,
 		enableColumnFilter: false,
 	}),
@@ -133,12 +201,16 @@ export function ManageTable() {
 	const [data, _setData] = React.useState([]);
 	// const rerender = React.useReducer(() => ({}), {})[1];
 	const [searchValue, setSearchValue] = useState('');
+	//eslint-disable-next-line
 	const [selectedDate, setSelectedDate] = useState(null);
+	//eslint-disable-next-line
+	const [selectedDueDate, setSelectedDueDate] = useState(null);
+	//eslint-disable-next-line
 	const [selectedState, setSelectedState] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
 	const [pagination, setPagination] = useState({
 		pageIndex: 0,
-		pageSize: 7,
+		pageSize: 6,
 	});
 
 	useEffect(() => {
@@ -176,10 +248,48 @@ export function ManageTable() {
 		},
 	});
 
-	const handleCreateDateChange = (date, dateString) => {
+	const [customPageSize, setCustomPageSize] = useState(
+		table.getState().pagination.pageSize,
+	);
+
+	const renderCustomSizeChanger = () => (
+		<Input
+			type="number"
+			value={customPageSize}
+			onChange={(e) => {
+				const newSize = parseInt(e.target.value, 10);
+				if (newSize > 0) {
+					setCustomPageSize(newSize);
+					table.setPageSize(newSize);
+				}
+			}}
+			style={{
+				width: 50,
+				marginLeft: 8,
+				WebkitAppearance: 'none',
+				MozAppearance: 'textfield',
+				appearance: 'textfield',
+				fontSize: 12,
+			}}
+		/>
+	);
+
+	const total = table.getFilteredRowModel().rows.length;
+	const pageIndex = table.getState().pagination.pageIndex;
+	const pageSize = table.getState().pagination.pageSize;
+	const start = pageIndex * pageSize + 1;
+	const end = Math.min((pageIndex + 1) * pageSize, total);
+
+	const handleInvoiceDateChange = (date, dateString) => {
 		// console.log('Selected date:', dateString);
 		setSelectedDate(dateString);
-		table.getColumn('timestamp').setFilterValue(dateString);
+		table.getColumn('invoice_date').setFilterValue(dateString);
+	};
+
+	const handleDueDateChange = (date, dateString) => {
+		// console.log('Selected date:', dateString);
+		setSelectedDueDate(dateString);
+		table.getColumn('due_date').setFilterValue(dateString);
 	};
 
 	const handleStateChange = (value) => {
@@ -206,9 +316,14 @@ export function ManageTable() {
 				</div>
 				<div className="second-search">
 					<DatePicker
-						onChange={handleCreateDateChange}
+						onChange={handleInvoiceDateChange}
 						className="date-picker"
-						placeholder="Select Create Date"
+						placeholder="Select Invoice Date"
+					/>
+					<DatePicker
+						onChange={handleDueDateChange}
+						className="date-picker"
+						placeholder="Select Pay Due"
 					/>
 					<Select
 						placeholder="State"
@@ -234,22 +349,19 @@ export function ManageTable() {
 				</div>
 			</div>
 			<div className="pagination-group">
-				<button
-					disabled={!table.getCanPreviousPage()}
-					onClick={() => table.previousPage()}
-				>
-					&lt;
-				</button>
-				<div>
-					Page{table.getState().pagination.pageIndex + 1} of{' '}
-					{table.getPageCount()}
+				<div className="total-info">
+					{`showing ${start}-${end} of ${total} items`}
 				</div>
-				<button
-					disabled={!table.getCanNextPage()}
-					onClick={() => table.nextPage()}
-				>
-					&gt;
-				</button>
+				<Pagination
+					current={table.getState().pagination.pageIndex + 1}
+					total={table.getFilteredRowModel().rows.length}
+					pageSize={table.getState().pagination.pageSize}
+					onChange={(page, pageSize) => {
+						table.setPageIndex(page - 1);
+						table.setPageSize(pageSize);
+					}}
+				/>
+				<div>Items per page: {renderCustomSizeChanger()}</div>
 			</div>
 			<table>
 				<thead>
@@ -287,26 +399,20 @@ export function ManageTable() {
 					))}
 				</tbody>
 			</table>
-			{/* <button onClick={() => rerender()} className="border p-2">
-				Rerender
-			</button> */}
 			<div className="pagination-group">
-				<button
-					disabled={!table.getCanPreviousPage()}
-					onClick={() => table.previousPage()}
-				>
-					&lt;
-				</button>
-				<div>
-					Page{table.getState().pagination.pageIndex + 1} of{' '}
-					{table.getPageCount()}
+				<div className="total-info">
+					{`showing ${start}-${end} of ${total} items`}
 				</div>
-				<button
-					disabled={!table.getCanNextPage()}
-					onClick={() => table.nextPage()}
-				>
-					&gt;
-				</button>
+				<Pagination
+					current={table.getState().pagination.pageIndex + 1}
+					total={table.getFilteredRowModel().rows.length}
+					pageSize={table.getState().pagination.pageSize}
+					onChange={(page, pageSize) => {
+						table.setPageIndex(page - 1);
+						table.setPageSize(pageSize);
+					}}
+				/>
+				<div>Items per page: {renderCustomSizeChanger()}</div>
 			</div>
 		</div>
 	);
