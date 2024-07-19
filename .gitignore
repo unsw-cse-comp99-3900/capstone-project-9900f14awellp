@@ -9,3 +9,7 @@ invoice/migrations/__pycache__/*
 
 # Ignore Redis database snapshot files
 dump.rdb
+
+# Ignore compiled Python files
+*.pyc
+__pycache__/
