@@ -8,4 +8,4 @@ invoice/migrations/__pycache__/*
 *.sqlite3
 
 # Ignore Redis database snapshot files
-*.rdb
+dump.rdb
