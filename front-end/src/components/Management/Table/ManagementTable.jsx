@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { invoiceBasicInfo, invoiceUrl } from '../../../apis/management';
+import { invoiceBasicInfo } from '../../../apis/management';
 import { StatusTag, StatusClosableTag } from '../StatusTag/StatusTag';
 
 import {
