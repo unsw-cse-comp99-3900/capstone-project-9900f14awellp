@@ -44,7 +44,7 @@ project
     cd InvoiceProcessing
     ```
 
-2. Set up the virtual environment:
+2. Set up the virtual environment(depends on you, run program on your virtual environment will make you environment cleaner):
     ```sh
     python -m venv env
     source env/bin/activate
