@@ -143,13 +143,15 @@ export const ManageTable = forwardRef((props, ref) => {
 	}, []);
 
 	//TODO: 目前使用浏览器内置的PDF查看器，之后可以使用pdf.js
-	const handleViewClick = async (uuid) => {
+	//TODO: 目前找不到PDF，显示404，需要修改
+	const handleViewClick = (path) => {
 		try {
-			const response = await invoiceUrl(uuid);
-			const pdfUrl = response.data.url;
+			const pdfUrl = path;
+			console.log(pdfUrl);
+			const realUrl = `capstone-project-9900f14awellp/InvoiceProcessing${path}`;
 
 			// 在新标签页中打开 PDF
-			window.open(pdfUrl, '_blank');
+			window.open(realUrl, '_blank');
 		} catch (error) {
 			console.error(error);
 		}
@@ -272,7 +274,7 @@ export const ManageTable = forwardRef((props, ref) => {
 			header: 'Actions',
 			cell: ({ row }) => (
 				<div className="actions-button-group">
-					<Button onClick={() => handleViewClick(row.original.uuid)}>
+					<Button onClick={() => handleViewClick(row.original.file)}>
 						View
 					</Button>
 					<Dropdown.Button
