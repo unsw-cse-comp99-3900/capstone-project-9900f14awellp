@@ -1,0 +1,83 @@
+.full-page{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: start;
+
+}
+.container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    width: 100%;
+    padding-top: 30px;
+    padding-left: 60px;
+    padding-right: 60px;
+    gap:20px;
+    box-sizing: border-box; /* 确保padding包含在宽度计算内 */
+}
+.title-container{
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.button-group{
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    gap: 10px;
+}
+.invoice-title{
+    font-size: calc(2.2vw + 2.2vh);
+    font-weight: 800;
+    color: #333;
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.second-button {
+    padding: 7px;
+    background-color: transparent;
+    color: #333;
+    border: 1px solid #333;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.second-button:hover {
+    background-color: #EAEAEA !important;
+}
+
+.second-button:disabled {
+	background-color: #cccccc;
+	color: #666666;
+	cursor: not-allowed;
+}
+
+
+.primary-button {
+    padding: 10px,10px;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: none !important;
+    
+}
+
+.primary-button:hover {
+    background-color: #494446 !important;
+}
+
+.full-table{
+    display: flex;
+    width: 100%;
+    flex: 1;
+    justify-content: center;
+}

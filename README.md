@@ -44,7 +44,7 @@ project
     cd InvoiceProcessing
     ```
 
-2. Set up the virtual environment:
+2. Set up the virtual environment(depends on you, run program on your virtual environment will make you environment cleaner):
     ```sh
     python -m venv env
     source env/bin/activate
@@ -57,10 +57,13 @@ project
 
 4. Run the database migrations:
     ```sh
+    python manage.py makemigrations
+    ```
+    ```sh
     python manage.py migrate
     ```
 
-5. Run the development server:
+6. Run the development server:
     ```sh
     python manage.py runserver
     ```

@@ -396,3 +396,143 @@ def get_creation_method(self, obj):
     return "upload"
 ```
 
+# 11. 发票创建耗时30秒，阻塞整个进程，如何使用celery把发票创建的进程异步化
+
+## 1.在settings.py所在的根目录下创建celery.py
+
+```python
+# InvoiceProcessing/celery.py
+from __future__ import absolute_import, unicode_literals
+import os
+from celery import Celery
+
+# 设置 Django 的默认设置模块
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'InvoiceProcessing.settings')
+
+app = Celery('InvoiceProcessing')
+
+# 从 Django 的设置中加载 Celery 配置
+app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# 自动发现任务
+app.autodiscover_tasks()
+
+```
+
+## 2.在 `__init__.py` 文件中导入 Celery：
+
+```python
+# InvoiceProcessing/__init__.py
+from __future__ import absolute_import, unicode_literals
+
+# 这将确保 Django 在 Celery 加载时会加载应用程序配置
+from .celery import app as celery_app
+
+__all__ = ('celery_app',)
+```
+
+## 3.setting.py中配置celery
+
+```python
+# InvoiceProcessing/settings.py
+
+# 使用 Redis 作为消息队列
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+```
+
+## 4.定义异步化任务
+
+```python
+# invoice/tasks.py
+from celery import shared_task
+import requests
+
+@shared_task
+def extract_pdf_data(invoice_id):
+    # 调用外部 API 提取 PDF 数据的逻辑
+    response = requests.get('https://example.com/extract-pdf')
+    data = response.json()
+
+    # 处理数据并保存到数据库
+    # ...
+
+```
+
+## 5.视图中调用任务
+
+```python
+# invoice/views.py
+from django.http import JsonResponse
+from .tasks import extract_pdf_data
+
+def create_invoice(request):
+    if request.method == 'POST':
+        # 创建发票的逻辑
+        invoice_id = create_invoice_in_db()
+
+        # 调用异步任务
+        extract_pdf_data.delay(invoice_id)
+
+        return JsonResponse({'status': 'success', 'invoice_id': invoice_id})
+
+```
+
+## 6.在运行celery异步worker前首先要运行redis服务器，然后运行celery worker，最后运行主代码，非常的繁琐，这里进行简化，只需要运行主程序代码就可以把三个服务器全部运行起来
+
+### 1. 创建自定义管理命令
+
+在你的 Django 应用中创建一个自定义管理命令，启动所有服务。在 `invoice` 应用中创建 `management/commands` 目录（如果还没有的话），然后创建一个新文件 `runserver_all.py`。
+
+```shell
+mkdir -p invoice/management/commands
+touch invoice/management/commands/runserver_all.py
+```
+
+### 2. 编写自定义管理命令
+
+编辑 `runserver_all.py` 文件，内容如下：
+
+```python
+import os
+from django.core.management.commands.runserver import Command as RunserverCommand
+from multiprocessing import Process
+import subprocess
+
+def start_redis():
+    subprocess.run(['redis-server'])
+
+def start_celery_worker():
+    subprocess.run(['celery', '-A', 'InvoiceProcessing', 'worker', '--loglevel=info'])
+
+class Command(RunserverCommand):
+    def handle(self, *args, **options):
+        # 启动 Redis 服务器
+        redis_process = Process(target=start_redis)
+        redis_process.start()
+
+        # 启动 Celery worker
+        celery_process = Process(target=start_celery_worker)
+        celery_process.start()
+
+        # 启动 Django 开发服务器
+        super().handle(*args, **options)
+
+        # 停止子进程
+        redis_process.terminate()
+        celery_process.terminate()
+
+```
+
+### 3. 运行自定义命令
+
+你现在可以使用自定义的管理命令来启动所有服务：
+
+```shell
+python manage.py runserver_all
+```

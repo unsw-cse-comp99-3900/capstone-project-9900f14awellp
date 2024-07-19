@@ -4,8 +4,10 @@ import os
 import base64
 import hashlib
 import requests
+from time import sleep
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+from .tasks import extract_pdf_data
 from django.http import JsonResponse
 from django.core.mail import EmailMessage
 from .models import Company, User, UpFile, GUIFile
@@ -19,8 +21,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import authenticate
 from django.urls import reverse
 from django.utils.timezone import now
-
-from .authentication import MyAhenAuthentication
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -36,9 +36,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser
 from .serializers import CompanySerializer,RegisterSerializer,\
                         FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, InvoiceUpfileSerializer
-
-
-
+from .converter import converter_xml
 # Create your views here.
 user_directory = os.path.join(settings.STATICFILES_DIRS[0])
 
@@ -119,7 +117,6 @@ class RegisterView(APIView):
                             'access': str(refresh.access_token)}, 
                             status=status.HTTP_201_CREATED)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
-    
     
 # 用户登录
 class LoginView(APIView):
@@ -435,59 +432,8 @@ class UpFileAPIView(APIView):
             
             # 上传的pdf文件直接转化为json和xml文件
             file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
-            
-            
-            file_name = os.path.basename(str(file.file))
-            file_stem = os.path.splitext(file_name)[0]
-            
-            # 1.将json文件转化为xml，for Later validation
-            if str(file.file).endswith('.json'):
-                    with open(str(file.file), 'r') as f:
-                        data = json.load(f)
-                        # json -> xml
-                        xml_elem = json_to_xml(data)
-                        xml_str = prettify(xml_elem)
-                    with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
-                        f.write(xml_str)
-            elif str(file.file).endswith('.pdf'):
-                url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
-                api_key = {'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
-                payload = {'user': 'LianqiangZhao',
-                        'pwd': 'Zlq641737796',
-                        'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
-                # 保留cookie
-                r = requests.get(url + '/Login', params=payload)
-                
-                # 1.2 上传pdf文件
-                with open(str(file.file), 'rb') as img_file:
-                    img_name = f"{file_stem}.pdf"
-                    data = img_file.read()
-                    b = bytearray(data)
-                    li = []
-                    for i in b:
-                        li.append(i)
-                    raw_data = {"PictureName": img_name, "PictureStream": li}
-                    json_data = json.dumps(raw_data)
-                    r2 = requests.post("https://app.ezzydoc.com/EzzyService.svc/Rest/uploadInvoiceImage",
-                                    data=json_data,
-                                    cookies=r.cookies,
-                                    params=api_key,
-                                    headers={'Content-Type': 'application/json'})
-                    invoiceID = r2.json().get("invoice_id")
-                
-                # 1.3 获得传回的json数据
-                payload2 = {'invoiceid':invoiceID,
-                            'APIKey': '744f4631-41ac-4982-8b41-f49c38b78626'}
-                
-                r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
-                if r3.status_code == 200:
-                    data = r3.json()
-                    with open(f"staticfiles/{request.user.id}/{file_stem}.json", "w", encoding="utf-8") as f:
-                        json.dump(data, f, ensure_ascii=False, indent=4)
-                    xml_elem = json_to_xml(data)
-                    xml_str = prettify(xml_elem)
-                    with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
-                        f.write(xml_str)
+            # 异步处理pdf文件
+            extract_pdf_data.delay(str(file.file),request.user.id)
             return Response({
                                 "code": 0,
                                 "msg": "success!",
@@ -1149,16 +1095,34 @@ class FileValidationsAPIView(APIView):
         body_data = {"filename":f"{file_stem}.xml",
                      "content":content,
                      "checksum":checkSum}
+
         validation_response = requests.post(url, json=body_data, 
                                             params=payload, 
                                             headers={"Authorization": f"Bearer {token()}", "Accept-Language":"en"})
         # 处理验证响应
+
         if validation_response.status_code == 200:
             validate_data = validation_response.json()
+
+            
             file.is_validated = True
             if validate_data.get('successful'):
                 file.is_correct = True
             file.save()
+            
+            report = validate_data.get('report')
+            if report:
+                # 保存report到数据库
+                # 将 report 字段内容保存到 JSON 文件中
+                json_file_path = f'staticfiles/{request.user.id}/{file_stem}_report.json'  # 请更改为实际的文件路径
+
+                try:
+                    with open(json_file_path, 'w', encoding='utf-8') as json_file:
+                        json.dump(report, json_file, ensure_ascii=False, indent=4)
+                    print(f"Report saved to {json_file_path}")
+                except Exception as e:
+                    return JsonResponse({"code": 500, "msg": f"Failed to save report: {str(e)}"}, status=500)
+                
             return Response({
                                 "code": 200,
                                 "msg": "Validation success!",
@@ -1180,9 +1144,21 @@ class SendInvoiceEmailAPIView(APIView):
         operation_summary="发票邮件发送功能",
         operation_description="Send the invoice file to the client's email",
         manual_parameters=[
-            openapi.Parameter('uuid', openapi.IN_QUERY, description="File UUID", type=openapi.TYPE_STRING),
-            openapi.Parameter('email', openapi.IN_QUERY, description="Client Email", type=openapi.TYPE_STRING)
+            openapi.Parameter(
+                'uuids', openapi.IN_QUERY, 
+                description="File UUIDs", 
+                type=openapi.TYPE_ARRAY, 
+                items=openapi.Items(type=openapi.TYPE_STRING)
+            ),
+            openapi.Parameter('email', openapi.IN_QUERY, description="Client Email", type=openapi.TYPE_STRING),
+            
         ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING, description='Custom Message')
+            },
+        ),
         responses={
             200: openapi.Response(
                 description="Email sent successfully",
@@ -1227,37 +1203,58 @@ class SendInvoiceEmailAPIView(APIView):
         }
     )
     def post(self, request):
-        uuid = request.query_params.get('uuid')
+        uuids = request.query_params.getlist('uuids')
         client_email = request.query_params.get('email')
-        if not uuid or not client_email:
+        custom_message = request.data.get('message') 
+        if not uuids or not client_email:
             return Response({
                                 "code": 400,
                                 "msg": "File ID and client email are required",
                             },
                             status=status.HTTP_400_BAD_REQUEST)
-        
-        file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
-        if file is None:
+            
+            
+        uuids = uuids[0].split(',')
+        # 格式化 UUID 列表
+        uuids = [str(uuid).strip() for uuid in uuids]
+        files = UpFile.objects.filter(userid=request.user.id, uuid__in=uuids)
+        if not files.exists():
             return Response({
                                 "code": 404,
-                                "msg": "file not found",
+                                "msg": "No files found",
                             },
                             status=status.HTTP_404_NOT_FOUND)
-            
+
+
+        email_body = f"Please find attached your invoice.\n\n{custom_message}"  # 将自定义消息添加到邮件正文中
         email = EmailMessage(
             'Your Invoice',
-            'Please find attached your invoice.',
+            email_body,
             to=[client_email]
         )
-        file_path = str(file.file)
-        if os.path.exists(file_path):
-            email.attach_file(file_path)
-        else:
-            return Response({
-                                "code": 404,
-                                "msg": "file not found on server",
-                            },
-                            status=status.HTTP_404_NOT_FOUND)
+        for file in files:
+            file_name = os.path.basename(str(file.file))
+            file_stem = os.path.splitext(file_name)[0]
+            
+            file_path = str(file.file)
+
+            if os.path.exists(file_path):
+                # 未验证
+                if not file.is_validated:
+                    email.attach_file(file_path)
+                # 验证通过
+                elif file.is_correct:
+                    email.attach_file(file_path)
+                    email.attach_file(f"staticfiles/{request.user.id}/{file_stem}_report.json")
+                # 验证失败
+                elif not file.is_correct:
+                    email.attach_file(f"staticfiles/{request.user.id}/{file_stem}_report.json")
+            else:
+                return Response({
+                                    "code": 404,
+                                    "msg": "file not found on server",
+                                },
+                                status=status.HTTP_404_NOT_FOUND)
         try:
             email.send()
             return Response({
