@@ -27,8 +27,11 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     
     def parse_date(self, date_str):
         # 提取时间戳
+        if not date_str:
+            raise ValueError("The date string is empty or None")
 
         timestamp = int(date_str.strip('/Date()').split('+')[0])
+        
         # 转换为datetime对象
         return datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d')
     
