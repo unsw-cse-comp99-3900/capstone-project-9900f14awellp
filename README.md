@@ -57,10 +57,13 @@ project
 
 4. Run the database migrations:
     ```sh
+    python manage.py makemigrations
+    ```
+    ```sh
     python manage.py migrate
     ```
 
-5. Run the development server:
+6. Run the development server:
     ```sh
     python manage.py runserver
     ```
