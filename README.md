@@ -44,30 +44,19 @@ project
     cd InvoiceProcessing
     ```
 
-2. Set up the virtual environment(depends on you, run program on your virtual environment will make you environment cleaner):
-    ```sh
-    python -m venv env
-    source env/bin/activate
-    ```
+2. Use Docker to build image
+   ```sh
+   docker-compose up --build
+   ```
 
-3. Install the dependencies:
-    ```sh
-    pip install -r requirements.txt
-    ```
+3. Initiate docker image
+   ```sh
+   docker-compose up
+   ```
 
-4. Run the database migrations:
-    ```sh
-    python manage.py makemigrations
-    ```
-    ```sh
-    python manage.py migrate
-    ```
-
-6. Run the development server:
-    ```sh
-    python manage.py runserver
-    ```
-
+4. Access API documentation
+   http://127.0.0.1:8000/invoice/swagger/
+   
 ### Front-end Installation
 
 1. Navigate to the front-end directory:
