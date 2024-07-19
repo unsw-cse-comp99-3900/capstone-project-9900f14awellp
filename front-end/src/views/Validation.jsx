@@ -20,6 +20,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import OutlinedAlerts from '../components/Alert';
 
 
 export default function Validation() {
@@ -33,6 +34,7 @@ export default function Validation() {
     const [selectedRules, setSelectedRules] = useState([]);
     const [invoiceUuidMap, setInvoiceUuidMap] = useState({});
     const [open, setOpen] = React.useState(true);
+    const [alert, setAlert] = useState(null); // 初始状态设置为null
 
     const handleClick = () => {
         setOpen(!open);
@@ -77,7 +79,8 @@ export default function Validation() {
         })
         .catch(error => {
             console.log(error.message);
-            alert(error.message);
+            setAlert({ severity: 'error', message: error.message });
+            //alert(error.message);
         });
     }, [token]);
     useEffect(() => {
@@ -87,7 +90,7 @@ export default function Validation() {
     const handleValidate = () => {
         const selectedUuid = invoiceUuidMap[selectedInvoice];
         if (!selectedUuid) {
-            alert('Please select an invoice');
+            setAlert({ severity: 'warning', message: 'Please select an invoice' });
             return;
         }
         setShowIcon(true);
@@ -104,7 +107,8 @@ export default function Validation() {
           })
         .then(response => {
                 console.log(response.data);
-                alert(response.data.msg);
+                setAlert({ severity: 'success', message: response.data.msg });
+                // alert(response.data.msg);
                 setValidationReport(response.data.validation_report); // 设置验证报告内容
                 setShowIcon(false); // 隐藏等待图标
                 handleClear();
@@ -112,9 +116,10 @@ export default function Validation() {
         })
         .catch(error => {
         if (error.response) {
-            alert(error.response.data.detail || 'validate failed');
+            setAlert({ severity: 'error', message: error.response.data.detail || 'validate failed' });
+            // alert(error.response.data.detail || 'validate failed');
         } else {
-            alert(error.message);
+            setAlert({ severity: 'error', message: error.message });
             console.log(error.message);
         }
         setShowIcon(false); // 隐藏等待图标，即使出错也要隐藏
@@ -123,6 +128,21 @@ export default function Validation() {
     return (
         <div>
             <ResponsiveAppBar />
+                {alert && (
+                    <div style={{
+                        position: 'fixed',
+                        top: '11vh',
+                        right: 10,
+                        // transform: 'translateX(-50%)',  
+                        width: '30%',
+                        zIndex: 9999
+                    }}>
+                        <OutlinedAlerts severity={alert.severity} onClose={() => setAlert(null)}>
+                            {alert.message}
+                        </OutlinedAlerts>
+                    </div>
+                )}
+
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '80vh'}}>
                     <h1 style={{ fontSize: '45px', marginBottom: '16px', fontWeight: 'bold' }}>Validate your E-invoice</h1>
                     <h6 style={{ fontSize: '15px', marginBottom: '16px', color: 'gray'  }}>please choose your invoice and rules</h6>
@@ -148,6 +168,7 @@ export default function Validation() {
                             <img src={waiting} alt="icon" />
                         </div>
                     )}
+                  
                     {validationReport && (
                         <BasicModal 
                             title="Validation Result" 

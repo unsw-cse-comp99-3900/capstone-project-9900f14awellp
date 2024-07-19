@@ -5,8 +5,12 @@ import { ButtonSizes } from '../components/Buttons';
 import { UnderlineLink, AlignRight} from '../components/Link';
 import { BasicModal } from '../components/Model';
 import axios from 'axios';
+import OutlinedAlerts from '../components/Alert';
 
 export default function Login() {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [alert, setAlert] = useState(null); // 初始状态设置为null
     //* 路由跳转
     const navigate = useNavigate();
     const goRegister = () => {
@@ -15,9 +19,6 @@ export default function Login() {
     const goDashboard = () => {
         navigate("/home");
     }
-    
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
     const handleLogin = () => {
         axios.post('http://127.0.0.1:8000/invoice/login/', null, {
             params: {
@@ -33,24 +34,42 @@ export default function Login() {
             // const token = response.data.token;
             localStorage.setItem('token', response.data.access);
             localStorage.setItem('userid', response.data.userid);
-            alert(response.data.state);
+            // alert(response.data.state); 
             goDashboard();
+            setAlert({ severity: 'success', message: 'Login successfully!' });
         })
         .catch(error => {
         if (error.response) {
-            alert(error.response.data.detail || 'Login failed');
+            setAlert({ severity: 'error', message: error.response.data.detail || 'Login failed' });
+            // alert(error.response.data.detail || 'Login failed');
             console.log(username, password)
             console.log(error.response);
 
         } else {
-            alert(error.message);
+            // alert(error.message);
+            setAlert({ severity: 'error', message: error.message });
             console.log(error.message);
         }
         });
     };
     return (
+        
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'white' }}>
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px', backgroundColor: 'white', border: '1px solid #ccc', borderRadius: '8px' }}>
+            {alert && (
+                    <div style={{
+                        position: 'fixed',
+                        top: '11vh',
+                        right: 10,
+                        // transform: 'translateX(-50%)',  
+                        width: '30%',
+                        zIndex: 9999
+                    }}>
+                        <OutlinedAlerts severity={alert.severity} onClose={() => setAlert(null)}>
+                            {alert.message}
+                        </OutlinedAlerts>
+                    </div>
+                )}
                 <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Login</h1>
                 <InputTextField label="username" id="Login-username" defaultValue="username" value={username} onChange={(e) => setUsername(e.target.value)}/>
                 <PasswordTextField id="Login-password" label="Password" value={password} onChange={(e) => setPassword(e.target.value)}/>
@@ -72,6 +91,7 @@ export default function Login() {
                 >
                     By clicking Login, you agree to our Terms of Service and Privacy Policy
                 </BasicModal>
+                
             </div>
         </div>
     );

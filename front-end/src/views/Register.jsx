@@ -5,27 +5,29 @@ import { ButtonSizes } from '../components/Buttons';
 import { UnderlineLink} from '../components/Link';
 import { BasicModal } from '../components/Model';
 import axios from 'axios';
+import OutlinedAlerts from '../components/Alert';
 
 export default function Register() {
-    //* 路由跳转
-    const navigate = useNavigate();
-    const goLogin = () => {
-        navigate("/login");
-    }
-    // const goDashboard = () => {
-    //     navigate("/home");
-    // }
-    const goChoice = () => {
-        navigate("/choice");
-    }
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [alert, setAlert] = useState(null); // 初始状态设置为null
+
+    //* 路由跳转
+    const navigate = useNavigate();
+    const goLogin = () => {
+        navigate("/login");
+    }
+    
+    const goChoice = () => {
+        navigate("/choice");
+    }
     const handleRegister = () => {
         if (password !== confirmPassword) {
-            alert('Passwords do not match');
+            // alert('Passwords do not match');
+            setAlert({ severity: 'warning', message: 'Passwords do not match' });
             return;
         }
         // console.log(username,password,confirmPassword,name,email)
@@ -45,16 +47,18 @@ export default function Register() {
             localStorage.setItem('token', response.data.access);
             localStorage.setItem('userid', response.data.userid);
             console.log(response.data);
+            setAlert({ severity: 'success', message: 'Register successfully!'});
             goChoice();
         })
         .catch(error => {
             if (error.response) {
                 console.log(username,password,confirmPassword,name,email)
-                alert(error.response.data.detail || 'Registration failed');
+                // alert(error.response.data.detail || 'Registration failed');
+                setAlert({ severity: 'error', message: error.response.data.detail || 'Registration failed' });
                 console.log(error.response.data.detail);
 
             } else {
-                alert(error.message);
+                setAlert({ severity: 'error', message: error.message });
                 console.log(error.message);
             }
         });
@@ -62,6 +66,20 @@ export default function Register() {
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center',flexDirection: 'column', alignItems: 'center', height: '100vh', backgroundColor: 'white' }}>
+                {alert && (
+                    <div style={{
+                        position: 'fixed',
+                        top: '11vh',
+                        right: 10,
+                        // transform: 'translateX(-50%)',  
+                        width: '30%',
+                        zIndex: 9999
+                    }}>
+                        <OutlinedAlerts severity={alert.severity} onClose={() => setAlert(null)}>
+                            {alert.message}
+                        </OutlinedAlerts>
+                    </div>
+                )}
                 <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Create an account</h1>
                 <InputTextField 
                 label="Username" 
