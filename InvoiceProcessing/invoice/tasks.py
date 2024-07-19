@@ -82,10 +82,11 @@ def extract_pdf_data(file_path,userid):
         sleep(60)
         r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
         r4 = requests.get(url + '/getInvoiceHeaderBlocks', cookies=r.cookies,params=payload2)
+
         if r3.status_code == 200:
-            form_data = r3.json()
-            invoiceForm = r4.json()
-            table = r4.json()
+            form_data = r3.json().get('form_data', {})
+            invoiceForm = r4.json().get('invoiceForm', {})
+            table = r4.json().get('table', {})
             combined_data = {
                 "form_data": form_data,
                 "invoiceForm": invoiceForm,
@@ -100,7 +101,7 @@ def extract_pdf_data(file_path,userid):
             xml_str = prettify(xml_elem)
             with open(f"staticfiles/{userid}/{file_stem}.xml", "w", encoding="utf-8") as f:
                 f.write(xml_str)
-            #converter_xml(f"staticfiles/{userid}/{file_stem}.xml")
+            converter_xml(f"staticfiles/{userid}/{file_stem}.xml")
             
             
             

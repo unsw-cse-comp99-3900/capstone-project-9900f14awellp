@@ -536,3 +536,11 @@ class Command(RunserverCommand):
 ```shell
 python manage.py runserver_all
 ```
+
+# 7. 有时候引入的包会显示没有安装这个包，但是当运行pip install celery时候显示已经安装了，如何解决
+
+* 1.打开命令面板（Shift + Command + P）。
+
+* 2.输入 `Python: Select Interpreter` 并选择这个选项。
+
+* 3.在弹出的列表中，选择你的虚拟环境对应的解释器路径。对于 Anaconda 环境，路径通常类似于 `.../anaconda3/envs/py39/bin/python`。
