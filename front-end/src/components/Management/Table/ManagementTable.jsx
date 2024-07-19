@@ -1,7 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+	useEffect,
+	useState,
+	forwardRef,
+	useImperativeHandle,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { invoiceBasicInfo } from '../../../apis/management';
+import { invoiceBasicInfo, invoiceUrl } from '../../../apis/management';
 import { StatusTag, StatusClosableTag } from '../StatusTag/StatusTag';
 
 import {
@@ -73,7 +78,7 @@ const tagRender = (props) => {
 	);
 };
 
-export function ManageTable() {
+export const ManageTable = forwardRef((props, ref) => {
 	// const data = defaultData;
 	const [data, _setData] = React.useState([]);
 	// const rerender = React.useReducer(() => ({}), {})[1];
@@ -136,6 +141,21 @@ export function ManageTable() {
 				console.log(error);
 			});
 	}, []);
+
+	//TODO: 目前使用浏览器内置的PDF查看器，之后可以使用pdf.js
+	//TODO: 目前找不到PDF，显示404，需要修改
+	const handleViewClick = (path) => {
+		try {
+			const pdfUrl = path;
+			console.log(pdfUrl);
+			const realUrl = `capstone-project-9900f14awellp/InvoiceProcessing${path}`;
+
+			// 在新标签页中打开 PDF
+			window.open(realUrl, '_blank');
+		} catch (error) {
+			console.error(error);
+		}
+	};
 
 	const columnHelper = createColumnHelper();
 
@@ -254,7 +274,9 @@ export function ManageTable() {
 			header: 'Actions',
 			cell: ({ row }) => (
 				<div className="actions-button-group">
-					<Button>View</Button>
+					<Button onClick={() => handleViewClick(row.original.file)}>
+						View
+					</Button>
 					<Dropdown.Button
 						menu={{
 							items,
@@ -292,6 +314,12 @@ export function ManageTable() {
 			);
 		},
 	});
+
+	useImperativeHandle(ref, () => ({
+		getSelectedData: () => {
+			return table.getSelectedRowModel().rows.map((row) => row.original);
+		},
+	}));
 
 	const [customPageSize, setCustomPageSize] = useState(
 		table.getState().pagination.pageSize,
@@ -461,4 +489,4 @@ export function ManageTable() {
 			</div>
 		</div>
 	);
-}
+});
