@@ -10,7 +10,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
 import axios from 'axios';
 import shipping from '../assets/shipping.gif';
-// import CustomAlert from '../components/Alert/MUIAlert'
+import OutlinedAlerts from '../components/Alert';
 
 export default function Sending() {
     const token = localStorage.getItem('token');
@@ -24,6 +24,7 @@ export default function Sending() {
     const [unvalidatedList, setUnvalidatedList] = useState([]);
     const [invoiceUuidMap, setInvoiceUuidMap] = useState({});
     const [selectedInvoices, setSelectedInvoices] = useState([]);
+    const [alert, setAlert] = useState(null); // 初始状态设置为null
 
     const handleClear = () =>{
         setFirstName('');
@@ -58,17 +59,19 @@ export default function Sending() {
         })
         .catch(error => {
             console.log(error.message);
-            alert(error.message);
+            setAlert({ severity: 'error', message: error.message });
         });
     }, [token]);
+
     useEffect(() => {
         fetchInvoiceData();
     }, [token, fetchInvoiceData]);
+
     const handleSend = () =>{
         const uuids = selectedInvoices.map(invoice => invoiceUuidMap[invoice]);
         const fullMessage = `${firstName} ${lastName}: ${message}`;
         if (!uuids) {
-            alert('Please select an invoice');
+            setAlert({ severity: 'warning', message: 'Please select an invoice' });
             return;
         }
         setShowIcon(true);
@@ -86,16 +89,18 @@ export default function Sending() {
           })
         .then(response => {
                 console.log(response.data);
-                alert(response.data.msg);
+                // alert(response.data.msg);
+                setAlert({ severity: 'success', message: response.data.msg });
                 setShowIcon(false); // 隐藏等待图标
                 handleClear();
                 fetchInvoiceData();
         })
         .catch(error => {
         if (error.response) {
-            alert(error.response.data.detail || 'Send failed');
+            setAlert({ severity: 'error', message: error.response.data.detail || 'Please input details.' });
+            //alert(error.response.data.detail || 'Send failed');
         } else {
-            alert(error.message);
+            setAlert({ severity: 'error', message: error.message });
             console.log(error.message);
         }
         setShowIcon(false); // 隐藏等待图标，即使出错也要隐藏
@@ -113,6 +118,20 @@ export default function Sending() {
     return (
         <div>
             <ResponsiveAppBar />
+            {alert && (
+                    <div style={{
+                        position: 'fixed',
+                        top: '11vh',
+                        right: 10,
+                        // transform: 'translateX(-50%)',  
+                        width: '30%',
+                        zIndex: 9999
+                    }}>
+                        <OutlinedAlerts severity={alert.severity} onClose={() => setAlert(null)}>
+                            {alert.message}
+                        </OutlinedAlerts>
+                    </div>
+                )}
             <Box
             sx={{
                 height: 'calc(100vh - 80px)', 
