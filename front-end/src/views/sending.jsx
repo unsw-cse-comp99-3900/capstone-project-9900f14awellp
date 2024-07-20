@@ -75,14 +75,16 @@ export default function Sending() {
             return;
         }
         setShowIcon(true);
-        console.log(uuids.join(','),message,email, fullMessage);
-        axios.post('http://127.0.0.1:8000/invoice/invoice-sending/',  { message: fullMessage } , {
+        console.log(typeof uuids,message,email, fullMessage);
+        axios.post('http://127.0.0.1:8000/invoice/invoice-sending/',  
+            { message: fullMessage } , 
+            {
             params: {
-              uuid: uuids.join(','),
+              uuids: uuids.join(','),
               email: email 
             }, 
             headers: {
-              'Accept': 'application/json',
+              'accept': 'application/json',
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             }

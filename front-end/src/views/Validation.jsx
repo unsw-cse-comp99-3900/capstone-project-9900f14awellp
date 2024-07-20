@@ -24,8 +24,6 @@ import OutlinedAlerts from '../components/Alert';
 
 
 export default function Validation() {
-    // let fileName = null;
-    // let uuid = null;
     const token = localStorage.getItem('token');
     const [showIcon, setShowIcon] = useState(false);
     const [validationReport, setValidationReport] = useState(null);
@@ -57,7 +55,7 @@ export default function Validation() {
     const fetchInvoiceData = useCallback(() => {
         axios.get(`http://127.0.0.1:8000/invoice/invoice-info/`,{
             headers: {
-                'Accept': 'application/json', // Setting the Accept header
+                'accept': 'application/json', // Setting the Accept header
                 'Authorization': `Bearer ${token}`
             }
         })

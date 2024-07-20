@@ -3,7 +3,7 @@ InvoiceProcessing/__pycache__/*
 invoice/__pycache__/*
 invoice/management/commands/__pycache__/*
 invoice/migrations/__pycache__/*
-
+../InvoiceProcessing/*
 # 忽略 Django 特定文件
 *.sqlite3
 
