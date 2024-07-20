@@ -1309,10 +1309,10 @@ class SendInvoiceEmailAPIView(APIView):
             if os.path.exists(file_path):
                 # 未验证
                 if not file.is_validated:
-                    email.attach_file(file.file)
+                    email.attach_file(file_path)
                 # 验证通过
                 elif file.is_correct:
-                    email.attach_file(file.file)
+                    email.attach_file(file_path)
                     email.attach_file(f"staticfiles/{request.user.id}/{file_stem}_report.json")
                 # 验证失败
                 elif not file.is_correct:
