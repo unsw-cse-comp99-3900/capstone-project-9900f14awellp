@@ -831,10 +831,10 @@ class GUIFileAPIView(APIView):
                     
             # 将数据保存在数据库的同时，创建json文件并保存进去
             file_instance = file_serializer.save(userid=request.user)
-            file.file = f"staticfiles/{request.user.id}/{filename}.json"
+            file_path = f"staticfiles/{request.user.id}/{filename}.json"
             # 将数据保存到 Invoice_upfile 表中
             UpFile.objects.create(
-                file=file.file,
+                file=file_path,
                 uuid=file_instance.uuid,
                 userid=file_instance.userid,
             )
