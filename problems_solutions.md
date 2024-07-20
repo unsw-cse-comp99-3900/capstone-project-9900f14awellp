@@ -537,10 +537,49 @@ class Command(RunserverCommand):
 python manage.py runserver_all
 ```
 
-# 7. 有时候引入的包会显示没有安装这个包，但是当运行pip install celery时候显示已经安装了，如何解决
+# 12. 有时候引入的包会显示没有安装这个包，但是当运行pip install celery时候显示已经安装了，如何解决
 
 * 1.打开命令面板（Shift + Command + P）。
 
 * 2.输入 `Python: Select Interpreter` 并选择这个选项。
 
 * 3.在弹出的列表中，选择你的虚拟环境对应的解释器路径。对于 Anaconda 环境，路径通常类似于 `.../anaconda3/envs/py39/bin/python`。
+
+# 13. Github 经常会merge的时候显示数据库数据发生冲突，如何解决？
+
+这是因为这些文件已经被 Git 跟踪，即使你在 `.gitignore` 文件中添加了规则，Git 仍然会跟踪这些已经添加到索引中的文件。要解决这个问题，你需要将这些文件从 Git 的索引中移除。
+
+
+
+* 使用 `git rm --cached` 命令将这些文件从 Git 的索引中移除。 
+
+```shell
+git rm -r --cached InvoiceProcessing/__pycache__
+git rm -r --cached InvoiceProcessing/InvoiceProcessing/__pycache__
+git rm --cached *.pyc *.pyo *.pyd
+```
+
+* 更新 ```.gitignore```文件
+
+  ```python
+  # Ignore compiled Python files
+  *.pyc
+  *.pyo
+  *.pyd
+  
+  # Ignore Python cache directories
+  __pycache__/
+  
+  # 忽略 Django 特定文件
+  *.sqlite3
+  db.sqlite3
+  media/
+  ```
+
+* 更改提交到仓库
+
+  ```python
+  git commit -m "Remove ignored files from repository"
+  ```
+
+* push到github

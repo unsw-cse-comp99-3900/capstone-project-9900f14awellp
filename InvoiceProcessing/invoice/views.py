@@ -1227,7 +1227,7 @@ class SendInvoiceEmailAPIView(APIView):
                             status=status.HTTP_404_NOT_FOUND)
 
 
-        email_body = f"Please find attached your invoice.\n\n{custom_message}"  # 将自定义消息添加到邮件正文中
+        email_body = f"{custom_message}\n\nPlease find attached your invoice."  # 将自定义消息添加到邮件正文中
         email = EmailMessage(
             'Your Invoice',
             email_body,
