@@ -1304,9 +1304,9 @@ class SendInvoiceEmailAPIView(APIView):
             file_name = os.path.basename(str(file.file))
             file_stem = os.path.splitext(file_name)[0]
             
-            file.file = str(file.file)
+            file_path = str(file.file)
 
-            if os.path.exists(file.file):
+            if os.path.exists(file_path):
                 # 未验证
                 if not file.is_validated:
                     email.attach_file(file.file)
