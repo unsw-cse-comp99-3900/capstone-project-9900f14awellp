@@ -9,7 +9,7 @@ from time import sleep
 from types import SimpleNamespace
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from .tasks import extract_pdf_data
+
 from django.http import JsonResponse
 from django.core.mail import EmailMessage
 from .models import Company, User, UpFile, GUIFile
