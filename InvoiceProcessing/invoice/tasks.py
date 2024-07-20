@@ -52,10 +52,10 @@ def extract_pdf_data(file_path,userid):
             converter_xml(f"staticfiles/{userid}/{file_stem}.xml")
     elif str(file_path).endswith('.pdf'):
         url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
-        api_key = {'APIKey': '953d6538-b373-4ebb-8109-15040694f23b'}
-        payload = {'user': 'LianqiangZZZ',
+        api_key = {'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
+        payload = {'user': 'ZZZhao',
                 'pwd': 'Zlq641737796',
-                'APIKey': '953d6538-b373-4ebb-8109-15040694f23b'}
+                'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
         # 保留cookie
         r = requests.get(url + '/Login', params=payload)
         
@@ -77,7 +77,7 @@ def extract_pdf_data(file_path,userid):
             invoiceID = str(r2.json().get("invoice_id"))
         # 1.3 获得传回的json数据
         payload2 = {'invoiceid':invoiceID,
-                    'APIKey': '953d6538-b373-4ebb-8109-15040694f23b'}
+                    'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
     
         sleep(60)
         r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
