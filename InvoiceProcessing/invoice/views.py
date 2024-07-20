@@ -434,7 +434,73 @@ class UpFileAPIView(APIView):
             # 上传的pdf文件直接转化为json和xml文件
             file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
             # 异步处理pdf文件
-            extract_pdf_data.delay(str(file.file),request.user.id)
+            # extract_pdf_data.delay(str(file.file),request.user.id)
+            file_name = os.path.basename(str(file.file))
+            file_stem = os.path.splitext(file_name)[0]
+            
+            # 1.将json文件转化为xml，for Later validation
+            if str(file.file).endswith('.json'):
+                    with open(str(file.file), 'r') as f:
+                        data = json.load(f)
+                        # json -> xml
+                        xml_elem = json_to_xml(data)
+                        xml_str = prettify(xml_elem)
+                    with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
+                        f.write(xml_str)
+                    converter_xml(f"staticfiles/{request.user.id}/{file_stem}.xml")
+            elif str(file.file).endswith('.pdf'):
+                url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
+                api_key = {'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
+                payload = {'user': 'ZZZhao',
+                        'pwd': 'Zlq641737796',
+                        'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
+                # 保留cookie
+                r = requests.get(url + '/Login', params=payload)
+                
+                # 1.2 上传pdf文件
+                with open(str(file.file), 'rb') as img_file:
+                    img_name = f"{file_stem}.pdf"
+                    data = img_file.read()
+                    b = bytearray(data)
+                    li = []
+                    for i in b:
+                        li.append(i)
+                    raw_data = {"PictureName": img_name, "PictureStream": li}
+                    json_data = json.dumps(raw_data)
+                    r2 = requests.post("https://app.ezzydoc.com/EzzyService.svc/Rest/uploadInvoiceImage",
+                                    data=json_data,
+                                    cookies=r.cookies,
+                                    params=api_key,
+                                    headers={'Content-Type': 'application/json'})
+                    invoiceID = str(r2.json().get("invoice_id"))
+                # 1.3 获得传回的json数据
+                payload2 = {'invoiceid':invoiceID,
+                            'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
+            
+                sleep(60)
+                r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
+                r4 = requests.get(url + '/getInvoiceHeaderBlocks', cookies=r.cookies,params=payload2)
+
+                if r3.status_code == 200:
+                    form_data = r3.json().get('form_data', {})
+                    invoiceForm = r4.json().get('invoiceForm', {})
+                    table = r4.json().get('table', {})
+                    combined_data = {
+                        "form_data": form_data,
+                        "invoiceForm": invoiceForm,
+                        "table": table,
+
+                    }
+
+                    with open(f"staticfiles/{request.user.id}/{file_stem}.json", "w", encoding="utf-8") as f:
+                        json.dump(combined_data, f, ensure_ascii=False, indent=4)
+                        
+                    xml_elem = json_to_xml(combined_data)
+                    xml_str = prettify(xml_elem)
+                    with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
+                        f.write(xml_str)
+                    converter_xml(f"staticfiles/{request.user.id}/{file_stem}.xml")
+                    
             return Response({
                                 "code": 0,
                                 "msg": "success!",
@@ -765,10 +831,10 @@ class GUIFileAPIView(APIView):
                     
             # 将数据保存在数据库的同时，创建json文件并保存进去
             file_instance = file_serializer.save(userid=request.user)
-            file_path = f"staticfiles/{request.user.id}/{filename}.json"
+            file.file = f"staticfiles/{request.user.id}/{filename}.json"
             # 将数据保存到 Invoice_upfile 表中
             UpFile.objects.create(
-                file=file_path,
+                file=file.file,
                 uuid=file_instance.uuid,
                 userid=file_instance.userid,
             )
@@ -1115,12 +1181,12 @@ class FileValidationsAPIView(APIView):
             if report:
                 # 保存report到数据库
                 # 将 report 字段内容保存到 JSON 文件中
-                json_file_path = f'staticfiles/{request.user.id}/{file_stem}_report.json'  # 请更改为实际的文件路径
+                json_file.file = f'staticfiles/{request.user.id}/{file_stem}_report.json'  # 请更改为实际的文件路径
 
                 try:
-                    with open(json_file_path, 'w', encoding='utf-8') as json_file:
+                    with open(json_file.file, 'w', encoding='utf-8') as json_file:
                         json.dump(report, json_file, ensure_ascii=False, indent=4)
-                    print(f"Report saved to {json_file_path}")
+                    print(f"Report saved to {json_file.file}")
                 except Exception as e:
                     return JsonResponse({"code": 500, "msg": f"Failed to save report: {str(e)}"}, status=500)
                 
@@ -1227,7 +1293,7 @@ class SendInvoiceEmailAPIView(APIView):
                             status=status.HTTP_404_NOT_FOUND)
 
 
-        email_body = f"Please find attached your invoice.\n\n{custom_message}"  # 将自定义消息添加到邮件正文中
+        email_body = f"{custom_message}\n\nPlease find attached your invoice."  # 将自定义消息添加到邮件正文中
         email = EmailMessage(
             'Your Invoice',
             email_body,
@@ -1237,15 +1303,15 @@ class SendInvoiceEmailAPIView(APIView):
             file_name = os.path.basename(str(file.file))
             file_stem = os.path.splitext(file_name)[0]
             
-            file_path = str(file.file)
+            file.file = str(file.file)
 
-            if os.path.exists(file_path):
+            if os.path.exists(file.file):
                 # 未验证
                 if not file.is_validated:
-                    email.attach_file(file_path)
+                    email.attach_file(file.file)
                 # 验证通过
                 elif file.is_correct:
-                    email.attach_file(file_path)
+                    email.attach_file(file.file)
                     email.attach_file(f"staticfiles/{request.user.id}/{file_stem}_report.json")
                 # 验证失败
                 elif not file.is_correct:

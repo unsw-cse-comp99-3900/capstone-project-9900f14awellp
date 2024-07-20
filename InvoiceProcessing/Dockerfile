@@ -10,7 +10,6 @@ COPY . /INVOICE_PROCESSING/
 # 安装系统依赖
 RUN apt-get update && apt-get install -y \
     build-essential \
-    redis-tools \
     && apt-get clean
 # 安装Python依赖
 RUN pip install --upgrade pip
@@ -20,4 +19,4 @@ RUN pip install -r requirements.txt
 EXPOSE 8000
 
 # 运行Django开发服务器
-CMD ["python", "manage.py", "runserver_all", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
