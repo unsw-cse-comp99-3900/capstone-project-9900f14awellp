@@ -149,7 +149,7 @@ class FileUploadSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['description', 'price', 'quantity', 'net', 'vat', 'gross']
+        fields = ['description', 'price', 'quantity', 'net', 'qst', 'gross']
                
 
 class FileGUISerializer(serializers.ModelSerializer):
@@ -159,7 +159,7 @@ class FileGUISerializer(serializers.ModelSerializer):
     orders = OrderSerializer(many=True)
     class Meta:
         model = GUIFile
-        fields = ["filename","uuid","userid",'id', 'customer_name', 'address', 'country_name', 'manager', 'issue_date', 'terms', 'vat_number', 'purchase_id', 'subtotal', 'vat_total', 'total_price', 'important_text', 'items', 'orders']
+        fields = ["filename","uuid","userid",'id', 'company_name', 'address', 'country_name', 'manager', 'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
 
 
     def create(self, validated_data):
@@ -172,16 +172,17 @@ class FileGUISerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         orders_data = validated_data.pop('orders')
-        instance.customer_name = validated_data.get('customer_name', instance.customer_name)
+        instance.company_name = validated_data.get('company_name', instance.company_name)
         instance.address = validated_data.get('address', instance.address)
         instance.country_name = validated_data.get('country_name', instance.country_name)
         instance.manager = validated_data.get('manager', instance.manager)
         instance.issue_date = validated_data.get('issue_date', instance.issue_date)
+        instance.due_date = validated_data.get('due_date', instance.due_date)
         instance.terms = validated_data.get('terms', instance.terms)
-        instance.vat_number = validated_data.get('vat_number', instance.vat_number)
+        instance.ABN = validated_data.get('ABN', instance.ABN)
         instance.purchase_id = validated_data.get('purchase_id', instance.purchase_id)
         instance.subtotal = validated_data.get('subtotal', instance.subtotal)
-        instance.vat_total = validated_data.get('vat_total', instance.vat_total)
+        instance.qst_total = validated_data.get('qst_total', instance.qst_total)
         instance.total_price = validated_data.get('total_price', instance.total_price)
         instance.important_text = validated_data.get('important_text', instance.important_text)
         instance.items = validated_data.get('items', instance.items)
@@ -193,7 +194,7 @@ class FileGUISerializer(serializers.ModelSerializer):
             order.price = order_data.get('price', order.price)
             order.quantity = order_data.get('quantity', order.quantity)
             order.net = order_data.get('net', order.net)
-            order.vat = order_data.get('vat', order.vat)
+            order.qst = order_data.get('qst', order.qst)
             order.gross = order_data.get('gross', order.gross)
             order.save()"""
             

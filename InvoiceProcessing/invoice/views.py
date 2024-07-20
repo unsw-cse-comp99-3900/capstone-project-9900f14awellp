@@ -630,7 +630,7 @@ class GUIFileAPIView(APIView):
                     type=openapi.TYPE_STRING,
                     description='条款'
                 ),
-                'vat_number': openapi.Schema(
+                'ABN': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='增值税号'
                 ),
@@ -642,7 +642,7 @@ class GUIFileAPIView(APIView):
                     type=openapi.TYPE_STRING,
                     description='小计'
                 ),
-                'vat_total': openapi.Schema(
+                'qst_total': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='增值税总计'
                 ),
@@ -662,13 +662,13 @@ class GUIFileAPIView(APIView):
                         'price': openapi.Schema(type=openapi.TYPE_STRING, description='价格'),
                         'quantity': openapi.Schema(type=openapi.TYPE_INTEGER, description='数量'),
                         'net': openapi.Schema(type=openapi.TYPE_STRING, description='净价'),
-                        'vat': openapi.Schema(type=openapi.TYPE_STRING, description='增值税'),
+                        'qst': openapi.Schema(type=openapi.TYPE_STRING, description='增值税'),
                         'gross': openapi.Schema(type=openapi.TYPE_STRING, description='毛价'),
                     }),
                     description='订单列表'
                 ),
             },
-            required=['filename', 'uuid', 'customer_name', 'address', 'country_name', 'manager', 'issue_date', 'due_date', 'terms', 'vat_number', 'purchase_id', 'subtotal', 'vat_total', 'total_price', 'important_text', 'items', 'orders']
+            required=['filename', 'uuid', 'customer_name', 'address', 'country_name', 'manager', 'issue_date', 'due_date', 'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
         )
     )
     def post(self, request):

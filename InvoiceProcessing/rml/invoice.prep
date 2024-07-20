@@ -79,10 +79,15 @@
         <td rightPadding="0">
             <spacer length="10"/>
             <para style="right">Invoice No.:&nbsp;&nbsp;&nbsp;{{data.id}}</para>
-            <para style="right">Date:&nbsp;&nbsp;&nbsp;{{data.issue_date}}</para>
-            <para style="right">Payment Terms:&nbsp;&nbsp;&nbsp;{{data.terms}}</para>
+
+
+            <para style="right">Invoice Date:&nbsp;&nbsp;&nbsp;{{data.issue_date}}</para>
+            <para style="right">Due Date:&nbsp;&nbsp;&nbsp;{{data.due_date}}</para>
             <spacer length="10"/>
-            <para style="right">VAT Number:&nbsp;&nbsp;&nbsp; {{data.vat_number}}</para>
+            <para style="right">ABN:&nbsp;&nbsp;&nbsp; {{data.ABN}}</para>
+
+
+
             <para style="right">Purchase ID:&nbsp;&nbsp;&nbsp; {{data.purchase_id}}</para>
         </td>
     </tr>
@@ -93,7 +98,7 @@
     			<td align="DECIMAL">Unit Price</td>
     			<td align="CENTER">Qty</td>
 				<td align="CENTER">Net</td>
-				<td align="CENTER">VAT</td>
+				<td align="CENTER">QST</td>
 				<td align="DECIMAL">Gross</td>
     	</tr>
 
@@ -103,7 +108,7 @@
             <td align="DECIMAL" rightPadding="20" vAlign="top">{{item.price}}</td>
             <td align="CENTER" vAlign="top">{{item.quantity}}</td>
             <td align="DECIMAL" rightPadding="20" vAlign="top">{{item.net}}</td>  
-            <td align="CENTER" vAlign="top">{{item.vat}}</td>
+            <td align="CENTER" vAlign="top">{{item.qst}}</td>
             <td align="DECIMAL" rightPadding="15" vAlign="top">{{item.gross}}</td>
         </tr>
     {{endfor}}
@@ -120,8 +125,8 @@
         </tr>
         <tr>
 			<td></td> 
-            <td align="RIGHT">VAT Total</td>
-            <td align="DECIMAL" rightPadding="15">{{data.vat_total}}</td>
+            <td align="RIGHT">QST Total</td>
+            <td align="DECIMAL" rightPadding="15">{{data.qst_total}}</td>
         </tr>
 		<tr>
 			<td></td> 

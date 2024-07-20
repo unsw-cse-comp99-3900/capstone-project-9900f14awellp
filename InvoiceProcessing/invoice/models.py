@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 class Company(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name='Company Name')
     # logo = models.ImageField(upload_to='company_logo/', verbose_name='Company Logo')
-    logo = models.ImageField(upload_to='avatar/', verbose_name='Avatar',null=True, blank=True)
+    logo = models.ImageField(upload_to='aqstar/', verbose_name='Aqstar',null=True, blank=True)
     phone_number = models.CharField(max_length=20, verbose_name='Company Phone Number')
     boss_id = models.OneToOneField('User', on_delete=models.CASCADE, related_name='employee', verbose_name='Company', null=True, blank=True)
     email = models.EmailField(verbose_name='Company Email')
@@ -44,7 +44,7 @@ class User(AbstractBaseUser):
     password = models.CharField(max_length=255, verbose_name='Password')
     name = models.CharField(max_length=255, verbose_name='Name')
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="employees",verbose_name='Company',null=True, blank=True)
-    avatar = models.ImageField(upload_to='avatar/', verbose_name='Avatar',null=True, blank=True)
+    aqstar = models.ImageField(upload_to='aqstar/', verbose_name='Aqstar',null=True, blank=True)
     email = models.EmailField(unique=True, verbose_name='Email')
     is_staff = models.BooleanField(default=False, verbose_name='Admin')
     reset_password_token = models.CharField(max_length=255, null=True, blank=True, verbose_name='Reset Password Token')
@@ -80,7 +80,7 @@ class Order(models.Model):
     price = models.CharField(max_length=20)
     quantity = models.IntegerField()
     net = models.CharField(max_length=20)
-    vat = models.CharField(max_length=10)
+    qst = models.CharField(max_length=10)
     gross = models.CharField(max_length=20)
 
     def __str__(self):
@@ -88,8 +88,8 @@ class Order(models.Model):
     def save(self, *args, **kwargs): 
         if not self.price.startswith('$'):
             self.price = f"\u0024{self.price}" 
-        if not self.vat.startswith('$'):
-            self.vat = f"\u0024{self.vat}"  
+        if not self.qst.startswith('$'):
+            self.qst = f"\u0024{self.qst}"  
         if not self.net.startswith('$'):
             self.net = f"\u0024{self.net}"   
         if not self.gross.startswith('$'):
@@ -100,16 +100,17 @@ class GUIFile(models.Model):
     filename = models.CharField(max_length=30)
     uuid = models.CharField(max_length=30)
     id = models.CharField(max_length=20, primary_key=True)
-    customer_name = models.CharField(max_length=255)
+    company_name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     country_name = models.CharField(max_length=100)
     manager = models.CharField(max_length=100)
     issue_date = models.DateField()
+    due_date = models.DateField()
     terms = models.CharField(max_length=100)
-    vat_number = models.CharField(max_length=20)
+    ABN = models.CharField(max_length=20)
     purchase_id = models.CharField(max_length=100)
     subtotal = models.CharField(max_length=20)
-    vat_total = models.CharField(max_length=20)
+    qst_total = models.CharField(max_length=20)
     total_price = models.CharField(max_length=20)
     important_text = models.TextField()
     items = models.JSONField(default=list)
@@ -125,8 +126,8 @@ class GUIFile(models.Model):
     def save(self, *args, **kwargs):
         if not self.subtotal.startswith('$'):
             self.subtotal = f"\u0024{self.subtotal}"
-        if not self.vat_total.startswith('$'):
-            self.vat_total = f"\u0024{self.vat_total}"
+        if not self.qst_total.startswith('$'):
+            self.qst_total = f"\u0024{self.qst_total}"
         if not self.total_price.startswith('$'):
             self.total_price = f"\u0024{self.total_price}"         
  
