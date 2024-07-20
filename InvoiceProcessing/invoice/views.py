@@ -1025,6 +1025,7 @@ def json_to_xml(json_obj, line_padding=""):
     
     return elem
 
+
 def prettify(elem):
     rough_string = ET.tostring(elem, 'utf-8')
     reparsed = minidom.parseString(rough_string)
@@ -1181,12 +1182,12 @@ class FileValidationsAPIView(APIView):
             if report:
                 # 保存report到数据库
                 # 将 report 字段内容保存到 JSON 文件中
-                json_file.file = f'staticfiles/{request.user.id}/{file_stem}_report.json'  # 请更改为实际的文件路径
+                json_file_path = f'staticfiles/{request.user.id}/{file_stem}_report.json'  # 请更改为实际的文件路径
 
                 try:
-                    with open(json_file.file, 'w', encoding='utf-8') as json_file:
+                    with open(json_file_path, 'w', encoding='utf-8') as json_file:
                         json.dump(report, json_file, ensure_ascii=False, indent=4)
-                    print(f"Report saved to {json_file.file}")
+                    print(f"Report saved to {json_file_path}")
                 except Exception as e:
                     return JsonResponse({"code": 500, "msg": f"Failed to save report: {str(e)}"}, status=500)
                 
