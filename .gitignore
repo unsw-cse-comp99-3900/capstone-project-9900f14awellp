@@ -1,4 +1,5 @@
 # Ignore compiled Python files
+InvoiceProcessing/InvoiceProcessing/__pycache__/*
 InvoiceProcessing/__pycache__/*
 invoice/__pycache__/*
 invoice/management/commands/__pycache__/*
