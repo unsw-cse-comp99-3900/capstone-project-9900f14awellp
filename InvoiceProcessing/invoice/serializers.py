@@ -1,5 +1,5 @@
 from rest_framework import serializers,exceptions
-from .models import Company, User, UpFile, GUIFile
+from .models import Company, User, UpFile, GUIFile,Order
 import json
 from datetime import datetime
 import os
@@ -144,14 +144,66 @@ class FileUploadSerializer(serializers.ModelSerializer):
         # Set is_validated to True when creating a new UpFile instance
         validated_data['is_validated'] = True
         return super().create(validated_data)"""
-        
+ 
+ 
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['description', 'price', 'quantity', 'net', 'qst', 'gross']
+               
+
 class FileGUISerializer(serializers.ModelSerializer):
     filename = serializers.CharField(required=True)
     uuid = serializers.CharField(required=True)
     userid = serializers.PrimaryKeyRelatedField(read_only=True)  # 设置为只读
+    orders = OrderSerializer(many=True)
     class Meta:
         model = GUIFile
-        fields = '__all__'
+        fields = ["filename","uuid","userid",'id', 'company_name', 'address', 'country_name', 'manager', 'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+
+
+    def create(self, validated_data):
+        orders_data = validated_data.pop('orders')
+        guifile = GUIFile.objects.create(**validated_data)
+        for order_data in orders_data:
+            order = Order.objects.create(**order_data)
+            guifile.orders.add(order)
+        return guifile
+
+    def update(self, instance, validated_data):
+        orders_data = validated_data.pop('orders')
+        instance.company_name = validated_data.get('company_name', instance.company_name)
+        instance.address = validated_data.get('address', instance.address)
+        instance.country_name = validated_data.get('country_name', instance.country_name)
+        instance.manager = validated_data.get('manager', instance.manager)
+        instance.issue_date = validated_data.get('issue_date', instance.issue_date)
+        instance.due_date = validated_data.get('due_date', instance.due_date)
+        instance.terms = validated_data.get('terms', instance.terms)
+        instance.ABN = validated_data.get('ABN', instance.ABN)
+        instance.purchase_id = validated_data.get('purchase_id', instance.purchase_id)
+        instance.subtotal = validated_data.get('subtotal', instance.subtotal)
+        instance.qst_total = validated_data.get('qst_total', instance.qst_total)
+        instance.total_price = validated_data.get('total_price', instance.total_price)
+        instance.important_text = validated_data.get('important_text', instance.important_text)
+        instance.items = validated_data.get('items', instance.items)
+        instance.save()
+
+        """for order_data in orders_data:
+            order = Order.objects.get(id=order_data['id'])
+            order.description = order_data.get('description', order.description)
+            order.price = order_data.get('price', order.price)
+            order.quantity = order_data.get('quantity', order.quantity)
+            order.net = order_data.get('net', order.net)
+            order.qst = order_data.get('qst', order.qst)
+            order.gross = order_data.get('gross', order.gross)
+            order.save()"""
+            
+        instance.orders.clear()
+        for order_data in orders_data:
+            order = Order.objects.create(**order_data)
+            instance.orders.add(order)
+        
+        return instance
 
 class FileDeletionSerializer(serializers.Serializer):
     file_name = serializers.CharField(required=True)
