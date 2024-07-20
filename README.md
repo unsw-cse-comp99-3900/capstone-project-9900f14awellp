@@ -41,23 +41,33 @@ project
 1. Clone the repository:
     ```sh
     git clone https://github.com/yourusername/InvoiceProcessing.git
-    cd InvoiceProcessing
-    ```
 
-2. Use Docker to build image
+    ```
+2. Enter this project
+   ```sh
+   cd capstone-project-9900f14awellp
+   ```
+3. Enter the back-end
+
+   ```sh
+   cd InvoiceProcessing
+   ```
+   
+4. Use Docker to build image
    ```sh
    docker-compose up --build
    ```
 
-3. Initiate docker image
+5. Initiate docker image
    ```sh
    docker-compose up
    ```
 
-4. Access API documentation
+5. Access API documentation
    http://127.0.0.1:8000/invoice/swagger/
-   
-### Front-end Installation
+
+
+### Front-end Installation (open up another command line terminal )
 
 1. Navigate to the front-end directory:
     ```sh
