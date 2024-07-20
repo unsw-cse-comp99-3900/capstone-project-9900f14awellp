@@ -4,7 +4,9 @@ import os
 import base64
 import hashlib
 import requests
+import subprocess
 from time import sleep
+from types import SimpleNamespace
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from .tasks import extract_pdf_data
@@ -39,7 +41,6 @@ from .serializers import CompanySerializer,RegisterSerializer,\
 from .converter import converter_xml
 # Create your views here.
 user_directory = os.path.join(settings.STATICFILES_DIRS[0])
-
 
 # 用户注册
 class RegisterView(APIView):
@@ -583,232 +584,92 @@ class GUIFileAPIView(APIView):
     # authentication_classes = [MyAhenAuthentication]
     authentication_classes = [JWTAuthentication]
     @swagger_auto_schema(
-        operation_summary='用户发票GUI说明',
+        operation_summary='创建新的用户发票GUI文件',
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
+                'id': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='发票id'
+                ),
                 'filename': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Invoice Title'
+                    description='发票标题'
                 ),
-                'uuid':openapi.Schema(
+                'uuid': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Invoice ID'
+                    description='发票ID'
                 ),
-                'abn': openapi.Schema(
+                'customer_name': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='ABN'
+                    description='客户名称'
                 ),
-                'additional_request': openapi.Schema(
+                'address': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Additional Request'
+                    description='地址'
                 ),
-                'approver': openapi.Schema(
+                'country_name': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Approver'
+                    description='国家名称'
                 ),
-                'approver_email': openapi.Schema(
+                'manager': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Approver Email'
+                    description='经理'
                 ),
-                'bPayRef': openapi.Schema(
+                'issue_date': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='BPay Reference'
+                    format=openapi.FORMAT_DATE,
+                    description='发行日期'
                 ),
-                'bPaycode': openapi.Schema(
+                'due_date': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='BPay Code'
+                    format=openapi.FORMAT_DATE,
+                    description='到期日期'
                 ),
-                'bankAccount': openapi.Schema(
+                'terms': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Bank Account'
+                    description='条款'
                 ),
-                'bankBranch': openapi.Schema(
+                'vat_number': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Bank Branch'
+                    description='增值税号'
                 ),
-                'bank_details': openapi.Schema(
+                'purchase_id': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Bank Details'
+                    description='采购ID'
                 ),
-                'changed': openapi.Schema(
-                    type=openapi.TYPE_BOOLEAN,
-                    description='Changed'
-                ),
-                'charge': openapi.Schema(
-                    type=openapi.TYPE_NUMBER,
-                    description='Charge'
-                ),
-                'company_invoiced': openapi.Schema(
+                'subtotal': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Company Invoiced'
+                    description='小计'
                 ),
-                'delivery_to': openapi.Schema(
+                'vat_total': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Delivery To'
+                    description='增值税总计'
                 ),
-                'delivery_to_address': openapi.Schema(
+                'total_price': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Delivery To Address'
+                    description='总价'
                 ),
-                'description': openapi.Schema(
+                'important_text': openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='Description'
+                    description='重要提示'
                 ),
-                'document_subtype': openapi.Schema(
-                    type=openapi.TYPE_INTEGER,
-                    description='Document Subtype'
+
+                'orders': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_OBJECT, properties={
+                        'description': openapi.Schema(type=openapi.TYPE_STRING, description='描述'),
+                        'price': openapi.Schema(type=openapi.TYPE_STRING, description='价格'),
+                        'quantity': openapi.Schema(type=openapi.TYPE_INTEGER, description='数量'),
+                        'net': openapi.Schema(type=openapi.TYPE_STRING, description='净价'),
+                        'vat': openapi.Schema(type=openapi.TYPE_STRING, description='增值税'),
+                        'gross': openapi.Schema(type=openapi.TYPE_STRING, description='毛价'),
+                    }),
+                    description='订单列表'
                 ),
-                'email': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Email'
-                ),
-                'email_to': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Email To'
-                ),
-                'expense_claim': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Expense Claim'
-                ),
-                'from_email': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='From Email'
-                ),
-                'glcode_option': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='GL Code Option'
-                ),
-                'glcode_text': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='GL Code Text'
-                ),
-                'invoiceDate': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Invoice Date'
-                ),
-                'invoiceNumber': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Invoice Number'
-                ),
-                'invoice_to': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Invoice To'
-                ),
-                'invoice_to_address': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Invoice To Address'
-                ),
-                'location': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Location'
-                ),
-                'purchaseOrder': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Purchase Order'
-                ),
-            'require_bank_details': openapi.Schema(
-                    type=openapi.TYPE_BOOLEAN,
-                    description='Require Bank Details'
-                ),
-            'require_email': openapi.Schema(
-                    type=openapi.TYPE_BOOLEAN,
-                    description='Require Email'
-                ),
-            'supplier_name': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='SupplierName'
-                ),
-            'supplier_address': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Supplier Address'
-                ),
-            'supplier_id': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Supplier ID'
-                ),
-                'tax': openapi.Schema(
-                    type=openapi.TYPE_NUMBER,
-                    description='Tax'
-                ),
-                'total': openapi.Schema(
-                    type=openapi.TYPE_NUMBER,
-                    description='Total'
-                ),
-                'tracking': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Tracking'
-                ),
-                'tracking_option': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='Tracking Option'
-                ),
-            }
-        ),
-        responses={
-            200: openapi.Response(
-                description="File uploaded successfully",
-                examples={
-                    "application/json": {
-                        "code": 0,
-                        "msg": "success!",
-                        "data": {
-                            "title": "Invoice Title",
-                            "abn": "ABN12345678",
-                            "additional_request": "Some request",
-                            "approver": "Approver Name",
-                            "approver_email": "approver@example.com",
-                            "bPayRef": "BPay Reference",
-                            "bPaycode": "BPay Code",
-                            "bankAccount": "Bank Account",
-                            "bankBranch": "Bank Branch",
-                            "bank_details": "Bank Details",
-                            "changed": True,
-                            "charge": 100.0,
-                            "company_invoiced": "Invoiced Company",
-                            "delivery_to": "Delivery To",
-                            "delivery_to_address": "Delivery Address",
-                            "description": "Description",
-                            "document_subtype": 1,
-                            "email": "email@example.com",
-                            "email_to": "email_to@example.com",
-                            "expense_claim": "Expense Claim",
-                            "from_email": "from@example.com",
-                            "glcode_option": "GL Code Option",
-                            "glcode_text": "GL Code Text",
-                            "invoiceDate": "2024-07-05",
-                            "invoiceNumber": "INV123456",
-                            "invoice_to": "Invoice To",
-                            "invoice_to_address": "Invoice Address",
-                            "location": "Location",
-                            "purchaseOrder": "PO123456",
-                            "require_bank_details": True,
-                            "require_email": True,
-                            "supplier": "Supplier Name",
-                            "supplier_address": "Supplier Address",
-                            "supplier_id": "Supplier ID",
-                            "tax": 10.0,
-                            "total": 110.0,
-                            "tracking": "Tracking",
-                            "tracking_option": "Tracking Option"
-                        }
-                    }
-                }
-            ),
-            400: openapi.Response(
-                description="Bad request",
-                examples={
-                    "application/json": {
-                        "code": 400,
-                        "msg": "bad request",
-                        "data": {
-                            "title": ["This field is required."],
-                            "abn": ["This field is required."]
-                        }
-                    }
-                }
-            )
-        }
+            },
+            required=['filename', 'uuid', 'customer_name', 'address', 'country_name', 'manager', 'issue_date', 'due_date', 'terms', 'vat_number', 'purchase_id', 'subtotal', 'vat_total', 'total_price', 'important_text', 'items', 'orders']
+        )
     )
     def post(self, request):
         file_serializer = FileGUISerializer(data=request.data)
@@ -841,7 +702,7 @@ class GUIFileAPIView(APIView):
             
             file_data = FileGUISerializer(file_instance).data
             # 把title和userid pop掉，存到文件中
-            file_data.pop('id', None)
+            #file_data.pop('id', None)
             file_data.pop('filename', None)
             file_data.pop('uuid', None)
             file_data.pop('userid', None)
@@ -852,6 +713,18 @@ class GUIFileAPIView(APIView):
             xml_str = prettify(xml_elem)
             with open(f"staticfiles/{request.user.id}/{filename}.xml", "w", encoding="utf-8") as f:
                 f.write(xml_str)
+            """output_dir = f"staticfiles/{request.user.id}"
+            options = SimpleNamespace(output=output_dir, longformat=False, saverml=False, showBoundary=False)
+
+            gen_invoice.generate_pdf(f"staticfiles/{request.user.id}/{filename}.json",options)"""
+            
+            subprocess.run(
+                    ['python', 'gen_invoice.py', "--output",f"staticfiles/{request.user.id}",file_path],
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+            
             
             return Response({
                                 "code": 0,
