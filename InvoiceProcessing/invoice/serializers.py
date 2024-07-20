@@ -188,15 +188,6 @@ class FileGUISerializer(serializers.ModelSerializer):
         instance.items = validated_data.get('items', instance.items)
         instance.save()
 
-        """for order_data in orders_data:
-            order = Order.objects.get(id=order_data['id'])
-            order.description = order_data.get('description', order.description)
-            order.price = order_data.get('price', order.price)
-            order.quantity = order_data.get('quantity', order.quantity)
-            order.net = order_data.get('net', order.net)
-            order.qst = order_data.get('qst', order.qst)
-            order.gross = order_data.get('gross', order.gross)
-            order.save()"""
             
         instance.orders.clear()
         for order_data in orders_data:
