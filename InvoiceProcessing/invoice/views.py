@@ -693,9 +693,10 @@ class GUIFileAPIView(APIView):
             # 将数据保存在数据库的同时，创建json文件并保存进去
             file_instance = file_serializer.save(userid=request.user)
             file_path = f"staticfiles/{request.user.id}/{filename}.json"
+            file_path_pdf = f"staticfiles/{request.user.id}/{filename}.pdf"
             # 将数据保存到 Invoice_upfile 表中
             UpFile.objects.create(
-                file=file_path,
+                file=file_path_pdf,
                 uuid=file_instance.uuid,
                 userid=file_instance.userid,
             )
@@ -809,6 +810,8 @@ class DeleteFileAPIView(APIView):
             os.remove(f"staticfiles/{request.user.id}/{file_stem}.json")
         if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}.xml"):
             os.remove(f"staticfiles/{request.user.id}/{file_stem}.xml")
+        if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}_report.json"):
+            os.remove(f"staticfiles/{request.user.id}/{file_stem}_report.json")
             
         file.delete()
         return Response({
