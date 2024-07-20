@@ -76,7 +76,7 @@ export default function Sending() {
         }
         setShowIcon(true);
         console.log(uuids.join(','),message,email, fullMessage);
-        axios.post('http://127.0.0.1:8000/invoice/invoice-sending/',  { fullMessage } , {
+        axios.post('http://127.0.0.1:8000/invoice/invoice-sending/',  { message: fullMessage } , {
             params: {
               uuid: uuids.join(','),
               email: email 

@@ -27,7 +27,11 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     
     def parse_date(self, date_str):
         # 提取时间戳
+        if not date_str:
+            raise ValueError("The date string is empty or None")
+
         timestamp = int(date_str.strip('/Date()').split('+')[0])
+        
         # 转换为datetime对象
         return datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d')
     
@@ -43,30 +47,28 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     def get_invoice_date(self, obj):
         data = self.get_file_data(obj)
         nested_form_data = data.get('invoiceForm', {})
-        nested_form_data2 = nested_form_data.get('invoiceForm', {})
-        return self.parse_date(nested_form_data2.get('invoiceDate', 'N/A'))
+        return self.parse_date(nested_form_data.get('invoiceDate', 'N/A'))
         
     def get_due_date(self,obj):
         data = self.get_file_data(obj)
         nested_form_data = data.get('invoiceForm', {})
-        nested_form_data2 = nested_form_data.get('invoiceForm', {})
-        return self.parse_date(nested_form_data2.get('paymentDate', 'N/A'))
+        return self.parse_date(nested_form_data.get('paymentDate', 'N/A'))
 
     def get_invoice_number(self, obj):
         data = self.get_file_data(obj)
         nested_form_data = data.get('form_data', {})
-        return nested_form_data.get('invoice_number', 'N/A') 
+        return nested_form_data.get('invoiceNumber', 'N/A') 
     
     def get_supplier(self, obj):
         data = self.get_file_data(obj)
         nested_form_data = data.get('form_data', {})
-        nested_form_data2 = nested_form_data.get('form_data', {})
-        return nested_form_data2.get('company_invoiced', 'N/A')
+        return nested_form_data.get('company_invoiced', 'N/A')
     
     def get_total(self, obj):
         data = self.get_file_data(obj)
         nested_form_data = data.get('form_data', {})
         return nested_form_data.get('total', 'N/A')
+    
     def get_state(self, obj):
         if not obj.is_validated:
             return "unvalidated"

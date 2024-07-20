@@ -52,10 +52,10 @@ def extract_pdf_data(file_path,userid):
             converter_xml(f"staticfiles/{userid}/{file_stem}.xml")
     elif str(file_path).endswith('.pdf'):
         url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
-        api_key = {'APIKey': '953d6538-b373-4ebb-8109-15040694f23b'}
-        payload = {'user': 'LianqiangZZZ',
+        api_key = {'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
+        payload = {'user': 'ZZZhao',
                 'pwd': 'Zlq641737796',
-                'APIKey': '953d6538-b373-4ebb-8109-15040694f23b'}
+                'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
         # 保留cookie
         r = requests.get(url + '/Login', params=payload)
         
@@ -77,15 +77,16 @@ def extract_pdf_data(file_path,userid):
             invoiceID = str(r2.json().get("invoice_id"))
         # 1.3 获得传回的json数据
         payload2 = {'invoiceid':invoiceID,
-                    'APIKey': '953d6538-b373-4ebb-8109-15040694f23b'}
+                    'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
     
         sleep(60)
         r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
         r4 = requests.get(url + '/getInvoiceHeaderBlocks', cookies=r.cookies,params=payload2)
+
         if r3.status_code == 200:
-            form_data = r3.json()
-            invoiceForm = r4.json()
-            table = r4.json()
+            form_data = r3.json().get('form_data', {})
+            invoiceForm = r4.json().get('invoiceForm', {})
+            table = r4.json().get('table', {})
             combined_data = {
                 "form_data": form_data,
                 "invoiceForm": invoiceForm,
@@ -100,7 +101,7 @@ def extract_pdf_data(file_path,userid):
             xml_str = prettify(xml_elem)
             with open(f"staticfiles/{userid}/{file_stem}.xml", "w", encoding="utf-8") as f:
                 f.write(xml_str)
-            #converter_xml(f"staticfiles/{userid}/{file_stem}.xml")
+            converter_xml(f"staticfiles/{userid}/{file_stem}.xml")
             
             
             

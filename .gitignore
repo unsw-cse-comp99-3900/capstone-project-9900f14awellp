@@ -1,11 +1,15 @@
 # Ignore compiled Python files
-*.pyc
-*.pyo
-*.pyd
-__pycache__/
+InvoiceProcessing/__pycache__/*
+invoice/__pycache__/*
+invoice/management/commands/__pycache__/*
+invoice/migrations/__pycache__/*
 
 # 忽略 Django 特定文件
 *.sqlite3
-# 忽略数据库文件
-db.sqlite3
-media/
+
+# Ignore Redis database snapshot files
+dump.rdb
+
+# Ignore compiled Python files
+*.pyc
+__pycache__/
