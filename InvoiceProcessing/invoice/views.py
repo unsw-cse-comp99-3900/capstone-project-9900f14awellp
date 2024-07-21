@@ -600,7 +600,7 @@ class GUIFileAPIView(APIView):
                     type=openapi.TYPE_STRING,
                     description='发票ID'
                 ),
-                'customer_name': openapi.Schema(
+                'company_name': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='客户名称'
                 ),
@@ -668,7 +668,7 @@ class GUIFileAPIView(APIView):
                     description='订单列表'
                 ),
             },
-            required=['filename', 'uuid', 'customer_name', 'address', 'country_name', 'manager', 'issue_date', 'due_date', 'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+            required=['filename', 'uuid', 'company_name', 'address', 'country_name', 'manager', 'issue_date', 'due_date', 'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
         )
     )
     def post(self, request):

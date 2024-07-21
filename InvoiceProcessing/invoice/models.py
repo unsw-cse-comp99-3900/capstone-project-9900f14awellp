@@ -121,7 +121,7 @@ class GUIFile(models.Model):
         unique_together = ('userid', 'filename')
         
     def __str__(self):
-        return self.customer_name
+        return self.company_name
 
     def save(self, *args, **kwargs):
         if not self.subtotal.startswith('$'):
