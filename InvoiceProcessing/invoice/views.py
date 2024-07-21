@@ -612,6 +612,28 @@ class GUIFileAPIView(APIView):
                     type=openapi.TYPE_STRING,
                     description='国家名称'
                 ),
+                
+                'bank': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='银行名称'
+                ),
+                'bank_branch': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='支行地址'
+                ),
+                'account_num': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='账户名称'
+                ),
+                'bsb_num': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='银行和分支机构的识别号码'
+                ),
+                'account_name': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='账户名称'
+                ),
+                
                 'manager': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='经理'
