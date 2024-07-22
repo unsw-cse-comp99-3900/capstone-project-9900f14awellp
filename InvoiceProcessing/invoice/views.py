@@ -1314,40 +1314,7 @@ class PasswordResetRequestView(APIView):
 class PasswordResetConfirmView(APIView):
     authentication_classes = []  # 禁用认证
     permission_classes = []
-
-    @swagger_auto_schema(
-        operation_summary='用户密码重置确认说明',
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'new_password': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='User New Password'
-                ),
-            }
-        ),
-        responses={
-            200: openapi.Response(
-                description="Password has been reset",
-                examples={
-                    "application/json": {
-                        "message": "Password has been reset"
-                    }
-                }
-            ),
-            400: openapi.Response(
-                description="Bad request",
-                examples={
-                    "application/json": {
-                        "error": "New password is required"
-                    },
-                    "application/json": {
-                        "error": "Invalid token or user ID"
-                    }
-                }
-            )
-        }
-    )
+    @swagger_auto_schema(auto_schema=None)  # 隐藏此方法的 Swagger 文档 
     def post(self, request, uidb64, token):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
@@ -1373,7 +1340,7 @@ class PasswordResetConfirmView(APIView):
             return render(request, 'password_reset_confirm.html', {
                 'uid': uidb64, 'token': token, 'error': 'Invalid token or user ID'
             })
-        
+    @swagger_auto_schema(auto_schema=None)  # 隐藏此方法的 Swagger 文档
     def get(self, request, uidb64, token):
         return render(request, 'password_reset_confirm.html', {'uid': uidb64, 'token': token})
 
