@@ -19,12 +19,14 @@
 }
 .title {
     font-size: calc(2.2vw + 2.2vh);
-    font-weight: 800;
+    font-weight: 700;
     color: #333;
-    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    font-family:'Lexend Deca', sans-serif;
     }
 
 .type{
     color: #A7A7A7;
     font-size: calc(0.9vw + 0.9vh);
+    font-weight: 300;
+    font-family:'Lexend Deca', sans-serif;
 }

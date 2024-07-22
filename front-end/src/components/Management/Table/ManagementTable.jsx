@@ -29,7 +29,7 @@ import './global.css';
 const statusMapping = {
 	Failed: 'Rejected',
 	unvalidated: 'Unvalidated',
-	success: 'Success',
+	Passed: 'Success',
 };
 
 // 格式化日期
