@@ -3,13 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { InputTextField, PasswordTextField } from '../components/Inputs';
 import { ButtonSizes } from '../components/Buttons';
 import { UnderlineLink, AlignRight} from '../components/Link';
-import { BasicModal } from '../components/Model';
+import { AlertDialogSlide } from '../components/Model';
 import axios from 'axios';
 import OutlinedAlerts from '../components/Alert';
+import FormDialog from '../components/Model';
+import loading from '../assets/loading.gif';
 
 export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showIcon, setShowIcon] = useState(false);
     const [alert, setAlert] = useState(null); // 初始状态设置为null
     //* 路由跳转
     const navigate = useNavigate();
@@ -52,6 +55,38 @@ export default function Login() {
         }
         });
     };
+
+    const handleEmailSubmit = ({ email, username }) => {
+        console.log('Email submitted:', email);
+        console.log('Username submitted:', username);
+        setShowIcon(true);
+        // 你可以在这里处理 email 值，例如更新状态或调用 API
+        axios.post('http://127.0.0.1:8000/invoice/password_reset/', {
+          username: username,
+          email: email
+        }, {
+          headers: {
+            'accept': 'application/json', // Setting the Accept header
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          console.log(response.data);
+          setShowIcon(false); // 隐藏等待图标
+          setAlert({ severity: 'success', message: response.data.message});
+        })
+        .catch(error => {
+          if (error.response) {
+            setAlert({ severity: 'error', message: error.response.data.error});
+            console.log(username, email)
+            console.log(error.response);
+          } else {
+            setAlert({ severity: 'error', message: error.message|| 'Reset password failed' });
+            console.log(error.message);
+          }
+          setShowIcon(false); // 隐藏等待图标
+        });
+      };
     return (
         
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'white' }}>
@@ -74,9 +109,7 @@ export default function Login() {
                 <InputTextField label="username" id="Login-username" defaultValue="username" value={username} onChange={(e) => setUsername(e.target.value)}/>
                 <PasswordTextField id="Login-password" label="Password" value={password} onChange={(e) => setPassword(e.target.value)}/>
                 <AlignRight>
-                    <UnderlineLink onClick={goRegister} fontsize='9px'>
-                        Forget your password?
-                    </UnderlineLink>
+                    <FormDialog onFormSubmit={handleEmailSubmit} />
                 </AlignRight>
                 
                 <ButtonSizes onClick={handleLogin}>
@@ -85,13 +118,26 @@ export default function Login() {
                 <UnderlineLink onClick={goRegister}  fontsize='10px'>
                     Don't have an account? Go register
                 </UnderlineLink>
-                <BasicModal 
-                    title="Terms of Service and Privacy Policy" 
-                    description="This is a dynamic description. Hi, you found us!"
-                >
-                    By clicking Login, you agree to our Terms of Service and Privacy Policy
-                </BasicModal>
-                
+                <AlertDialogSlide 
+                    fontsize='8px'
+                />
+                {showIcon && (
+                        <div style={{
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            justifyContent: 'center', 
+                            alignItems: 'center', 
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            width: '100vw',
+                            height: '100vh',
+                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                            zIndex: 9999
+                        }}>
+                            <img src={loading} alt="icon" />
+                        </div>
+                    )}
             </div>
         </div>
     );

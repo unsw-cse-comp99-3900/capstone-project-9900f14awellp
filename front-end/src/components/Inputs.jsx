@@ -11,6 +11,31 @@ import FormControl from '@mui/material/FormControl';
 import { alpha, styled } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 
+export const UserTextField = ({id, label, helperText,value, onChange, ...props })=>{
+  return (
+    <Box
+      component="form"
+      sx={{
+        '& .MuiTextField-root': { m: 1, width: '25ch' },
+      }}
+      // noValidate
+      autoComplete="on"
+    >
+    <div>
+    <TextField
+          required
+          id={id}
+          label={label}
+          value={value}
+          onChange={onChange}
+          helperText={helperText}
+          {...props}
+        />
+    </div>
+    </Box>
+  )
+}
+
 export const InputTextField = ({ label, id, variant, value, onChange }) => {
   return (
     <Box
@@ -62,7 +87,7 @@ return (
 
 }
 
-export const PasswordTextField = ({ id, label, value, onChange }) => {
+export const PasswordTextField = ({ id, label, value, onChange,  helperText}) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (event) => {
@@ -77,6 +102,7 @@ export const PasswordTextField = ({ id, label, value, onChange }) => {
         <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined">
           <InputLabel htmlFor="all-password">{label}</InputLabel>
           <OutlinedInput
+            required
             id={id}
             type={showPassword ? 'text' : 'password'}
             value={value}

@@ -69,16 +69,16 @@ export default function Sending() {
 
     const handleSend = () =>{
         const uuids = selectedInvoices.map(invoice => invoiceUuidMap[invoice]);
-        const fullMessage = `${firstName} ${lastName}: ${message}`;
+        const fullMessage = `Dear ${firstName} ${lastName}: \n${message}`;
         if (!uuids) {
             setAlert({ severity: 'warning', message: 'Please select an invoice' });
             return;
         }
         setShowIcon(true);
-        console.log(uuids.join(','),message,email, fullMessage);
+        console.log(uuids.join(','), email, fullMessage);
         axios.post('http://127.0.0.1:8000/invoice/invoice-sending/',  { message: fullMessage } , {
             params: {
-              uuid: uuids.join(','),
+              uuids: uuids.join(','),
               email: email 
             }, 
             headers: {

@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { UserTextField } from "../components/Inputs";
 
 export default function Welcome() {
     //* 路由跳转
@@ -18,6 +19,14 @@ export default function Welcome() {
             </p>
             <button onClick={goLogin}>Login</button>
             <button onClick={goRegister}>Register</button>
+            <UserTextField
+                id= "login-userName"
+                label="User Name"
+                helperText="Please enter your user name"
+                defaultValue="name"
+            />
+
+            
         </div>
     );
     }
