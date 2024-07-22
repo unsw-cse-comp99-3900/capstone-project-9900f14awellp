@@ -12,7 +12,6 @@ from xml.dom import minidom
 
 from django.http import JsonResponse
 from django.core.mail import EmailMessage
-from .models import Company, User, UpFile, GUIFile
 from django.conf import settings
 from django.db.models.signals import post_save # 用户已经建好了，才触发generate_token函数生成token
 from django.contrib.auth.hashers import make_password, check_password
@@ -36,9 +35,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser
+
 from .serializers import CompanySerializer,RegisterSerializer,\
                         FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, InvoiceUpfileSerializer
+from .models import Company, User, UpFile, GUIFile
 from .converter import converter_xml
+from .permission import IsAdminUser,CompanyWorker
 # Create your views here.
 user_directory = os.path.join(settings.STATICFILES_DIRS[0])
 
@@ -345,7 +347,6 @@ class JoinCompanyView(APIView):
         }
     )
     def post(self, request):
-        print(request.headers)
         company_name = request.data.get('company_name')
         if not company_name:
             return Response({'error': 'company_name field is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -583,12 +584,13 @@ class UpFileAPIView(APIView):
 class GUIFileAPIView(APIView):
     # authentication_classes = [MyAhenAuthentication]
     authentication_classes = [JWTAuthentication]
+    permission_classes = [CompanyWorker]
     @swagger_auto_schema(
         operation_summary='创建新的用户发票GUI文件',
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'id': openapi.Schema(
+                'file_id': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='发票id'
                 ),
@@ -709,7 +711,7 @@ class GUIFileAPIView(APIView):
             if UpFile.objects.filter(uuid=uuid).exists() or GUIFile.objects.filter(uuid=uuid).exists():
                 return Response({
                     "code": 400,
-                    "msg": "File ID exists",
+                    "msg": "File UUID exists",
                 }, status=status.HTTP_400_BAD_REQUEST)
                     
             # 将数据保存在数据库的同时，创建json文件并保存进去
@@ -766,6 +768,7 @@ class GUIFileAPIView(APIView):
 
 class DeleteFileAPIView(APIView):
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
     @swagger_auto_schema(
         operation_summary='删除发票文件',
         manual_parameters=[
@@ -818,7 +821,9 @@ class DeleteFileAPIView(APIView):
                             },
                             status=status.HTTP_404_NOT_FOUND
                             )
+        print("*"*50)
         file_gui = GUIFile.objects.filter(userid=request.user, uuid=file.uuid).first()
+
         if file_gui is not None:
             file_gui.delete()
 
@@ -900,6 +905,75 @@ class FileInfoAPIView(APIView):
         invoices = UpFile.objects.filter(userid=request.user.id)
         serializer = InvoiceUpfileSerializer(invoices, many=True)
         return Response(serializer.data)
+
+class CompanyFileInfoAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    @swagger_auto_schema(
+        operation_summary="获取公司所有用户的发票文件信息",
+        operation_description="获取当前登录用户所在公司的所有用户的发票文件信息",
+        responses={
+            200: openapi.Response(
+                description="成功返回发票文件信息",
+                examples={
+                    "application/json": [
+                        {
+                            "id": 1,
+                            "timestamp": "2024-07-10T12:34:56Z",
+                            "userid": 1,
+                            "uuid": "some-uuid",
+                            "file": "path/to/file.pdf",
+                            "supplier": "Supplier Name",
+                            "total": 100.0,
+                            "state": "已通过",
+                            "creation_method": "upload"
+                        },
+                        {
+                            "id": 2,
+                            "timestamp": "2024-07-11T12:34:56Z",
+                            "userid": 1,
+                            "uuid": "another-uuid",
+                            "file": "path/to/another_file.pdf",
+                            "supplier": "Another Supplier",
+                            "total": 200.0,
+                            "state": "未验证",
+                            "creation_method": "gui"
+                        }
+                    ]
+                }
+            ),
+            401: openapi.Response(
+                description="未授权",
+                examples={
+                    "application/json": {
+                        "detail": "Authentication credentials were not provided."
+                    }
+                }
+            ),
+            403: openapi.Response(
+                description="禁止访问",
+                examples={
+                    "application/json": {
+                        "detail": "You do not have permission to perform this action."
+                    }
+                }
+            ),
+            500: openapi.Response(
+                description="服务器内部错误",
+                examples={
+                    "application/json": {
+                        "detail": "Internal server error."
+                    }
+                }
+            )
+        }
+    )
+    def get(self, request):
+        company = request.user.company
+        invoices = UpFile.objects.filter(userid__company=company)
+        serializer = InvoiceUpfileSerializer(invoices, many=True)
+        return Response(serializer.data)
+
 
 
 def json_to_xml(json_obj, line_padding=""):
@@ -1085,7 +1159,6 @@ class FileValidationsAPIView(APIView):
                 try:
                     with open(json_file_path, 'w', encoding='utf-8') as json_file:
                         json.dump(report, json_file, ensure_ascii=False, indent=4)
-                    print(f"Report saved to {json_file_path}")
                 except Exception as e:
                     return JsonResponse({"code": 500, "msg": f"Failed to save report: {str(e)}"}, status=500)
                 

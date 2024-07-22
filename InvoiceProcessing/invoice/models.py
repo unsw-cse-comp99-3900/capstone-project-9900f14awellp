@@ -99,7 +99,7 @@ class Order(models.Model):
 class GUIFile(models.Model):
     filename = models.CharField(max_length=30)
     uuid = models.CharField(max_length=30)
-    id = models.CharField(max_length=20, primary_key=True)
+    file_id = models.CharField(max_length=20)
     company_name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     country_name = models.CharField(max_length=100)
@@ -124,7 +124,9 @@ class GUIFile(models.Model):
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFiles",null=True, blank=True)
 
     class Meta:
-        unique_together = ('userid', 'filename')
+        constraints = [
+            models.UniqueConstraint(fields=['file_id', 'userid'], name='unique_file_user')
+        ]
         
     def __str__(self):
         return self.company_name
