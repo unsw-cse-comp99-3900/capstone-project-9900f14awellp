@@ -1,13 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-
+def user_directory_path(instance, filename):
+    # 文件将上传到 MEDIA_ROOT/user_<id>/<filename>
+    return 'staticfiles/{0}/{1}'.format(instance.userid.id, filename)
     
 # Create your models here.
 class Company(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name='Company Name')
     # logo = models.ImageField(upload_to='company_logo/', verbose_name='Company Logo')
-    logo = models.ImageField(upload_to='aqstar/', verbose_name='Aqstar',null=True, blank=True)
+    logo = models.ImageField(upload_to='staticfiles/avatar/', verbose_name='Aqstar',null=True, blank=True)
     phone_number = models.CharField(max_length=20, verbose_name='Company Phone Number')
     boss_id = models.OneToOneField('User', on_delete=models.CASCADE, related_name='employee', verbose_name='Company', null=True, blank=True)
     email = models.EmailField(verbose_name='Company Email')
@@ -44,8 +46,9 @@ class User(AbstractBaseUser):
     password = models.CharField(max_length=255, verbose_name='Password')
     name = models.CharField(max_length=255, verbose_name='Name')
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="employees",verbose_name='Company',null=True, blank=True)
-    aqstar = models.ImageField(upload_to='aqstar/', verbose_name='Aqstar',null=True, blank=True)
+    avatar = models.ImageField(upload_to="staticfiles/avatar/", verbose_name='Avatar',null=True, blank=True)
     email = models.EmailField(unique=True, verbose_name='Email')
+    bio = models.TextField(verbose_name='Bio', default="Nothing")
     is_staff = models.BooleanField(default=False, verbose_name='Admin')
     reset_password_token = models.CharField(max_length=255, null=True, blank=True, verbose_name='Reset Password Token')
     reset_password_sent_at = models.DateTimeField(null=True, blank=True, verbose_name='Reset Password Sent At')
@@ -57,9 +60,7 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 
-def user_directory_path(instance, filename):
-    # 文件将上传到 MEDIA_ROOT/user_<id>/<filename>
-    return 'staticfiles/{0}/{1}'.format(instance.userid.id, filename)
+
 # use userid to bind user and file
 class UpFile(models.Model):
     file = models.FileField(upload_to=user_directory_path)
@@ -99,7 +100,7 @@ class Order(models.Model):
 class GUIFile(models.Model):
     filename = models.CharField(max_length=30)
     uuid = models.CharField(max_length=30)
-    id = models.CharField(max_length=20, primary_key=True)
+    file_id = models.CharField(max_length=20)
     company_name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     country_name = models.CharField(max_length=100)
@@ -124,7 +125,9 @@ class GUIFile(models.Model):
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFiles",null=True, blank=True)
 
     class Meta:
-        unique_together = ('userid', 'filename')
+        constraints = [
+            models.UniqueConstraint(fields=['file_id', 'userid'], name='unique_file_user')
+        ]
         
     def __str__(self):
         return self.company_name

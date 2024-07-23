@@ -3,6 +3,7 @@ from .models import Company, User, UpFile, GUIFile,Order
 import json
 from datetime import datetime
 import os
+import re
 
 class InvoiceUpfileSerializer(serializers.ModelSerializer):
     supplier = serializers.SerializerMethodField()
@@ -26,15 +27,22 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         return file_stem
     
     def parse_date(self, date_str):
-        # 提取时间戳
         if not date_str:
             raise ValueError("The date string is empty or None")
 
-        timestamp = int(date_str.strip('/Date()').split('+')[0])
+        # 使用正则表达式匹配 /Date(XXX)/ 格式
+        match = re.match(r'/Date\((\d+)\+\d+\)/', date_str)
+        if match:
+            # 提取时间戳并转换为datetime对象
+            timestamp = int(match.group(1))
+            return datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d')
+        else:
+            try:
+                # 处理 YYYY-MM-DD 格式的日期字符串
+                return datetime.strptime(date_str, '%Y-%m-%d').strftime('%Y-%m-%d')
+            except ValueError:
+                raise ValueError("The date string format is not recognized")
         
-        # 转换为datetime对象
-        return datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d')
-    
     def get_file_data(self, obj):
         file_name = os.path.basename(str(obj.file))
         file_stem = os.path.splitext(file_name)[0]
@@ -46,28 +54,38 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         
     def get_invoice_date(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('invoiceForm', {})
-        return self.parse_date(nested_form_data.get('invoiceDate', 'N/A'))
+        nested_form_data = data.get('invoiceForm', {}).get('invoiceDate', {})
+        if not nested_form_data:
+            nested_form_data = data.get('issue_date', {})
+        return self.parse_date(nested_form_data)
         
     def get_due_date(self,obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('invoiceForm', {})
-        return self.parse_date(nested_form_data.get('paymentDate', 'N/A'))
+        nested_form_data = data.get('invoiceForm', {}).get('paymentDate', {})
+        if not nested_form_data:
+            nested_form_data = data.get('issue_date', {})
+        return self.parse_date(nested_form_data)
 
     def get_invoice_number(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {})
-        return nested_form_data.get('invoiceNumber', 'N/A') 
+        nested_form_data = data.get('form_data', {}).get('invoiceNumber', {})
+        if not nested_form_data:
+            nested_form_data = data.get('file_id', {})
+        return nested_form_data
     
     def get_supplier(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {})
-        return nested_form_data.get('company_invoiced', 'N/A')
+        nested_form_data = data.get('form_data', {}).get('company_invoiced', {})
+        if not nested_form_data:
+            nested_form_data = data.get('company_name', {})
+        return nested_form_data
     
     def get_total(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {})
-        return nested_form_data.get('total', 'N/A')
+        nested_form_data = data.get('form_data', {}).get('total', {})
+        if not nested_form_data:
+            nested_form_data = data.get('total_price', {})
+        return nested_form_data
     
     def get_state(self, obj):
         if not obj.is_validated:
@@ -82,6 +100,38 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         if GUIFile.objects.filter(userid=obj.userid, uuid=obj.uuid).exists():
             return "gui"
         return "upload"
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    # 你需要将company字段重定义为SerializerMethodField，而不是直接使用模型字段。这将确保在序列化时调用你定义的get_company方法。以下是修改后的代码：
+    company = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'name', 'company', 'avatar', 'bio', 'is_staff', 'create_date', 'update_date']
+        
+    def get_company(self, obj):
+            return obj.company.name if obj.company else None
+        
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'name', 'avatar', 'bio']
+        # extra_kwargs 设置各字段为可选。
+        extra_kwargs = {
+            'username': {'required': False},
+            'email': {'required': False},
+            'name': {'required': False},
+            'avatar': {'required': False},
+            'bio': {'required': False}
+        }
+        
+    # update 方法循环更新实例的每个字段并保存。
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
     
 class CompanySerializer(serializers.ModelSerializer):
     
@@ -97,7 +147,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['username','password','name','email',"confirm_password"]
+        fields = ['username','password','name','avatar','email',"confirm_password",'bio']
         extra_kwargs = {
             "id": {"read_only": True,},
             'password': {'write_only': True},
@@ -159,7 +209,7 @@ class FileGUISerializer(serializers.ModelSerializer):
     orders = OrderSerializer(many=True)
     class Meta:
         model = GUIFile
-        fields = ["filename","uuid","userid",'id', 'company_name', 'address', 'country_name',"bank","bank_branch","account_num","bsb_num","account_name",'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+        fields = ["filename","uuid","userid",'file_id', 'company_name', 'address', 'country_name',"bank","bank_branch","account_num","bsb_num","account_name",'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
 
 
     def create(self, validated_data):
