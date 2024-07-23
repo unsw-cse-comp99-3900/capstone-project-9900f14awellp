@@ -70,7 +70,7 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         data = self.get_file_data(obj)
         nested_form_data = data.get('form_data', {}).get('invoiceNumber', {})
         if not nested_form_data:
-            nested_form_data = data.get('id', {})
+            nested_form_data = data.get('file_id', {})
         return nested_form_data
     
     def get_supplier(self, obj):
@@ -100,6 +100,38 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         if GUIFile.objects.filter(userid=obj.userid, uuid=obj.uuid).exists():
             return "gui"
         return "upload"
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    # 你需要将company字段重定义为SerializerMethodField，而不是直接使用模型字段。这将确保在序列化时调用你定义的get_company方法。以下是修改后的代码：
+    company = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'name', 'company', 'avatar', 'bio', 'is_staff', 'create_date', 'update_date']
+        
+    def get_company(self, obj):
+            return obj.company.name if obj.company else None
+        
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'name', 'avatar', 'bio']
+        # extra_kwargs 设置各字段为可选。
+        extra_kwargs = {
+            'username': {'required': False},
+            'email': {'required': False},
+            'name': {'required': False},
+            'avatar': {'required': False},
+            'bio': {'required': False}
+        }
+        
+    # update 方法循环更新实例的每个字段并保存。
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
     
 class CompanySerializer(serializers.ModelSerializer):
     
@@ -115,7 +147,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['username','password','name','email',"confirm_password"]
+        fields = ['username','password','name','avatar','email',"confirm_password",'bio']
         extra_kwargs = {
             "id": {"read_only": True,},
             'password': {'write_only': True},

@@ -37,7 +37,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser
 
 from .serializers import CompanySerializer,RegisterSerializer,\
-                        FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, InvoiceUpfileSerializer
+                        FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, InvoiceUpfileSerializer,\
+                        UserInfoSerializer,UserUpdateSerializer
 from .models import Company, User, UpFile, GUIFile
 from .converter import converter_xml
 from .permission import IsAdminUser,CompanyWorker
@@ -73,6 +74,16 @@ class RegisterView(APIView):
                 'confirm_password': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='Confirm Password'
+                ),
+                'avatar': openapi.Schema(
+                    type=openapi.TYPE_FILE,
+                    description='User Avatar',
+                    nullable=True
+                ),
+                'bio': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='User Bio',
+                    nullable=True
                 )
             }
         ),
@@ -104,18 +115,19 @@ class RegisterView(APIView):
     )
     def post(self, request):
         ser = RegisterSerializer(data=request.data)
-
+        print(ser)
         if ser.is_valid():
             ser.validated_data.pop('confirm_password')
             ser.validated_data['password'] = make_password(ser.validated_data['password'])
             ser.save()
-            instance = User.objects.filter(**ser.validated_data).first()
+            instance = User.objects.filter(email=ser.validated_data.get('email')).first()
             refresh = RefreshToken.for_user(instance)
             os.makedirs(os.path.join(user_directory,str(instance.id)), exist_ok=True)
             return Response({"state":"Register success",
                             'username':instance.username,
                             'password':instance.password,
                             'userid':instance.id,
+                            'bio':instance.bio,
                             'refresh': str(refresh),
                             'access': str(refresh.access_token)}, 
                             status=status.HTTP_201_CREATED)
@@ -187,11 +199,80 @@ class LoginView(APIView):
             }, status=status.HTTP_200_OK)
         return Response({'detail': 'User not exists or password is wrong, please check your input.'}, status=status.HTTP_401_UNAUTHORIZED)
     
+class UserInfo(APIView):
+    authentication_classes = [JWTAuthentication]
+
+
+    @swagger_auto_schema(
+        operation_summary='获取用户信息',
+        responses={200: UserInfoSerializer()}
+    )
+    def get(self, request):
+        user = request.user
+        serializer = UserInfoSerializer(user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        operation_summary='更新用户信息',
+        request_body=UserUpdateSerializer,
+        responses={
+            200: UserInfoSerializer(),
+            400: openapi.Response(
+                description="Bad request",
+                examples={"application/json": {"error": "Validation errors"}}
+            )
+        }
+    )
+    def post(self, request):
+        user = request.user
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class DeleterUser(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    
+    @swagger_auto_schema(
+        operation_summary='删除用户',
+        operation_description='根据用户名删除用户',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='User Name')
+            },
+            required=['username']
+        ),
+        responses={
+            200: openapi.Response(description='User deleted successfully', examples={
+                'application/json': {'success': 'User deleted successfully'}
+            }),
+            400: openapi.Response(description='Bad request', examples={
+                'application/json': {'error': 'username field is required'}
+            }),
+            404: openapi.Response(description='User not found', examples={
+                'application/json': {'error': 'User does not exist'}
+            })
+        }
+    )
+    def post(self, request):
+        username = request.data.get('username', None)
+        if not username:
+            return Response({'error': 'username field is required'}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.filter(username=username).first()
+        if not user:
+            return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        user.delete()
+        return Response({'success': 'User deleted successfully'}, status=status.HTTP_200_OK)
+
+    
 class CreateCompanyView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     @swagger_auto_schema(
-        operation_summary='用户创建公司说明(因为swagger无法上传file，这里建议使用postman测试)',
+        operation_summary='用户创建公司说明(因为swagger无法上传file, 这里建议使用postman测试)',
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -970,6 +1051,7 @@ class CompanyFileInfoAPIView(APIView):
     )
     def get(self, request):
         company = request.user.company
+        # 这句可以连接到user表上 去对应user.company找到公司
         invoices = UpFile.objects.filter(userid__company=company)
         serializer = InvoiceUpfileSerializer(invoices, many=True)
         return Response(serializer.data)
