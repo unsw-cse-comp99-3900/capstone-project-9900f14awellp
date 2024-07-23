@@ -72,10 +72,10 @@
 	padding: 12px 16px;
 	vertical-align: middle;
 	box-sizing: border-box;
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-family:'Lexend Deca' sans-serif;;
 	color: #acacac;
 	font-size: 14.5px;
-	font-weight: light;
+	font-weight: 600;
 }
 
 .table-container table td {
@@ -85,16 +85,14 @@
 	box-sizing: border-box;
 	color: rgba(172, 172, 172, 0.9);
 	font-size: 14px;
-	font-weight: lighter;
-	font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
-		'Lucida Sans', Arial, sans-serif;
+	font-weight: 400;
+	font-family:'Lexend Deca' sans-serif;;
 }
 
 .bold-text {
-	font-weight: bold;
+	font-weight: 600;
 	color: #333;
-	font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
-		'Lucida Sans', Arial, sans-serif;
+	font-family:'Lexend Deca' sans-serif;
 }
 
 /* 去除最后一行的底部边框 */
