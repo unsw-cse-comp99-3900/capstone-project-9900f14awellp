@@ -103,7 +103,13 @@ class GUIFile(models.Model):
     company_name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     country_name = models.CharField(max_length=100)
-    manager = models.CharField(max_length=100)
+    
+    bank = models.CharField(max_length=255)
+    bank_branch = models.CharField(max_length=255)
+    account_num = models.CharField(max_length=20)
+    bsb_num = models.CharField(max_length=20)
+    account_name = models.CharField(max_length=255)
+    
     issue_date = models.DateField()
     due_date = models.DateField()
     terms = models.CharField(max_length=100)
@@ -121,7 +127,7 @@ class GUIFile(models.Model):
         unique_together = ('userid', 'filename')
         
     def __str__(self):
-        return self.customer_name
+        return self.company_name
 
     def save(self, *args, **kwargs):
         if not self.subtotal.startswith('$'):

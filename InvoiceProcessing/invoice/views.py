@@ -600,7 +600,7 @@ class GUIFileAPIView(APIView):
                     type=openapi.TYPE_STRING,
                     description='发票ID'
                 ),
-                'customer_name': openapi.Schema(
+                'company_name': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='客户名称'
                 ),
@@ -612,6 +612,28 @@ class GUIFileAPIView(APIView):
                     type=openapi.TYPE_STRING,
                     description='国家名称'
                 ),
+                
+                'bank': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='银行名称'
+                ),
+                'bank_branch': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='支行地址'
+                ),
+                'account_num': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='账户名称'
+                ),
+                'bsb_num': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='银行和分支机构的识别号码'
+                ),
+                'account_name': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='账户名称'
+                ),
+                
                 'manager': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='经理'
@@ -668,7 +690,7 @@ class GUIFileAPIView(APIView):
                     description='订单列表'
                 ),
             },
-            required=['filename', 'uuid', 'customer_name', 'address', 'country_name', 'manager', 'issue_date', 'due_date', 'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+            required=['filename', 'uuid', 'company_name', 'address', 'country_name', 'manager', 'issue_date', 'due_date', 'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
         )
     )
     def post(self, request):
@@ -1292,40 +1314,7 @@ class PasswordResetRequestView(APIView):
 class PasswordResetConfirmView(APIView):
     authentication_classes = []  # 禁用认证
     permission_classes = []
-
-    @swagger_auto_schema(
-        operation_summary='用户密码重置确认说明',
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'new_password': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='User New Password'
-                ),
-            }
-        ),
-        responses={
-            200: openapi.Response(
-                description="Password has been reset",
-                examples={
-                    "application/json": {
-                        "message": "Password has been reset"
-                    }
-                }
-            ),
-            400: openapi.Response(
-                description="Bad request",
-                examples={
-                    "application/json": {
-                        "error": "New password is required"
-                    },
-                    "application/json": {
-                        "error": "Invalid token or user ID"
-                    }
-                }
-            )
-        }
-    )
+    @swagger_auto_schema(auto_schema=None)  # 隐藏此方法的 Swagger 文档 
     def post(self, request, uidb64, token):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
@@ -1351,7 +1340,7 @@ class PasswordResetConfirmView(APIView):
             return render(request, 'password_reset_confirm.html', {
                 'uid': uidb64, 'token': token, 'error': 'Invalid token or user ID'
             })
-        
+    @swagger_auto_schema(auto_schema=None)  # 隐藏此方法的 Swagger 文档
     def get(self, request, uidb64, token):
         return render(request, 'password_reset_confirm.html', {'uid': uidb64, 'token': token})
 

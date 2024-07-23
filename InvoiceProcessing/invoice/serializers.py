@@ -159,7 +159,7 @@ class FileGUISerializer(serializers.ModelSerializer):
     orders = OrderSerializer(many=True)
     class Meta:
         model = GUIFile
-        fields = ["filename","uuid","userid",'id', 'company_name', 'address', 'country_name', 'manager', 'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+        fields = ["filename","uuid","userid",'id', 'company_name', 'address', 'country_name',"bank","bank_branch","account_num","bsb_num","account_name",'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
 
 
     def create(self, validated_data):
@@ -175,7 +175,13 @@ class FileGUISerializer(serializers.ModelSerializer):
         instance.company_name = validated_data.get('company_name', instance.company_name)
         instance.address = validated_data.get('address', instance.address)
         instance.country_name = validated_data.get('country_name', instance.country_name)
-        instance.manager = validated_data.get('manager', instance.manager)
+        
+        instance.bank = validated_data.get('bank', instance.bank) 
+        instance.bank_branch = validated_data.get('bank_branch', instance.bank_branch)
+        instance.account_num = validated_data.get('account_num', instance.account_num)
+        instance.bsb_num = validated_data.get('bsb_num', instance.bsb_num)
+        instance.account_name = validated_data.get('account_name', instance.account_name)
+            
         instance.issue_date = validated_data.get('issue_date', instance.issue_date)
         instance.due_date = validated_data.get('due_date', instance.due_date)
         instance.terms = validated_data.get('terms', instance.terms)
@@ -188,15 +194,6 @@ class FileGUISerializer(serializers.ModelSerializer):
         instance.items = validated_data.get('items', instance.items)
         instance.save()
 
-        """for order_data in orders_data:
-            order = Order.objects.get(id=order_data['id'])
-            order.description = order_data.get('description', order.description)
-            order.price = order_data.get('price', order.price)
-            order.quantity = order_data.get('quantity', order.quantity)
-            order.net = order_data.get('net', order.net)
-            order.qst = order_data.get('qst', order.qst)
-            order.gross = order_data.get('gross', order.gross)
-            order.save()"""
             
         instance.orders.clear()
         for order_data in orders_data:

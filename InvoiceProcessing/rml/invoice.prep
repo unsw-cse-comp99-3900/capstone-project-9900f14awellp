@@ -9,7 +9,6 @@
             <setFont name="Helvetica-Oblique" size="4"/>
             <fill color="0x00337f"/>
             <fill color="0x1E4C9C"/>
-            <drawString x="57" y="30">VAT Reg No.:&nbsp;&nbsp;&nbsp;GR1234567890</drawString>
         </pageGraphics>
         <!--get these right using showboundary-->
         <frame id ="main_content" x1="57" y1="260" width="481" height="490"/>
@@ -73,7 +72,6 @@
             <para style="normal" leading="20" fontSize="17"><b>{{data.customer_name}}</b><br/></para>
             <pre style="normal">{{data.address}}</pre>
             <para style="normal" leading="20">{{data.country_name}}</para>
-            <para style="normal"><i>Requested by:</i><br/>{{data.manager}}</para>
         </td>
     
         <td rightPadding="0">
@@ -146,18 +144,16 @@
 			<para  style="footer">For international payments, we need a wire transfer and the <b>sender should pay all charges so we receive the correct cleared amount.  We cannot accept cheques.</b></para>
 			<indent left="20"/>
 			<pre style="footer">
-Bank: National World Bank
-Branch: Central Business Centre, 1 Bond lane, London SW99 ABC
-Account name: London Printers Ltd.
-Sort Code: 12-34-56
-Account no: 123456789
-IBAN:  BR12 ABC12 3456 1234 5678 12
-Swift Code: ABCDEFGH1Z
+Bank: {{data.bank}}
+Branch: {{data.bank_branch}}
+Account name: {{data.account_name}}.
+BSB no: {{data.bsb_num}}
+Account no: {{data.account_num}}
 			</pre>
 			<indent left="-20"/>
 
     <spacer length="6"/>
-    <para style="footer">Please note that this is due immediately.</para>
+    <para style="footer">Please note the due date.</para>
   </td>
  </tr>
 </blockTable>
