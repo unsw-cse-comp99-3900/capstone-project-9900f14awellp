@@ -19,7 +19,7 @@
 .upload-title-container {
 	width: 100%;
 	font-size: calc(1.2vw + 1.2vh);
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-family: 'Lexend Deca', sans-serif;
 	font-weight: 500;
 }
 
@@ -27,7 +27,7 @@
 	margin-top: 3vh;
 	border: 2px dashed #ccc;
 	border-radius: 6px;
-	width: 90%;
+	width: 98%;
 	height: 28%;
 	padding: 20px;
 	text-align: center;
@@ -45,7 +45,7 @@
 
 .drop-text {
 	font-size: calc(0.6vw + 0.6vh);
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-family: 'Lexend Deca', sans-serif;
 	font-weight: 400;
 	color: #333;
 }
@@ -57,9 +57,9 @@
 	align-items: center;
 	flex-direction: row;
 	color: #ccc;
-	font-size: calc(0.6vw + 0.6vh);
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
-	font-weight: 400;
+	font-size: calc(0.55vw + 0.5vh);
+	font-family: 'Lexend Deca', sans-serif;
+	font-weight: 300;
 	margin-top: calc(-0.5vw - 0.5vh);
 }
 
@@ -77,7 +77,7 @@
 .preview-button {
 	cursor: pointer;
 	width: 28%;
-	height: 60%;
+	height: 53px;
 	background-color: #333;
 	border: transparent;
 	border-radius: 15px;
@@ -88,7 +88,9 @@
 .preview-button:hover {
     background-color: #494446;
 }
-
+.file-info{
+	width: 98%;
+}
 .file-info.hidden {
 	visibility: hidden;
 }

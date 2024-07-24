@@ -11,13 +11,22 @@ import "./global.css";
 export default function Create() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [showCardSelector, setShowCardSelector] = useState(true);
-  // eslint-disable-next-line
   const [showUploadContent, setShowUploadContent] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadComplete, setUploadComplete] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
+  // useEffect(() => {
+  //   console.log("Current step changed:", currentStep);
+  // }, [currentStep]);
+
+  // useEffect(() => {
+  //   console.log("Upload progress changed:", uploadProgress);
+  // }, [uploadProgress]);
+
   const steps = ["Select", "Fill/Upload", "Done"];
-  const currentStep = !showCardSelector ? 1 : 0;
 
   const cards = [
     { icon: "✏️", title: "GUI Form", route: "form" },
@@ -45,6 +54,7 @@ export default function Create() {
     const isUploadRoute = location.pathname === "/create/upload";
     setShowUploadContent(isUploadRoute);
     setShowCardSelector(location.pathname === "/create");
+    setCurrentStep(location.pathname === "/create" ? 0 : 1);
   }, [location]);
 
   // 选择卡片，根据选择卡片的index设置selectedCard
@@ -54,15 +64,43 @@ export default function Create() {
 
   // 点击Continue按钮，根据selectedCard的值跳转到对应的路由
   const handleContinue = () => {
+    console.log("handleContinue called. Current step:", currentStep);
+
     if (currentStep === 0) {
       if (selectedCard !== null) {
+        console.log(
+          "Moving from step 0 to step 1. Selected card:",
+          selectedCard
+        );
         setShowCardSelector(false);
+        setCurrentStep(1);
         navigate(cards[selectedCard].route);
       }
-    } else if (currentStep === 1) {
-      if (location.pathname === "/create/upload") {
+    } else if (currentStep === 1 && location.pathname === "/create/upload") {
+      console.log("In step 1, upload route");
+      // 检查是否有文件被选择
+      const fileInput = document.querySelector('input[type="file"]');
+      if (fileInput && fileInput.files.length > 0) {
+        console.log("File selected, starting upload");
+        // 开始上传进度动画
+        setUploadProgress(0);
+        let timer = setInterval(() => {
+          setUploadProgress((prev) => {
+            const newProgress =
+              prev >= 100 || uploadComplete ? 100 : prev + 100 / 60;
+            console.log("Upload progress:", newProgress);
+            if (newProgress >= 100 || uploadComplete) {
+              clearInterval(timer);
+            }
+            return newProgress;
+          });
+        }, 1000);
+
         // 触发文件上传
         window.dispatchEvent(new Event("uploadFile"));
+      } else {
+        console.log("No file selected");
+        showAlert("请先选择一个文件再提交", "warning");
       }
     }
   };
@@ -71,6 +109,7 @@ export default function Create() {
   const handleBack = () => {
     if (currentStep === 1) {
       setShowCardSelector(true);
+      setCurrentStep(0);
       navigate("/create");
     }
   };
@@ -99,13 +138,16 @@ export default function Create() {
         </>
       )}
 
-      {!showCardSelector && <Outlet context={{ showAlert }} />}
+      {!showCardSelector && (
+        <Outlet context={{ showAlert, setUploadComplete, setUploadProgress }} />
+      )}
 
       <ProgressIndicator
         steps={steps}
         currentStep={currentStep}
         onContinue={handleContinue}
         onBack={handleBack}
+        uploadProgress={uploadProgress}
       />
     </div>
   );
