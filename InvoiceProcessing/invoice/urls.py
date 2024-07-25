@@ -37,6 +37,7 @@ urlpatterns = [
     path('invoice-sending/',views.SendInvoiceEmailAPIView.as_view(),name='invoice-sending'),
     path('invoice-info/',views.FileInfoAPIView.as_view(),name='invoice-info'),
     path('company-invoice-info/',views.CompanyFileInfoAPIView.as_view(),name='company-invoice-info'),
+    path('company-info/',views.CompanyInfo.as_view(),name='company-info'),
     path('user-info/',views.UserInfo.as_view(),name='user-info'),
     path("user-delete/",views.DeleterUser.as_view(),name='user-delete'),
     path('password_reset/', views.PasswordResetRequestView.as_view(), name='password_reset'),

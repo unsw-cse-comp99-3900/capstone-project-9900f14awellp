@@ -985,14 +985,14 @@ class FileInfoAPIView(APIView):
     def get(self, request):
         invoices = UpFile.objects.filter(userid=request.user.id)
         serializer = InvoiceUpfileSerializer(invoices, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 class CompanyFileInfoAPIView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
     @swagger_auto_schema(
         operation_summary="获取公司所有用户的发票文件信息",
-        operation_description="获取当前登录用户所在公司的所有用户的发票文件信息",
+        operation_description="获取当前登录管理员用户所在公司的所有用户的发票文件信息",
         responses={
             200: openapi.Response(
                 description="成功返回发票文件信息",
@@ -1056,8 +1056,32 @@ class CompanyFileInfoAPIView(APIView):
         serializer = InvoiceUpfileSerializer(invoices, many=True)
         return Response(serializer.data)
 
-
-
+class CompanyInfo(APIView):
+    authentication_classes = [JWTAuthentication]
+    @swagger_auto_schema(
+        operation_summary="获取公司的详细信息",
+        operation_description="获取当前登录用户所属公司的详细信息",
+        responses={
+            200: openapi.Response(
+                description="成功返回公司详细信息",
+                examples={
+                    "application/json": {
+                        "id": 1,
+                        "name": "Company Name",
+                        "address": "Company Address",
+                        "phone": "123-456-7890",
+                        "email": "company@example.com",
+                        "ABN": "string",
+                    }
+                }
+            )})
+    def get(self, request):
+        company = request.user.company
+        serializer = CompanySerializer(company)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+        
+        
+    
 def json_to_xml(json_obj, line_padding=""):
     elem = ET.Element('root')
     
