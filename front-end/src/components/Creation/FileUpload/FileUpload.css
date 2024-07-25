@@ -82,7 +82,8 @@
 	border: transparent;
 	border-radius: 15px;
 	color: white;
-	font-size: calc(0.65vw + 0.65vh);
+	font-size: calc(0.6vw + 0.65vh);
+	font-family: 'Lexend Deca', sans-serif;
 }
 
 .preview-button:hover {
