@@ -69,24 +69,20 @@
 <blockTable style="detailtable" colWidths="60%, 40%">
     <tr>
         <td leftPadding="0">
-            <para style="normal" leading="20" fontSize="17"><b>{{data.customer_name}}</b><br/></para>
-            <pre style="normal">{{data.address}}</pre>
-            <para style="normal" leading="20">{{data.country_name}}</para>
+            <para style="normal" leading="20" fontSize="17"><b>Company:{{data.my_company_name}}</b><br/></para>
+            <pre style="normal">Address:{{data.my_address}}</pre>
+            <pre style="normal">Email:{{data.my_email}}</pre>
         </td>
     
         <td rightPadding="0">
             <spacer length="10"/>
-            <para style="right">Invoice No.:&nbsp;&nbsp;&nbsp;{{data.id}}</para>
-
+            <para style="right">Invoice No.:&nbsp;&nbsp;&nbsp;{{data.invoice_num}}</para>
 
             <para style="right">Invoice Date:&nbsp;&nbsp;&nbsp;{{data.issue_date}}</para>
             <para style="right">Due Date:&nbsp;&nbsp;&nbsp;{{data.due_date}}</para>
             <spacer length="10"/>
-            <para style="right">ABN:&nbsp;&nbsp;&nbsp; {{data.ABN}}</para>
+            <para style="right">ABN:&nbsp;&nbsp;&nbsp; {{data.my_abn}}</para>
 
-
-
-            <para style="right">Purchase ID:&nbsp;&nbsp;&nbsp; {{data.purchase_id}}</para>
         </td>
     </tr>
 </blockTable>
@@ -96,18 +92,18 @@
     			<td align="DECIMAL">Unit Price</td>
     			<td align="CENTER">Qty</td>
 				<td align="CENTER">Net</td>
-				<td align="CENTER">QST</td>
+				<td align="CENTER">QST(%)</td>
 				<td align="DECIMAL">Gross</td>
     	</tr>
 
     {{for item in (data.orders)}}
         <tr>
             <td><para style="table_normal">{{item.description}}</para></td>
-            <td align="DECIMAL" rightPadding="20" vAlign="top">{{item.price}}</td>
+            <td align="DECIMAL" rightPadding="20" vAlign="top">{{item.unit_price}}</td>
             <td align="CENTER" vAlign="top">{{item.quantity}}</td>
             <td align="DECIMAL" rightPadding="20" vAlign="top">{{item.net}}</td>  
-            <td align="CENTER" vAlign="top">{{item.qst}}</td>
-            <td align="DECIMAL" rightPadding="15" vAlign="top">{{item.gross}}</td>
+            <td align="CENTER" vAlign="top">{{item.gst}}</td>
+            <td align="DECIMAL" rightPadding="15" vAlign="top">{{item.amount}}</td>
         </tr>
     {{endfor}}
 
@@ -117,14 +113,14 @@
   
     <blockTable style="totalBodyTableStyle" rowHeights="20, 20, 30" colWidths="62.5%,10%,27.5%" >
         <tr>
-			<td align="LEFT"><para style="table_normal" textColor="red"><b>{{data.important_text}}</b></para></td>
+			<td align="LEFT"><para style="table_normal" textColor="red"><b>{{data.note}}</b></para></td>
             <td align="RIGHT">Net Total</td>
             <td align="DECIMAL" rightPadding="15">{{data.subtotal}}</td>
         </tr>
         <tr>
 			<td></td> 
             <td align="RIGHT">QST Total</td>
-            <td align="DECIMAL" rightPadding="15">{{data.qst_total}}</td>
+            <td align="DECIMAL" rightPadding="15">{{data.gst_total}}</td>
         </tr>
 		<tr>
 			<td></td> 
@@ -144,8 +140,8 @@
 			<para  style="footer">For international payments, we need a wire transfer and the <b>sender should pay all charges so we receive the correct cleared amount.  We cannot accept cheques.</b></para>
 			<indent left="20"/>
 			<pre style="footer">
-Bank: {{data.bank}}
-Branch: {{data.bank_branch}}
+Bank: {{data.bank_name}}
+Currency: {{data.Currency}}
 Account name: {{data.account_name}}.
 BSB no: {{data.bsb_num}}
 Account no: {{data.account_num}}
