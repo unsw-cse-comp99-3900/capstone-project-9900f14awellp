@@ -3,6 +3,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
+	font-family: 'Lexend Deca', sans-serif;
 }
 
 .search-bar {
@@ -21,6 +22,7 @@
 .primary-search {
 	width: 30%;
 }
+
 .second-search {
 	width: 40%;
 	display: flex;
@@ -28,8 +30,13 @@
 	justify-content: end;
 	gap: 10px;
 }
+
 .state-select {
 	width: 50%;
+}
+
+.search-input::placeholder {
+	font-family: "Lexend Deca", sans-serif;
 }
 
 .state-select .ant-select-selection-overflow {
@@ -47,8 +54,7 @@
 	width: 100%;
 	justify-content: space-between;
 	align-items: center;
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
-	font-size: 12px;
+	font-size: 13px;
 	color: #acacac;
 	padding-top: 10px;
 	border-top: 1px solid #e0e0e0;

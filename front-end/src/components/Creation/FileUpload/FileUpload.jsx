@@ -3,7 +3,7 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 
-import { uploadFile } from "../../../apis/upload";
+import { uploadFile } from "@/apis/upload";
 import UploadProgress from "../FileInfo/FileInfo";
 
 import "./FileUpload.css";

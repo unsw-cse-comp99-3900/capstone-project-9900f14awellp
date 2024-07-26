@@ -1,10 +1,11 @@
 import { React, useEffect, useState } from "react";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 
-import { ResponsiveAppBar } from "../../components/Navbar";
-import CardSelector from "../../components/Creation/File2GUIselect/CardSelector";
-import ProgressIndicator from "../../components/Creation/CreationProgress/Progress";
-import { CustomAlert } from "../../components/Alert/MUIAlert";
+import { ResponsiveAppBar } from "@/components/Navbar";
+import CardSelector from "@/components/Creation/File2GUIselect/CardSelector";
+import ProgressIndicator from "@/components/Creation/CreationProgress/Progress";
+import { CustomAlert } from "@/components/Alert/MUIAlert";
+import { InvoiceProvider } from "@/Content/GuiContent";
 
 import "./global.css";
 
@@ -88,7 +89,7 @@ export default function Create() {
           setUploadProgress((prev) => {
             const newProgress =
               prev >= 100 || uploadComplete ? 100 : prev + 100 / 60;
-            console.log("Upload progress:", newProgress);
+            //console.log("Upload progress:", newProgress);
             if (newProgress >= 100 || uploadComplete) {
               clearInterval(timer);
             }
@@ -115,40 +116,44 @@ export default function Create() {
   };
 
   return (
-    <div className="center">
-      <ResponsiveAppBar />
-      {alert.show && (
-        <CustomAlert
-          message={alert.message}
-          severity={alert.severity}
-          onClose={hideAlert}
-        />
-      )}
-      {showCardSelector && (
-        <>
-          <div className="head-title-div">
-            <div className="title">Create your E-invoice</div>
-            <div className="type">select your invoice type</div>
-          </div>
-          <CardSelector
-            cards={cards}
-            selectedCard={selectedCard}
-            onCardSelect={handleCardSelect}
+    <InvoiceProvider>
+      <div className="center">
+        <ResponsiveAppBar />
+        {alert.show && (
+          <CustomAlert
+            message={alert.message}
+            severity={alert.severity}
+            onClose={hideAlert}
           />
-        </>
-      )}
+        )}
+        {showCardSelector && (
+          <>
+            <div className="head-title-div">
+              <div className="title">Create your E-invoice</div>
+              <div className="type">select your invoice type</div>
+            </div>
+            <CardSelector
+              cards={cards}
+              selectedCard={selectedCard}
+              onCardSelect={handleCardSelect}
+            />
+          </>
+        )}
 
-      {!showCardSelector && (
-        <Outlet context={{ showAlert, setUploadComplete, setUploadProgress }} />
-      )}
+        {!showCardSelector && (
+          <Outlet
+            context={{ showAlert, setUploadComplete, setUploadProgress }}
+          />
+        )}
 
-      <ProgressIndicator
-        steps={steps}
-        currentStep={currentStep}
-        onContinue={handleContinue}
-        onBack={handleBack}
-        uploadProgress={uploadProgress}
-      />
-    </div>
+        <ProgressIndicator
+          steps={steps}
+          currentStep={currentStep}
+          onContinue={handleContinue}
+          onBack={handleBack}
+          uploadProgress={uploadProgress}
+        />
+      </div>
+    </InvoiceProvider>
   );
 }

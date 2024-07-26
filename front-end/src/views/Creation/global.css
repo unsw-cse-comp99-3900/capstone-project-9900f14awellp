@@ -33,12 +33,23 @@
 
 .GUIlayout{
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    gap: 25px;
     flex-direction: row;
     margin-top: 3vh;
-    border: #333 1px solid;
-    width: 65%;
+    border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 56%;
     height:58vh;
+}
+
+.GUIform{
+    height: 100%;
+    width: 48%;
+}
+
+.GUIpreview{
+    height: 100%;
+    width: 48%;
 }
