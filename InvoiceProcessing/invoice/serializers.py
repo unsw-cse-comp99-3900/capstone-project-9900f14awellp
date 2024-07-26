@@ -199,17 +199,48 @@ class FileUploadSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['description', 'price', 'quantity', 'net', 'qst', 'gross']
+        fields = ['description', 'unit_price', 'quantity', 'net', 'gst', 'amount']
                
 
 class FileGUISerializer(serializers.ModelSerializer):
-    filename = serializers.CharField(required=True)
+    invoice_name = serializers.CharField(required=True)
     uuid = serializers.CharField(required=True)
     userid = serializers.PrimaryKeyRelatedField(read_only=True)  # 设置为只读
     orders = OrderSerializer(many=True)
     class Meta:
         model = GUIFile
-        fields = ["filename","uuid","userid",'file_id', 'company_name', 'address', 'country_name',"bank","bank_branch","account_num","bsb_num","account_name",'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+        # fields = ["filename","uuid","userid",'invoice_num', 'company_name', 'address', 'country_name',"bank","bank_branch","account_num","bsb_num","account_name",'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+        fields = [
+            "invoice_name",  # 对应filename
+            "uuid", 
+            "userid", 
+            "invoice_num", 
+            "my_company_name",  # 对应company_name
+            "my_address",  # 对应address
+            "my_abn",
+            "my_email",
+            # "country_name",  # 模型中无对应字段
+            "client_company_name",
+            "client_address",
+            "client_abn",
+            "client_email",
+            
+            "bank_name",  # 对应bank
+            "currency", 
+            "account_num", 
+            "bsb_num", 
+            "account_name", 
+            "issue_date", 
+            "due_date", 
+
+            "subtotal", 
+            "gst_total",  # 对应qst_total
+            "total_amount",  # 对应total_price
+            "note",  # 对应important_text
+            # "items",  # 模型中无对应字段
+            "orders"
+        ]
+
 
 
     def create(self, validated_data):
@@ -222,26 +253,32 @@ class FileGUISerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         orders_data = validated_data.pop('orders')
-        instance.company_name = validated_data.get('company_name', instance.company_name)
-        instance.address = validated_data.get('address', instance.address)
-        instance.country_name = validated_data.get('country_name', instance.country_name)
+        instance.my_company_name = validated_data.get('my_company_name', instance.my_company_name)
+        instance.my_address = validated_data.get('my_address', instance.my_address)
+        instance.my_email = validated_data.get('my_email', instance.my_email)
+        instance.my_abn = validated_data.get('my_abn', instance.my_abn)
         
-        instance.bank = validated_data.get('bank', instance.bank) 
-        instance.bank_branch = validated_data.get('bank_branch', instance.bank_branch)
+        instance.client_company_name = validated_data.get('client_company_name', instance.client_company_name)
+        instance.client_abn = validated_data.get('client_abn', instance.client_abn)
+        instance.client_address = validated_data.get('client_address', instance.client_address)
+        instance.client_email = validated_data.get('client_email', instance.client_email)
+
+        instance.banbank_namek = validated_data.get('bank_name', instance.bank_name) 
+        instance.currency = validated_data.get('currency', instance.currency)
         instance.account_num = validated_data.get('account_num', instance.account_num)
         instance.bsb_num = validated_data.get('bsb_num', instance.bsb_num)
         instance.account_name = validated_data.get('account_name', instance.account_name)
             
         instance.issue_date = validated_data.get('issue_date', instance.issue_date)
         instance.due_date = validated_data.get('due_date', instance.due_date)
-        instance.terms = validated_data.get('terms', instance.terms)
-        instance.ABN = validated_data.get('ABN', instance.ABN)
-        instance.purchase_id = validated_data.get('purchase_id', instance.purchase_id)
+
+
+
         instance.subtotal = validated_data.get('subtotal', instance.subtotal)
-        instance.qst_total = validated_data.get('qst_total', instance.qst_total)
-        instance.total_price = validated_data.get('total_price', instance.total_price)
-        instance.important_text = validated_data.get('important_text', instance.important_text)
-        instance.items = validated_data.get('items', instance.items)
+        instance.gst_total = validated_data.get('gst_total', instance.gst_total)
+        instance.total_amount = validated_data.get('total_amount', instance.total_amount)
+        instance.note = validated_data.get('note', instance.note)
+
         instance.save()
 
             
