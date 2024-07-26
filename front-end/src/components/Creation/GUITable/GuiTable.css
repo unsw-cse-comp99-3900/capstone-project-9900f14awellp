@@ -1,0 +1,32 @@
+  .no-shadow{
+    box-shadow: none !important;
+    height: 40px;
+    font-family: 'Lexend Deca', sans-serif;
+    font-weight: 400;
+  }
+
+  .gui-table-layout{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+    width: 100%;
+    height: 100%;
+    gap: 20px;
+  }
+
+  .gui-table{
+    width: 100%;
+  }
+
+  .gui-table .ant-table-tbody > tr > td * {
+    font-family: 'Lexend Deca', sans-serif;
+    font-weight: 200;
+  }
+
+  .gui-table-button{
+    display: flex;
+    width: 100%;
+    justify-content: end;
+    align-items: center;
+  }
