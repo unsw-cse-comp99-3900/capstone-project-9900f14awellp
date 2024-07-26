@@ -11,7 +11,12 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { useTheme } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
-// import { CustomizedInputsStyled } from '../components/Inputs'
+import {
+  Typography,
+  Avatar,
+  InputLabel,
+  Grid
+} from '@mui/material';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -160,5 +165,57 @@ export const CreateCompanyForm = ({ open, handleClose, handleSubmit, formData, h
           <Button onClick={handleSubmit} variant="contained" sx = {{backgroundColor: '#263238'}} >Submit</Button>
         </DialogActions>
       </Dialog>
+    );
+  };
+
+
+  export const GetProfileForm = ({handleFormSubmit, handleEditClick}) =>{
+    return (
+      <div>
+         
+        <Avatar
+          src="https://via.placeholder.com/150"
+          sx={{ width: 80, height: 80, mb: 2 }}
+        />
+        
+        <Box component="form" noValidate sx={{ mt: 3 }} onSubmit={handleFormSubmit}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="role-label">Role</InputLabel>
+                  <Typography variant="body1">User</Typography>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+                <Typography variant="body1">@username123</Typography> 
+            </Grid>
+            <Grid item xs={12}>
+              
+                <Typography variant="body1">email@domain.com</Typography>
+              
+            </Grid>
+            <Grid item xs={12}>
+              
+                <Typography variant="body1">Company Name</Typography>
+            
+            </Grid>
+            <Grid item xs={12}>
+              
+                <Typography variant="body1">
+                  Hi, enjoy my invoice website
+                </Typography>
+              
+            </Grid>
+          </Grid>
+            <Button
+              variant="contained"
+              color="inherit"
+              sx={{ mt: 3, mb: 2 }}
+              onClick={handleEditClick}
+            >
+              Edit Profile
+            </Button>
+      </Box>
+      </div>
     );
   };

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { InputTextField, PasswordTextField } from '../components/Inputs';
 import { ButtonSizes } from '../components/Buttons';
 import { UnderlineLink} from '../components/Link';
-import { BasicModal } from '../components/Model';
+import { AlertDialogSlide } from '../components/Model';
 import axios from 'axios';
 import OutlinedAlerts from '../components/Alert';
 
@@ -120,12 +120,9 @@ export default function Register() {
                 <UnderlineLink onClick={goLogin}  fontsize='10px'>
                     Have an account? Go Login
                 </UnderlineLink>
-                <BasicModal 
-                    title="Terms of Service and Privacy Policy" 
-                    description="This is a dynamic description. Hi, you found us!"
-                >
-                    By clicking Login, you agree to our Terms of Service and Privacy Policy
-                </BasicModal>
+                <AlertDialogSlide 
+                    fontsize='8px'
+                />
         </div>
     );
 }
