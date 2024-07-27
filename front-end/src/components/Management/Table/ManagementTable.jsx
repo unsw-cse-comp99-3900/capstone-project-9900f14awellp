@@ -390,7 +390,7 @@ export const ManageTable = forwardRef((props, ref) => {
         <div className="primary-search">
           <Input
             placeholder="Search anything..."
-            classNames="search-input"
+            className="search-input"
             prefix={
               <SearchOutlined
                 style={{
@@ -400,25 +400,22 @@ export const ManageTable = forwardRef((props, ref) => {
             }
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="search-input"
           />
         </div>
         <div className="second-search">
           <DatePicker
             onChange={handleInvoiceDateChange}
-            className="date-picker"
+            className="date-picker search-input"
             placeholder="Invoice Date"
-            classNames="search-input"
           />
           <DatePicker
             onChange={handleDueDateChange}
-            className="date-picker"
+            className="date-picker search-input"
             placeholder="Payment Due"
-            classNames="search-input"
           />
           <Select
             placeholder="Status"
-            classNames="search-input"
+            className="search-input state-select"
             mode="multiple"
             tagRender={tagRender}
             options={[
@@ -436,7 +433,6 @@ export const ManageTable = forwardRef((props, ref) => {
               },
             ]}
             onChange={handleStateChange}
-            className="state-select"
           />
         </div>
       </div>
