@@ -20,6 +20,7 @@ test('Register element test', () => {
   expect(screen.getByRole('textbox', {name: "Username"})).toBeInTheDocument();
   expect(screen.getByRole('textbox', {name: "Email"})).toBeInTheDocument();
   expect(screen.getByRole('textbox', {name: "Name"})).toBeInTheDocument();
+  expect(screen.getByText("Password")).toBeInTheDocument();
 
   expect(screen.getAllByRole('button', {name: "toggle password visibility"})[0]).toBeInTheDocument();
   expect(screen.getByRole('button', {name: "Sign up"})).toBeInTheDocument();
@@ -30,7 +31,7 @@ test('Register element test', () => {
 });
 
 describe('uncomplete form with show alert when submit', () => {
-  test('only username', async () => {
+  test('only enter Username', async () => {
     render_register();
 
     fireEvent.change(screen.getByRole('textbox', {name: "Username"}), { target: { value: 'testuser' } });
@@ -41,4 +42,37 @@ describe('uncomplete form with show alert when submit', () => {
     });
   });
 
+  test('only enter Email', async () => {
+    render_register();
+
+    fireEvent.change(screen.getByRole('textbox', {name: "Email"}), { target: { value: 'apple@mail.com' } });
+    fireEvent.click(screen.getByRole('button', {name: "Sign up"}));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Registration failed/i)).toBeInTheDocument();
+    });
+  });
+
+  test('only enter Name', async () => {
+    render_register();
+
+    fireEvent.change(screen.getByRole('textbox', {name: "Name"}), { target: { value: 'testname' } });
+    fireEvent.click(screen.getByRole('button', {name: "Sign up"}));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Registration failed/i)).toBeInTheDocument();
+    });
+  });
+
+  test('only enter ', async () => {
+    render_register();
+
+    // fireEvent.change(screen.getByText("Password"), { target: { value: '1234'} });
+    fireEvent.change(screen.getByText("Confirm Password"), { target: { value: '1234'} });
+    fireEvent.click(screen.getByRole('button', {name: "Sign up"}));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Registration failed/i)).toBeInTheDocument();
+    });
+  });
 });
