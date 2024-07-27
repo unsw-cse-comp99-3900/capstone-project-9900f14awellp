@@ -1,131 +1,133 @@
-.form-container{
-    height: 100%;
-    display: flex;
-    justify-content: start;
-    gap: 20px;
-    flex-direction: column;
-    overflow: auto;
-    padding: 30px;
-    padding-top: 40px;
-    padding-left: 45px;
-
+.form-container {
+  height: 100%;
+  display: flex;
+  justify-content: start;
+  gap: 40px;
+  flex-direction: column;
+  overflow: auto;
+  padding-top: 40px;
+  padding-left: 160px;
+  padding-right: 90px;
 }
 
-.details-container{
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-direction: column;
+.details-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-direction: column;
 }
-.title-row{
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row;
-}
-
-.details-title{
-    font-size: 18px;
-    font-family: 'Lexend Deca', sans-serif;
-    color: #333;
-    font-weight: 500;
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
 }
 
-
-.inputs-group{
-    display: flex;
-    justify-content: start;
-    gap: 12px;
-    flex-direction: column;
-    width: 100%;
-    padding-left: 1.5%;
+.details-title {
+  font-size: 36px;
+  font-family: "Lexend Deca", sans-serif;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 10px;
 }
 
-.title-and-input{
-    display: flex;
-    justify-content: start;
-    gap: 6px;
-    flex-direction: column;
-    font-family: 'Lexend Deca', sans-serif;
-    color: #424242;
-    font-weight: 300;
-    font-size: 14.5px;
+.inputs-group {
+  display: flex;
+  justify-content: start;
+  gap: 22px;
+  flex-direction: column;
+  width: 100%;
 }
 
-.datepicker-groups{
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row;
-    width: 100%;
+.title-and-input {
+  display: flex;
+  justify-content: start;
+  gap: 10px;
+  flex-direction: column;
+  font-family: "Lexend Deca", sans-serif;
+  color: #424242;
+  font-weight: 300;
+  font-size: 18px;
 }
 
-.create-datepicker{
-    width: 48%;
+.datepicker-groups {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  width: 100%;
 }
 
-.currency-container{
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    gap: 10px;
-    flex-direction: row;
-    font-family: 'Lexend Deca', sans-serif;
-    font-weight: 300;
+.create-datepicker {
+  width: 49.5%;
 }
 
-.currency-container img{
-    max-height: 16px;
-    width: auto;
-    margin-right: 3px;
+.currency-container {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+  flex-direction: row;
+  font-family: "Lexend Deca", sans-serif;
+  font-weight: 300;
 }
-.currency-texts{
-    display: flex;
-    justify-content: start;
-    gap: 3px;
-    flex-direction: row;
+
+.currency-container img {
+  max-height: 16px;
+  width: auto;
+  margin-right: 3px;
 }
-.currency-bond{
-    font-weight: 500;
+.currency-texts {
+  display: flex;
+  justify-content: start;
+  gap: 3px;
+  flex-direction: row;
+}
+.currency-bond {
+  font-weight: 500;
 }
 
 .currency-select .ant-select-selection-item {
-    display: flex;
-    align-items: center;
-  }
-  
-  .currency-select .ant-select-selection-item .currency-container {
-    display: flex;
-    align-items: center;
-  }
-  
-  .currency-select .ant-select-selection-item .currency-container img {
-    max-height: 16px;
-    width: auto;
-    margin-right: 3px;
-  }
-  
-  .currency-select .ant-select-selection-item .currency-texts {
-    display: flex;
-    flex-direction: row;
-  }
-  
-  .currency-select .ant-select-selection-item .currency-bond {
-    font-weight: 500;
-  }
-
-.items-container{
-    display: flex;
-    justify-content: start;
-    flex-direction: row;
-    gap:8px;
-    padding-left: 1.5%;
+  display: flex;
+  align-items: center;
 }
 
-.items-title{
-    display: flex;
-    justify-content: start;
-    flex-direction: row;
-    font-family: 'Lexend Deca', sans-serif;
-    color: #424242;
-    font-weight: 300;
-    font-size: 14.5px;
+.currency-select .ant-select-selection-item .currency-container {
+  display: flex;
+  align-items: center;
+}
+
+.currency-select .ant-select-selection-item .currency-container img {
+  max-height: 16px;
+  width: auto;
+  margin-right: 3px;
+}
+
+.currency-select .ant-select-selection-item .currency-texts {
+  display: flex;
+  flex-direction: row;
+}
+
+.currency-select .ant-select-selection-item .currency-bond {
+  font-weight: 500;
+}
+
+.items-container {
+  display: flex;
+  justify-content: start;
+  flex-direction: row;
+  gap: 8px;
+  padding-left: 1.5%;
+}
+
+.items-title {
+  display: flex;
+  justify-content: start;
+  flex-direction: row;
+  font-family: "Lexend Deca", sans-serif;
+  color: #424242;
+  font-weight: 300;
+  font-size: 14.5px;
+}
+
+.blank-area{
+    height: 80px;
 }

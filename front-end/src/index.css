@@ -67,3 +67,6 @@
     @apply bg-background text-foreground;
   }
 }
+.ant-btn-primary {
+  box-shadow: none !important;
+}

@@ -1,8 +1,41 @@
-.gui-preview{
-        height: 100%;
-        display: flex;
-        justify-content: start;
-        flex-direction: column;
-        overflow: auto;
-    
+.gui-preview {
+  height: 100%;
+  display: flex;
+  justify-content: start;
+  flex-direction: column;
+  overflow: auto;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.preview-button-row {
+  padding-top: 40px;
+  padding-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+}
+
+.preview-header {
+  font-family: "Lexend Deca", sans-serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: #333;
+}
+
+.preview-gui-button {
+  border-radius: 20px;
+  font-family: "Lexend Deca", sans-serif;
+  font-size: 15px;
+}
+
+.preview-pdf-pag{
+        background-color: white;
+        
+}
+
+.preview-title {
+  font-family: "Lexend Deca", sans-serif;
+  font-size: 20px;
 }
