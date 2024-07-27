@@ -106,11 +106,11 @@ export const ManageTable = forwardRef((props, ref) => {
     pageSize: 6,
   });
   const navigate = useNavigate();
-  const goValidate = () => {
-    navigate("/validate");
+  const goValidate = (uuid) => {
+    navigate(`/validate/id=${uuid}`);
   };
-  const goSend = () => {
-    navigate("/send");
+  const goSend = (uuid) => {
+    navigate(`/send/id=${uuid}`);
   };
 
   const items = [
@@ -118,16 +118,16 @@ export const ManageTable = forwardRef((props, ref) => {
       key: "1",
       label: "Validate",
       onClick: (uuid) => {
-        console.log(uuid);
-        goValidate();
+        // console.log(uuid);
+        goValidate(uuid);
       },
     },
     {
       key: "2",
       label: "Send",
       onClick: (uuid) => {
-        console.log(uuid);
-        goSend();
+        // console.log(uuid);
+        goSend(uuid);
       },
     },
   ];
