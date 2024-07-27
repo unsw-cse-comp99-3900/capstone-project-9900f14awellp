@@ -1,5 +1,5 @@
 from rest_framework import serializers,exceptions
-from .models import Company, User, UpFile, GUIFile,Order
+from .models import Company, User, UpFile, GUIFile,Order,Draft
 import json
 from datetime import datetime
 import os
@@ -201,7 +201,96 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['description', 'unit_price', 'quantity', 'net', 'gst', 'amount']
                
+class DraftGUISerializer(serializers.ModelSerializer):
+    #invoice_name = serializers.CharField(required=True)
+    #uuid = serializers.CharField(required=True)
+    userid = serializers.PrimaryKeyRelatedField(read_only=True)  # 设置为只读
+    orders = OrderSerializer(many=True)
+    class Meta:
+        # 使用draft而不是model
+        model = Draft
+        # fields = ["filename","uuid","userid",'invoice_num', 'company_name', 'address', 'country_name',"bank","bank_branch","account_num","bsb_num","account_name",'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+        fields = [
+            "id",
+            "invoice_name",  # 对应filename
+            "uuid", 
+            "userid", 
+            "invoice_num", 
+            "my_company_name",  # 对应company_name
+            "my_address",  # 对应address
+            "my_abn",
+            "my_email",
+            # "country_name",  # 模型中无对应字段
+            "client_company_name",
+            "client_address",
+            "client_abn",
+            "client_email",
+            
+            "bank_name",  # 对应bank
+            "currency", 
+            "account_num", 
+            "bsb_num", 
+            "account_name", 
+            "issue_date", 
+            "due_date", 
 
+            "subtotal", 
+            "gst_total",  # 对应qst_total
+            "total_amount",  # 对应total_price
+            "note",  # 对应important_text
+            # "items",  # 模型中无对应字段
+            "orders"
+        ]
+
+    def create(self, validated_data):
+        orders_data = validated_data.pop('orders')
+        guifile = Draft.objects.create(**validated_data)
+        for order_data in orders_data:
+            order = Order.objects.create(**order_data)
+            guifile.orders.add(order)
+        return guifile
+
+    def update(self, instance, validated_data):
+        orders_data = validated_data.pop('orders')
+        instance.invoice_name = validated_data.get('invoice_name', instance.invoice_name)
+        instance.uuid = validated_data.get('uuid', instance.uuid)
+        instance.invoice_num = validated_data.get('invoice_num', instance.invoice_num)
+        instance.my_company_name = validated_data.get('my_company_name', instance.my_company_name)
+        instance.my_address = validated_data.get('my_address', instance.my_address)
+        instance.my_email = validated_data.get('my_email', instance.my_email)
+        instance.my_abn = validated_data.get('my_abn', instance.my_abn)
+        
+        instance.client_company_name = validated_data.get('client_company_name', instance.client_company_name)
+        instance.client_abn = validated_data.get('client_abn', instance.client_abn)
+        instance.client_address = validated_data.get('client_address', instance.client_address)
+        instance.client_email = validated_data.get('client_email', instance.client_email)
+
+        instance.bank_name = validated_data.get('bank_name', instance.bank_name) 
+        instance.currency = validated_data.get('currency', instance.currency)
+        instance.account_num = validated_data.get('account_num', instance.account_num)
+        instance.bsb_num = validated_data.get('bsb_num', instance.bsb_num)
+        instance.account_name = validated_data.get('account_name', instance.account_name)
+            
+        instance.issue_date = validated_data.get('issue_date', instance.issue_date)
+        instance.due_date = validated_data.get('due_date', instance.due_date)
+
+
+
+        instance.subtotal = validated_data.get('subtotal', instance.subtotal)
+        instance.gst_total = validated_data.get('gst_total', instance.gst_total)
+        instance.total_amount = validated_data.get('total_amount', instance.total_amount)
+        instance.note = validated_data.get('note', instance.note)
+
+        instance.save()
+
+            
+        instance.orders.clear()
+        for order_data in orders_data:
+            order = Order.objects.create(**order_data)
+            instance.orders.add(order)
+        
+        return instance
+    
 class FileGUISerializer(serializers.ModelSerializer):
     invoice_name = serializers.CharField(required=True)
     uuid = serializers.CharField(required=True)

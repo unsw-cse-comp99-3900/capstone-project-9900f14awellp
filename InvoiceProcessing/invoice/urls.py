@@ -37,6 +37,7 @@ urlpatterns = [
     path('invoice-sending/',views.SendInvoiceEmailAPIView.as_view(),name='invoice-sending'),
     path('invoice-info/',views.FileInfoAPIView.as_view(),name='invoice-info'),
     path('invoice-preview',views.GUIFilePreview.as_view(),name='invoice-preview'),
+    path('invoice-draft',views.GUIFileDraft.as_view(),name='invoice-draft'),
     path('company-invoice-info/',views.CompanyFileInfoAPIView.as_view(),name='company-invoice-info'),
     path('company-info/',views.CompanyInfo.as_view(),name='company-info'),
     path('user-info/',views.UserInfo.as_view(),name='user-info'),

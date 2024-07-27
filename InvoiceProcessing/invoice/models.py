@@ -97,7 +97,9 @@ class Order(models.Model):
             self.amount = f"\u0024{self.amount}" 
                
         super().save(*args, **kwargs)
-class GUIFile(models.Model):
+      
+# 保存draft记录  
+class Draft(models.Model):
     invoice_name = models.CharField(max_length=30,default="")
     uuid = models.CharField(max_length=30,default="")
     invoice_num = models.CharField(max_length=20,default="")
@@ -128,15 +130,61 @@ class GUIFile(models.Model):
     note = models.TextField(default="")
 
     orders = models.ManyToManyField(Order)
+    userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFileDraf",null=True, blank=True)
+
+
+
+    def save(self, *args, **kwargs):
+        if not self.subtotal.startswith('$'):
+            self.subtotal = f"\u0024{self.subtotal}"
+        if not self.gst_total.startswith('$'):
+            self.gst_total = f"\u0024{self.gst_total}"
+        if not self.total_amount.startswith('$'):
+            self.total_amount = f"\u0024{self.total_amount}"         
+ 
+        super().save(*args, **kwargs)
+    
+    
+    
+    
+    
+class GUIFile(models.Model):
+    invoice_name = models.CharField(max_length=30)
+    uuid = models.CharField(max_length=30)
+    invoice_num = models.CharField(max_length=20)
+    my_company_name = models.CharField(max_length=255)
+    my_address = models.CharField(max_length=255)
+    my_abn = models.CharField(max_length=20)
+    my_email = models.EmailField()
+    
+    
+    client_company_name = models.CharField(max_length=100)
+    client_address = models.CharField(max_length=100)
+    client_abn = models.CharField(max_length=100)
+    client_email = models.EmailField(default="")
+    
+    bank_name = models.CharField(max_length=255)
+    currency = models.CharField(max_length=255)
+    account_num = models.CharField(max_length=20)
+    bsb_num = models.CharField(max_length=20)
+    account_name = models.CharField(max_length=255)
+    
+    issue_date = models.DateField()
+    due_date = models.DateField()
+    
+
+    subtotal = models.CharField(max_length=20)
+    gst_total = models.CharField(max_length=20)
+    total_amount = models.CharField(max_length=20)
+    note = models.TextField(default="")
+
+    orders = models.ManyToManyField(Order)
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFiles",null=True, blank=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['invoice_name', 'userid'], name='unique_file_user')
         ]
-        
-    def __str__(self):
-        return self.company_name
 
     def save(self, *args, **kwargs):
         if not self.subtotal.startswith('$'):
