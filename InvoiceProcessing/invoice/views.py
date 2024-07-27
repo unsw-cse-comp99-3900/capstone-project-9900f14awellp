@@ -9,6 +9,7 @@ from time import sleep
 from types import SimpleNamespace
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+from datetime import datetime
 
 from django.http import JsonResponse
 from django.core.mail import EmailMessage
@@ -829,7 +830,6 @@ class GUIFileAPIView(APIView):
 
             
 class GUIFilePreview(APIView):
-
     authentication_classes = [JWTAuthentication]
     permission_classes=[CompanyWorker]
     @swagger_auto_schema(
@@ -1123,6 +1123,7 @@ class GUIFileDraft(APIView):
                                 "data": file_serializer.errors
                             },
             )
+
 class DeleteFileAPIView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
@@ -1530,6 +1531,7 @@ class FileValidationsAPIView(APIView):
             file.is_validated = True
             if validate_data.get('successful'):
                 file.is_correct = True
+                file.validation_date = datetime.now()
             file.save()
             
             report = validate_data.get('report')
@@ -1646,7 +1648,7 @@ class SendInvoiceEmailAPIView(APIView):
                             },
                             status=status.HTTP_404_NOT_FOUND)
 
-
+        files.update(sending_date=datetime.now(), email_receiver=client_email)
         email_body = f"{custom_message}\n\nPlease find attached your invoice."  # 将自定义消息添加到邮件正文中
         email = EmailMessage(
             'Your Invoice',
@@ -1689,7 +1691,85 @@ class SendInvoiceEmailAPIView(APIView):
                                 "msg": f"Failed to send email: {str(e)}",
                             },
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+     
+
+class TimeOfInvoice(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[CompanyWorker]
+    @swagger_auto_schema(
+        operation_summary="获取发票文件的创建时间、验证时间、发送时间和接收邮件的地址",
+        operation_description="根据UUID获取文件的时间点。",
+        manual_parameters=[
+            openapi.Parameter(
+                'uuid',
+                openapi.IN_QUERY,
+                description="文件的UUID",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="成功",
+                examples={
+                    "application/json": {
+                        "code": 200,
+                        "msg": "success",
+                        "create_date": "2024-01-01T00:00:00Z",
+                        "validation_date": "2024-01-02T00:00:00Z",
+                        "send_date": "2024-01-03T00:00:00Z",
+                        "email_receiver": "example@example.com"
+                    }
+                },
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'code': openapi.Schema(type=openapi.TYPE_INTEGER, description='响应代码'),
+                        'msg': openapi.Schema(type=openapi.TYPE_STRING, description='响应消息'),
+                        'create_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description='创建日期'),
+                        'validation_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description='验证日期'),
+                        'send_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description='发送日期'),
+                        'email_receiver': openapi.Schema(type=openapi.TYPE_STRING, description='接收邮件的地址'),
+                    }
+                )
+            ),
+            404: openapi.Response(
+                description="文件未找到",
+                examples={
+                    "application/json": {
+                        "code": 404,
+                        "msg": "file not found"
+                    }
+                },
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'code': openapi.Schema(type=openapi.TYPE_INTEGER, description='响应代码'),
+                        'msg': openapi.Schema(type=openapi.TYPE_STRING, description='响应消息')
+                    }
+                )
+            )
+        }
+    )
+    def get(self, request):
+        uuid = request.GET.get('uuid')
         
+        file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
+        if file is None:
+            return JsonResponse({"code": 404, "msg": "file not found"}, status=status.HTTP_404_NOT_FOUND)
+        create_date = file.create_date
+        validation_date = file.validation_date
+        sending_date = file.sending_date
+        email_receiver = file.email_receiver
+        return JsonResponse({
+            "code": 200,
+            "msg": "success",
+            "create_date": create_date,
+            "validation_date": validation_date,
+            "send_date":sending_date,
+            "email_receiver":email_receiver
+        }, status=status.HTTP_200_OK)
+    
 class PasswordResetRequestView(APIView):
     authentication_classes = []  # 禁用认证
     permission_classes = []

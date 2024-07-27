@@ -69,7 +69,10 @@ class UpFile(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     is_validated = models.BooleanField(default=False)
     is_correct = models.BooleanField(default=False)
-    
+    create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
+    validation_date = models.DateTimeField(verbose_name='Validation Date',default="2000-01-01")
+    sending_date = models.DateTimeField(verbose_name='Validation Date',default="2000-01-01")
+    email_receiver=models.CharField(max_length=30, default="", verbose_name='Email Receiver')
     
     class Meta:
         unique_together = ('userid', 'file')
