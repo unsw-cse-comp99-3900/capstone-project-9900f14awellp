@@ -1,7 +1,12 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
 import { ConfigProvider } from "antd";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { InvoiceProvider } from "@/Content/GuiContent";
 
 import Welcome from "@/views/Welcome";
 import Dashboard from "@/views/Dashboard";
@@ -20,104 +25,114 @@ import Choice from "@/views/ChoiceCompany";
 import CompanyDetails from "@/views/CompanyDetails";
 import { RouterAuth } from "@/router/RouterAuth";
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#333",
+    },
+  },
+});
+
+const router = createBrowserRouter([
+  { path: "/", element: <Welcome /> },
+  {
+    path: "/home",
+    element: (
+      <RouterAuth>
+        <Dashboard />
+      </RouterAuth>
+    ),
+  },
+  {
+    path: "/create",
+    element: (
+      <RouterAuth>
+        <Create />
+      </RouterAuth>
+    ),
+    children: [
+      { path: "upload", element: <Upload /> },
+      { path: "form", element: <GUI /> },
+    ],
+  },
+  {
+    path: "/draft",
+    element: (
+      <RouterAuth>
+        <Draft />
+      </RouterAuth>
+    ),
+  },
+  {
+    path: "/manage",
+    element: (
+      <RouterAuth>
+        <InvoiceManagement />
+      </RouterAuth>
+    ),
+  },
+  {
+    path: "/send",
+    element: (
+      <RouterAuth>
+        <Sending />
+      </RouterAuth>
+    ),
+    children: [{ path: ":id", element: <Sending /> }],
+  },
+  {
+    path: "/validate",
+    element: (
+      <RouterAuth>
+        <Validation />
+      </RouterAuth>
+    ),
+    children: [{ path: ":id", element: <Validation /> }],
+  },
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
+  {
+    path: "/choice",
+    element: (
+      <RouterAuth>
+        <Choice />
+      </RouterAuth>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <RouterAuth>
+        <Profile />
+      </RouterAuth>
+    ),
+  },
+  {
+    path: "/company-details",
+    element: (
+      <RouterAuth>
+        <CompanyDetails />
+      </RouterAuth>
+    ),
+  },
+  { path: "/404", element: <NotFound /> },
+  { path: "*", element: <Navigate to="/404" /> },
+]);
+
 export default function App() {
   return (
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: "#333", // 设置主色调为 #333
-          // 你可以在这里添加更多的主题配置
+          colorPrimary: "#333",
         },
       }}
     >
-      <BrowserRouter>
-        <Routes>
-          <Route index element={<Welcome></Welcome>} />
-          <Route
-            path="/home"
-            element={
-              <RouterAuth>
-                <Dashboard />
-              </RouterAuth>
-            }
-          />
-          <Route
-            path="/create"
-            element={
-              <RouterAuth>
-                <Create />
-              </RouterAuth>
-            }
-          >
-            <Route path="upload" element={<Upload />}></Route>
-            <Route path="form" element={<GUI />}></Route>
-          </Route>
-          <Route
-            path="/manage"
-            element={
-              <RouterAuth>
-                <InvoiceManagement />
-              </RouterAuth>
-            }
-          ></Route>
-          <Route
-            path="/send"
-            element={
-              <RouterAuth>
-                <Sending />
-              </RouterAuth>
-            }
-          >
-            <Route path=":id" element={<Sending />} />
-          </Route>
-          <Route
-            path="/validate"
-            element={
-              <RouterAuth>
-                <Validation />
-              </RouterAuth>
-            }
-          >
-            <Route path=":id" element={<Validation />} />
-          </Route>
-          <Route path="/login" element={<Login></Login>} />
-          <Route path="/register" element={<Register></Register>} />
-          <Route
-            path="/choice"
-            element={
-              <RouterAuth>
-                <Choice />
-              </RouterAuth>
-            }
-          />
-          <Route
-            path="/draft"
-            element={
-              <RouterAuth>
-                <Draft />
-              </RouterAuth>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <RouterAuth>
-                <Profile />
-              </RouterAuth>
-            }
-          />
-          <Route
-            path="/company-details"
-            element={
-              <RouterAuth>
-                <CompanyDetails />
-              </RouterAuth>
-            }
-          />
-          <Route path="/404" element={<NotFound></NotFound>} />
-          <Route path="*" element={<Navigate to="/404" />} />
-        </Routes>
-      </BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <InvoiceProvider>
+          <RouterProvider router={router} />
+        </InvoiceProvider>
+      </ThemeProvider>
     </ConfigProvider>
   );
 }

@@ -56,10 +56,11 @@
 
 .GUIform{
     height: 100%;
-    width: 48%;
+    width: 52%;
 }
 
 .GUIpreview{
     height: 100%;
     width: 48%;
+    background-color: #F6F8FA;
 }
