@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import { ResponsiveAppBar } from "../components/Navbar";
 import { NestedList } from "../components/List";
 import Box from "@mui/material/Box";
@@ -25,6 +26,8 @@ export default function Sending() {
   const [invoiceUuidMap, setInvoiceUuidMap] = useState({});
   const [selectedInvoices, setSelectedInvoices] = useState([]);
   const [alert, setAlert] = useState(null); // 初始状态设置为null
+  const { id } = useParams();
+  console.log(id);
 
   const handleClear = () => {
     setFirstName("");
