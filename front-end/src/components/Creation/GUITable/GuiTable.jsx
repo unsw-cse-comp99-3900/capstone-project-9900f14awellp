@@ -133,8 +133,24 @@ const EditableCell = ({
 };
 
 export function GuiTable() {
-  const { invoiceData, updateInvoiceData } = useInvoice();
+  const { invoiceData, updateInvoiceData, clearInvoice } = useInvoice();
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (invoiceData.orders.length === 0) {
+      const initialOrder = {
+        key: "1",
+        description: "",
+        unitPrice: null,
+        quantity: null,
+        gst: null,
+        totalPrice: 0,
+      };
+      updateInvoiceData({
+        orders: [initialOrder],
+      });
+    }
+  }, []);
 
   const calculateTotalPrice = (record) => {
     const { unitPrice, quantity, gst } = record;
@@ -148,7 +164,7 @@ export function GuiTable() {
     const newKey = (invoiceData.orders.length + 1).toString();
     const newOrder = {
       key: newKey,
-      productName: "",
+      description: "",
       unitPrice: null,
       quantity: null,
       gst: null,
@@ -204,8 +220,8 @@ export function GuiTable() {
   const columns = [
     {
       title: "Product Name",
-      dataIndex: "productName",
-      width: "30%",
+      dataIndex: "description",
+      width: "37%",
       editable: true,
       onHeaderCell: () => ({
         style: {
@@ -225,10 +241,10 @@ export function GuiTable() {
       }),
     },
     {
-      title: "Unit Price",
+      title: "Unit Price($)",
       dataIndex: "unitPrice",
       editable: true,
-      width: "20%",
+      width: "18%",
       onHeaderCell: () => ({
         style: {
           fontFamily: "Lexend Deca, sans-serif",
@@ -293,7 +309,7 @@ export function GuiTable() {
     {
       title: "Amount",
       dataIndex: "totalPrice",
-      width: "15%",
+      width: "18%",
       onHeaderCell: () => ({
         style: {
           fontFamily: "Lexend Deca, sans-serif",
@@ -318,6 +334,7 @@ export function GuiTable() {
     {
       title: "",
       dataIndex: "operation",
+      width: "7%",
       render: (_, record) =>
         //订单数量大于等于1时才显示删除按钮
         invoiceData.orders.length >= 1 ? (
@@ -349,7 +366,7 @@ export function GuiTable() {
         editable: col.editable,
         dataIndex: col.dataIndex,
         title: col.title,
-        inputType: col.dataIndex === "productName" ? "text" : "number",
+        inputType: col.dataIndex === "description" ? "text" : "number",
         handleSave,
       }),
     };
