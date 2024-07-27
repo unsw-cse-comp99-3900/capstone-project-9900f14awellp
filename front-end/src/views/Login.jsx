@@ -38,6 +38,7 @@ export default function Login() {
         // const token = response.data.token;
         localStorage.setItem("token", response.data.access);
         localStorage.setItem("userid", response.data.userid);
+        localStorage.setItem("is_admin", response.data.is_admin);
         // alert(response.data.state);
         goDashboard();
         setAlert({ severity: "success", message: "Login successfully!" });

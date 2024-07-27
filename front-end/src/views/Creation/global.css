@@ -4,7 +4,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 4vh;
     flex-direction: column;
     }
 
@@ -15,6 +14,8 @@
     align-items: center;
     gap: 3vh;
     flex-direction: column;
+    padding-top: 4vh;
+    padding-bottom: 4vh;
 
 }
 .title {
