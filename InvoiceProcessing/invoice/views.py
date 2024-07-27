@@ -38,8 +38,8 @@ from rest_framework.parsers import MultiPartParser
 
 from .serializers import CompanySerializer,RegisterSerializer,\
                         FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, InvoiceUpfileSerializer,\
-                        UserInfoSerializer,UserUpdateSerializer
-from .models import Company, User, UpFile, GUIFile
+                        UserInfoSerializer,UserUpdateSerializer,DraftGUISerializer
+from .models import Company, User, UpFile, GUIFile,Draft
 from .converter import converter_xml
 from .permission import IsAdminUser,CompanyWorker
 # Create your views here.
@@ -668,6 +668,14 @@ class GUIFileAPIView(APIView):
     permission_classes = [CompanyWorker]
     @swagger_auto_schema(
         operation_summary='创建新的用户发票GUI文件',
+        manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_QUERY,
+                description="发票id,用于删除draft记录",
+                type=openapi.TYPE_STRING,
+            )
+        ],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -707,6 +715,30 @@ class GUIFileAPIView(APIView):
                     description='订单列表'
                 ),
             },
+            required=["invoice_name","uuid", "invoice_num", 
+            "my_company_name",  # 对应company_name
+            "my_address",  # 对应address
+            "my_abn",
+            "my_email",
+            # "country_name",  # 模型中无对应字段
+            "client_company_name",
+            "client_address",
+            "client_abn",
+            "client_email",
+            
+            "bank_name",  # 对应bank
+            "currency", 
+            "account_num", 
+            "bsb_num", 
+            "account_name", 
+            "issue_date", 
+            "due_date", 
+            "subtotal", 
+            "gst_total",  # 对应qst_total
+            "total_amount",  # 对应total_price
+            "note",  # 对应important_text
+            # "items",  # 模型中无对应字段
+            "orders"]
             )
         )
     def post(self, request):
@@ -715,6 +747,10 @@ class GUIFileAPIView(APIView):
             file_serializer.validated_data['userid'] = request.user
             filename = file_serializer.validated_data.get('invoice_name')
             uuid = file_serializer.validated_data.get('uuid')
+            
+            # 用于删除draft记录
+            file_id = request.GET.get('id',None)
+            
             # 检查同一个用户下filename是否一样
             if GUIFile.objects.filter(userid=request.user, invoice_name=filename).exists() or UpFile.objects.filter(userid=request.user, file=filename).exists():
                 return Response({
@@ -739,6 +775,12 @@ class GUIFileAPIView(APIView):
                 uuid=file_instance.uuid,
                 userid=file_instance.userid,
             )
+
+            if file_id != None:
+                draft = Draft.objects.filter(userid=request.user, id=file_id).first()
+                draft.delete()
+            
+
             
             file_data = FileGUISerializer(file_instance).data
             # 把title和userid pop掉，存到文件中
@@ -747,9 +789,10 @@ class GUIFileAPIView(APIView):
             file_data.pop('uuid', None)
             file_data.pop('userid', None)
 
-            if os.path.isfile(f"staticfiles/{request.user.id}/{filename}_preview.json"):
-                os.remove(f"staticfiles/{request.user.id}/{filename}_preview.json")
-                os.remove(f"staticfiles/{request.user.id}/{filename}_preview.pdf")
+            if os.path.isfile(f"staticfiles/{request.user.id}/{request.user.id}_preview.json"):
+                os.remove(f"staticfiles/{request.user.id}/{request.user.id}_preview.json")
+                os.remove(f"staticfiles/{request.user.id}/{request.user.id}_preview.pdf")
+                
             with open(file_path, "w", encoding='utf-8') as f:
                 json.dump(file_data, f, ensure_ascii=False, indent=4)
             xml_elem = json_to_xml(file_data)
@@ -784,6 +827,7 @@ class GUIFileAPIView(APIView):
                             },
                             status=status.HTTP_400_BAD_REQUEST)
 
+            
 class GUIFilePreview(APIView):
 
     authentication_classes = [JWTAuthentication]
@@ -832,18 +876,15 @@ class GUIFilePreview(APIView):
             )
         )
     def post(self,request):
-        file_serializer = FileGUISerializer(data=request.data)
+        file_serializer = DraftGUISerializer(data=request.data)
         if file_serializer.is_valid():
             file_serializer.validated_data['userid'] = request.user
-            filename = file_serializer.validated_data.get('invoice_name')
             
-
-
             # 创建临时发票文档
-            file_path = f"staticfiles/{request.user.id}/{filename}_preview.json"
-            file_path_pdf = f"staticfiles/{request.user.id}/{filename}_preview.pdf"
+            file_path = f"staticfiles/{request.user.id}/{request.user.id}_preview.json"
+            file_path_pdf = f"staticfiles/{request.user.id}/{request.user.id}_preview.pdf"
             
-            file_data = FileGUISerializer(request.data).data
+            file_data = DraftGUISerializer(request.data).data
             # 把title和userid pop掉，存到文件中
             #file_data.pop('id', None)
             file_data.pop('invoice_name', None)
@@ -880,7 +921,208 @@ class GUIFilePreview(APIView):
                             },
                             status=status.HTTP_400_BAD_REQUEST)
 
-
+class GUIFileDraft(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[CompanyWorker]
+    @swagger_auto_schema(
+        operation_summary='用户发票GUI Draft创建',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'invoice_name': openapi.Schema(type=openapi.TYPE_STRING, description='发票名称'),
+                'uuid': openapi.Schema(type=openapi.TYPE_STRING, description='UUID'),
+                'invoice_num': openapi.Schema(type=openapi.TYPE_STRING, description='发票编号'),
+                'my_company_name': openapi.Schema(type=openapi.TYPE_STRING, description='公司名称'),
+                'my_address': openapi.Schema(type=openapi.TYPE_STRING, description='公司地址'),
+                'my_abn': openapi.Schema(type=openapi.TYPE_STRING, description='公司ABN'),
+                'my_email': openapi.Schema(type=openapi.TYPE_STRING, description='公司邮箱'),
+                'client_company_name': openapi.Schema(type=openapi.TYPE_STRING, description='客户公司名称'),
+                'client_address': openapi.Schema(type=openapi.TYPE_STRING, description='客户地址'),
+                'client_abn': openapi.Schema(type=openapi.TYPE_STRING, description='客户ABN'),
+                'client_email': openapi.Schema(type=openapi.TYPE_STRING, description='客户邮箱'),
+                'bank_name': openapi.Schema(type=openapi.TYPE_STRING, description='银行名称'),
+                'currency': openapi.Schema(type=openapi.TYPE_STRING, description='货币种类'),
+                'account_num': openapi.Schema(type=openapi.TYPE_STRING, description='账户号码'),
+                'bsb_num': openapi.Schema(type=openapi.TYPE_STRING, description='BSB号码'),
+                'account_name': openapi.Schema(type=openapi.TYPE_STRING, description='账户名称'),
+                'bank_branch': openapi.Schema(type=openapi.TYPE_STRING, description='银行分行'),
+                'issue_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='发行日期'),
+                'due_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='到期日期'),
+                'subtotal': openapi.Schema(type=openapi.TYPE_STRING, description='小计'),
+                'gst_total': openapi.Schema(type=openapi.TYPE_STRING, description='GST总计'),
+                'total_amount': openapi.Schema(type=openapi.TYPE_STRING, description='总金额'),
+                'note': openapi.Schema(type=openapi.TYPE_STRING, description='备注'),
+                'orders': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_OBJECT, properties={
+                        'description': openapi.Schema(type=openapi.TYPE_STRING, description='描述'),
+                        'unit_price': openapi.Schema(type=openapi.TYPE_STRING, description='单价'),
+                        'quantity': openapi.Schema(type=openapi.TYPE_INTEGER, description='数量'),
+                        'net': openapi.Schema(type=openapi.TYPE_STRING, description='净价'),
+                        'gst': openapi.Schema(type=openapi.TYPE_STRING, description='GST'),
+                        'amount': openapi.Schema(type=openapi.TYPE_STRING, description='总价'),
+                    }),
+                    description='订单列表'
+                ),
+            },
+            )
+        )
+    def post(self,request):
+        file_serializer = DraftGUISerializer(data=request.data)
+        if file_serializer.is_valid():
+            file_serializer.validated_data['userid'] = request.user
+            
+            # draft不需要考虑数据完整性，直接创建 或者 更新，通过id作区分
+            # 创建和更新的逻辑？
+            # 
+            file_serializer.save(userid=request.user)
+            return Response({
+                                "code": 0,
+                                "msg": "success!",
+                                "data": file_serializer.data
+                            },
+                            status=status.HTTP_200_OK
+                            )
+        else:
+            return Response({
+                    "code": 400,
+                    "msg": "bad request",
+                    "data": file_serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST)
+            
+    @swagger_auto_schema(
+        operation_summary="获取发票数据",
+        operation_description="根据发票名称获取发票数据。",
+        manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_QUERY,
+                description="发票id",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="成功",
+                examples={
+                    "application/json": {
+                        "code": 200,
+                        "msg": "success",
+                        "data": {
+                            "invoice_name": "example_invoice",
+                            "uuid": "123",
+                            "my_company_name":"string"
+                            }
+                    }
+                }
+            )
+        }
+    )
+    def get(self,request):
+        fileid = request.GET.get('id')
+        if not fileid:
+            return Response({
+                                "code": 400,
+                                "msg": "File name is required",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        file = Draft.objects.filter(userid=request.user, id=fileid).first()
+        file_data = DraftGUISerializer(file).data
+        return Response({
+                            "code": 200,
+                            "msg": "success",
+                            "data": file_data
+                        },
+                        status=status.HTTP_200_OK
+                        )
+    
+    @swagger_auto_schema(
+        operation_summary="部分更新发票数据",
+        operation_description="根据发票ID部分更新发票数据。",
+        manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_QUERY,
+                description="发票id",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'invoice_name': openapi.Schema(type=openapi.TYPE_STRING, description='发票名称'),
+                'uuid': openapi.Schema(type=openapi.TYPE_STRING, description='UUID'),
+                'invoice_num': openapi.Schema(type=openapi.TYPE_STRING, description='发票编号'),
+                'my_company_name': openapi.Schema(type=openapi.TYPE_STRING, description='公司名称'),
+                'my_address': openapi.Schema(type=openapi.TYPE_STRING, description='公司地址'),
+                'my_abn': openapi.Schema(type=openapi.TYPE_STRING, description='公司ABN'),
+                'my_email': openapi.Schema(type=openapi.TYPE_STRING, description='公司邮箱'),
+                'client_company_name': openapi.Schema(type=openapi.TYPE_STRING, description='客户公司名称'),
+                'client_address': openapi.Schema(type=openapi.TYPE_STRING, description='客户地址'),
+                'client_abn': openapi.Schema(type=openapi.TYPE_STRING, description='客户ABN'),
+                'client_email': openapi.Schema(type=openapi.TYPE_STRING, description='客户邮箱'),
+                'bank_name': openapi.Schema(type=openapi.TYPE_STRING, description='银行名称'),
+                'currency': openapi.Schema(type=openapi.TYPE_STRING, description='货币种类'),
+                'account_num': openapi.Schema(type=openapi.TYPE_STRING, description='账户号码'),
+                'bsb_num': openapi.Schema(type=openapi.TYPE_STRING, description='BSB号码'),
+                'account_name': openapi.Schema(type=openapi.TYPE_STRING, description='账户名称'),
+                'bank_branch': openapi.Schema(type=openapi.TYPE_STRING, description='银行分行'),
+                'issue_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='发行日期'),
+                'due_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='到期日期'),
+                'subtotal': openapi.Schema(type=openapi.TYPE_STRING, description='小计'),
+                'gst_total': openapi.Schema(type=openapi.TYPE_STRING, description='GST总计'),
+                'total_amount': openapi.Schema(type=openapi.TYPE_STRING, description='总金额'),
+                'note': openapi.Schema(type=openapi.TYPE_STRING, description='备注'),
+                'orders': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_OBJECT, properties={
+                        'description': openapi.Schema(type=openapi.TYPE_STRING, description='描述'),
+                        'unit_price': openapi.Schema(type=openapi.TYPE_STRING, description='单价'),
+                        'quantity': openapi.Schema(type=openapi.TYPE_INTEGER, description='数量'),
+                        'net': openapi.Schema(type=openapi.TYPE_STRING, description='净价'),
+                        'gst': openapi.Schema(type=openapi.TYPE_STRING, description='GST'),
+                        'amount': openapi.Schema(type=openapi.TYPE_STRING, description='总价'),
+                    }),
+                    description='订单列表'
+                ),
+            },
+        )
+    )
+    def patch(self,request):
+        fileid = request.GET.get('id')
+        if not fileid:
+            return Response({
+                                "code": 400,
+                                "msg": "File id is required",
+                            },
+            )
+        file = Draft.objects.filter(userid=request.user, id=fileid).first()
+        if not file:
+            return Response({
+                                "code": 404,
+                                "msg": "File not found",
+                            },
+            )
+        file_serializer = DraftGUISerializer(file,data=request.data,partial=True)
+        if file_serializer.is_valid():
+            file_serializer.save()
+            return Response({
+                                "code": 200,
+                                "msg": "success",
+                                "data": file_serializer.data
+                            },
+            )
+        else:
+            return Response({
+                                "code": 400,
+                                "msg": "bad request",
+                                "data": file_serializer.errors
+                            },
+            )
 class DeleteFileAPIView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
@@ -919,6 +1161,7 @@ class DeleteFileAPIView(APIView):
             )
         }
     )
+    
     def post(self,request):
         uuid = request.query_params.get('uuid')
         if not uuid:
@@ -936,7 +1179,6 @@ class DeleteFileAPIView(APIView):
                             },
                             status=status.HTTP_404_NOT_FOUND
                             )
-        print("*"*50)
         file_gui = GUIFile.objects.filter(userid=request.user, uuid=file.uuid).first()
 
         if file_gui is not None:
