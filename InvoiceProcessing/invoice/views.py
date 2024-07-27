@@ -197,6 +197,7 @@ class LoginView(APIView):
                 'company_id':user.company_id,
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'is_admin':user.is_staff,
             }, status=status.HTTP_200_OK)
         return Response({'detail': 'User not exists or password is wrong, please check your input.'}, status=status.HTTP_401_UNAUTHORIZED)
     
