@@ -83,6 +83,11 @@ project
     ```sh
     npm start
     ```
+
+4. Front End Testing
+   ```sh
+   npm test
+   ```
 ## Usage
 
 1. Ensure the back-end server is running on `http://localhost:8000`.
