@@ -40,6 +40,7 @@ describe('App constructure test without login', () => {
 });
 
 describe('App constructure test with login', () => {
+
   beforeAll(() => {
     localStorage.setItem('token', 'mock_token');
     // localStorage.setItem('userid', 9999);
