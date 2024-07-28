@@ -3,9 +3,10 @@
   display: flex;
   justify-content: start;
   flex-direction: column;
-  overflow: auto;
-  padding-left: 40px;
+  overflow-y: auto;
+  padding-left: 70px;
   padding-right: 40px;
+  padding-bottom: 50px;
 }
 
 .preview-button-row {
@@ -30,12 +31,209 @@
   font-size: 15px;
 }
 
-.preview-pdf-pag{
-        background-color: white;
-        
+.preview-pdf-page {
+  min-height: 73%;
+  width: 100%;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 15px -5px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  padding-left: 40px;
+  padding-right: 40px;
+  padding-bottom: 40px;
+  font-family: "Lexend Deca", sans-serif;
+  height: auto;
+  flex-shrink: 0;
 }
 
-.preview-title {
-  font-family: "Lexend Deca", sans-serif;
-  font-size: 20px;
+.preview-title-container {
+  font-size: 30px;
+  font-weight: 400;
+  color: #333;
+  padding: 30px 0 10px 0;
+  position: relative;
+}
+
+.preview-title-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #ebebeb;
+}
+
+.preview-second-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  flex-direction: row;
+}
+.preview-second-row-title {
+  font-size: 16px;
+  font-weight: 350;
+  color: #a9a8ab;
+}
+
+.preview-second-row-content {
+  font-size: 16px;
+  font-weight: 300;
+  color: #333;
+}
+
+.bill-from-to-info {
+  width: 50%;
+}
+
+.preview-products-row {
+  display: flex;
+  justify-content: start;
+  padding-top: 20px;
+  flex-direction: column;
+  gap:4px;
+}
+
+.preview-products-header {
+  display: flex;
+  align-items: center;
+  background-color: #f4f6f8;
+  color: #838284;
+  border-radius: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 14px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.header-product {
+  width: 40%;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis;
+}
+
+.header-quantity {
+  width: 15%;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+.header-price {
+  width: 20%;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+.header-gst {
+  width: 10%;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+.header-total {
+  width: 15%;
+  display: flex;
+  justify-content: flex-end;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+.preview-product-row {
+  display: flex;
+  flex-direction: row;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-weight: 200;
+  font-size: 14px;
+}
+
+.preview-product-description {
+  width: 40%;
+  padding-right: 5%;
+  word-wrap: break-word;
+  white-space: normal;
+  font-weight: 400;
+}
+
+.preview-product-quantity {
+  width: 15%;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.preview-product-unit-price {
+  width: 20%;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.preview-product-gst {
+  width: 10%;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.preview-product-total-price{
+  text-align: right;
+  width: 15%;
+  word-wrap: break-word;
+  white-space: normal;
+  font-weight: 400;
+}
+
+.preview-product-total-settle-pay-details{
+  display: flex;
+  padding-top: 40px;
+  padding-bottom: 20px;
+  flex-direction: row;
+  justify-content: space-between;
+
+}
+
+.preview-pay-details-row{
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-total-settle-row{
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+
+.preview-settle-title{
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.preview-settle-price{
+  font-weight: 500;
+  font-size: 16px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.preview-pay-details{
+  font-size: 15px;
+  font-weight: 300;
+}
+
+.preview-note-row{
+  padding-bottom: 10vh;
+  padding-top: 20px;
+}
+
+.preview-note-content{
+  font-size: 15px;
+  font-weight: 300;
 }

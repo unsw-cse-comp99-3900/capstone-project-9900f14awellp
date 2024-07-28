@@ -5,6 +5,12 @@ const InvoiceContext = createContext();
 
 export function InvoiceProvider({ children }) {
   const [invoiceData, setInvoiceData] = useState({
+    //! editBefore用来标识是否是编辑之前的数据，如果从draft表格跳转过来，就是true
+    editBefore: false,
+    //! draftId用来标识是哪个draft，从draft表格跳转过来的时候更新，
+    //! 要在1. 使用patch来部分更新时使用；2. 保存为正式invoice时用来删除相应draft
+    dreaftId: "",
+    //TODO: 上面这两个字段需要从draft表格跳转过来的时候更新
     uuid: "",
     invoice_name: "",
     invoice_num: "",
@@ -36,6 +42,8 @@ export function InvoiceProvider({ children }) {
 
   const clearInvoiceData = () => {
     setInvoiceData({
+      editBefore: false,
+      dreaftId: "",
       uuid: "",
       invoice_name: "",
       invoice_num: "",

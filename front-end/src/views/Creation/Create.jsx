@@ -1,5 +1,8 @@
 import { React, useEffect, useState } from "react";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
+
+import { submitInvoice } from "@/apis/gui";
 
 import { ResponsiveAppBar } from "@/components/Navbar";
 import CardSelector from "@/components/Creation/File2GUIselect/CardSelector";
@@ -11,8 +14,71 @@ import { useInvoice } from "@/Content/GuiContent";
 
 import "./global.css";
 
+function validateInvoiceData(data) {
+  const requiredFields = [
+    "invoice_name",
+    "invoice_num",
+    "my_company_name",
+    "my_address",
+    "my_ABN",
+    "my_email",
+    "client_company_name",
+    "client_address",
+    "client_ABN",
+    "client_email",
+    "bank_name",
+    "currency",
+    "account_num",
+    "bsb_num",
+    "account_name",
+    "issue_date",
+    "due_date",
+    "subtotal",
+    "gst_total",
+    "total_amount",
+  ];
+
+  const emptyFields = requiredFields.filter((field) => !data[field]);
+
+  if (emptyFields.length > 0) {
+    return {
+      isValid: false,
+      emptyFields: emptyFields,
+    };
+  }
+
+  // 检查订单数组
+  if (!data.orders || data.orders.length === 0) {
+    return {
+      isValid: false,
+      emptyFields: ["orders"],
+    };
+  }
+
+  // 检查每个订单项
+  const emptyOrderFields = data.orders.flatMap((order, index) => {
+    const orderEmptyFields = [
+      "description",
+      "unitPrice",
+      "quantity",
+      "gst",
+    ].filter((field) => !order[field]);
+    return orderEmptyFields.map((field) => `orders[${index}].${field}`);
+  });
+
+  if (emptyOrderFields.length > 0) {
+    return {
+      isValid: false,
+      emptyFields: emptyOrderFields,
+    };
+  }
+
+  return { isValid: true };
+}
+
 export default function Create() {
-  const { clearInvoiceData } = useInvoice();
+  const { invoiceData, clearInvoiceData, updateInvoiceData } = useInvoice();
+  console.log("invoiceData", invoiceData);
 
   const [selectedCard, setSelectedCard] = useState(null);
   const [showCardSelector, setShowCardSelector] = useState(true);
@@ -69,7 +135,7 @@ export default function Create() {
   };
 
   // 点击Continue按钮，根据selectedCard的值跳转到对应的路由
-  const handleContinue = () => {
+  const handleContinue = async () => {
     // console.log("handleContinue called. Current step:", currentStep);
 
     if (currentStep === 0) {
@@ -80,6 +146,10 @@ export default function Create() {
         // );
         setShowCardSelector(false);
         setCurrentStep(1);
+        if (cards[selectedCard].route === "form") {
+          const newUuid = uuidv4();
+          updateInvoiceData({ uuid: newUuid });
+        }
         navigate(cards[selectedCard].route);
       }
     } else if (currentStep === 1 && location.pathname === "/create/upload") {
@@ -108,22 +178,32 @@ export default function Create() {
         // console.log("No file selected");
         showAlert("submit after selecting a file", "warning");
       }
+    } else if (currentStep === 1 && location.pathname === "/create/form") {
+      const validationResult = validateInvoiceData(invoiceData);
+      if (!validationResult.isValid) {
+        const emptyFieldsMessage = validationResult.emptyFields.join(", ");
+        showAlert(
+          `Please fill in the mandatory fields below: 
+          ${emptyFieldsMessage}`,
+          "warning"
+        );
+        return;
+      }
+
+      try {
+        await submitInvoice(invoiceData);
+        showAlert("submit successful", "success");
+        setCurrentStep(2); // 移动到下一步
+        setTimeout(() => {
+          navigate("/home");
+          clearInvoiceData();
+        }, 2000);
+      } catch (error) {
+        console.error("提交发票时出错:", error);
+        showAlert("发票提交失败。请重试。", "error");
+      }
     }
   };
-
-  // 点击Back按钮，如果是第一步，跳转到create页面，否则返回上一步
-  // const handleBack = () => {
-  //   if (currentStep === 1) {
-  //     console.log("Navigating back to /create");
-  //     if (location.pathname === "/create/form") {
-  //       clearInvoiceData();
-  //     }
-  //     setShowCardSelector(true);
-  //     setCurrentStep(0);
-  //     navigate("/create", { replace: true });
-  //     console.log("Navigation completed");
-  //   }
-  // };
 
   const handleBack = () => {
     if (currentStep === 1) {
