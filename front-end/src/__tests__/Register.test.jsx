@@ -114,9 +114,7 @@ describe('uncomplete form with show alert when submit', () => {
 
 describe('complete form test', () => {
   test('successful login', async () => {
-
     render_register();
-    
   
     const username_parent = screen.getByTestId("Register-Username");
     const username_field = username_parent.querySelector('#Register-Username');
@@ -139,8 +137,6 @@ describe('complete form test', () => {
     fireEvent.change(password_field_CP, { target: { value: '123456' } });
   
     fireEvent.click(screen.getByRole('button', {name: "Sign up"}));
-
-    
   
     await waitFor(() => {
       expect(screen.getByText(/Register successfully!/i)).toBeInTheDocument();
