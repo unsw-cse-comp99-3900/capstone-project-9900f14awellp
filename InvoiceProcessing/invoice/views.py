@@ -535,10 +535,10 @@ class UpFileAPIView(APIView):
                     converter_xml(f"staticfiles/{request.user.id}/{file_stem}.xml")
             elif str(file.file).endswith('.pdf'):
                 url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
-                api_key = {'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
-                payload = {'user': 'ZZZhao',
+                api_key = {'APIKey': 'f97106de-6723-4665-a890-d247f58ea44d'}
+                payload = {'user': 'Lianqiangzhao',
                         'pwd': 'Zlq641737796',
-                        'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
+                        'APIKey': 'f97106de-6723-4665-a890-d247f58ea44d'}
                 # 保留cookie
                 r = requests.get(url + '/Login', params=payload)
                 
@@ -560,7 +560,7 @@ class UpFileAPIView(APIView):
                     invoiceID = str(r2.json().get("invoice_id"))
                 # 1.3 获得传回的json数据
                 payload2 = {'invoiceid':invoiceID,
-                            'APIKey': 'b2cfb232-7b4f-4e1e-ae12-d044a8f335cb'}
+                            'APIKey': 'f97106de-6723-4665-a890-d247f58ea44d'}
             
                 sleep(60)
                 r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
@@ -674,7 +674,7 @@ class GUIFileAPIView(APIView):
             openapi.Parameter(
                 'id',
                 openapi.IN_QUERY,
-                description="发票id,用于删除draft记录",
+                description="发票id,不是uuid, 用于删除draft记录,",
                 type=openapi.TYPE_STRING,
             )
         ],
@@ -780,6 +780,13 @@ class GUIFileAPIView(APIView):
 
             if file_id != None:
                 draft = Draft.objects.filter(userid=request.user, id=file_id).first()
+                if draft == None:
+                    return Response({
+                        "code": 400,
+                        "msg": "File id not exist",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
+
                 draft.delete()
             
 
