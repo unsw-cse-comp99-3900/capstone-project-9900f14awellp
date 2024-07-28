@@ -187,9 +187,9 @@ export function GuiForm() {
             <Input
               size="large"
               placeholder="Email Address"
-              value={invoiceData.client_address}
+              value={invoiceData.client_email}
               onChange={(e) =>
-                handleInputChange("client_address", e.target.value)
+                handleInputChange("client_email", e.target.value)
               }
             />
           </div>
