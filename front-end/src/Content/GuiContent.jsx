@@ -11,6 +11,7 @@ export function InvoiceProvider({ children }) {
     //! 要在1. 使用patch来部分更新时使用；2. 保存为正式invoice时用来删除相应draft
     dreaftId: "",
     //TODO: 上面这两个字段需要从draft表格跳转过来的时候更新
+    //TODO: 下面的所有字段,从draft表格跳转过来的时候, 用get /invoice-draft接口来获取后更新
     uuid: "",
     invoice_name: "",
     invoice_num: "",
