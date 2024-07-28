@@ -143,6 +143,7 @@ export function GuiTable() {
         description: "",
         unitPrice: null,
         quantity: null,
+        net: null,
         gst: null,
         totalPrice: 0,
       };
@@ -167,6 +168,7 @@ export function GuiTable() {
       description: "",
       unitPrice: null,
       quantity: null,
+      net: null,
       gst: null,
       totalPrice: 0,
     };
@@ -178,14 +180,26 @@ export function GuiTable() {
   const handleSave = (row) => {
     const newOrders = [...invoiceData.orders];
     const index = newOrders.findIndex((item) => row.key === item.key);
-    if (index !== -1) {
-      newOrders[index] = { ...row, totalPrice: calculateTotalPrice(row) };
+    const updatedRow = { ...row };
+
+    // 计算net值
+    if (updatedRow.unitPrice && updatedRow.quantity) {
+      updatedRow.net = updatedRow.unitPrice * updatedRow.quantity;
     } else {
-      newOrders.push({ ...row, totalPrice: calculateTotalPrice(row) });
+      updatedRow.net = null;
     }
+
+    // 计算totalPrice
+    updatedRow.totalPrice = calculateTotalPrice(updatedRow);
+
+    if (index !== -1) {
+      newOrders[index] = updatedRow;
+    } else {
+      newOrders.push(updatedRow);
+    }
+
     updateInvoiceData({ orders: newOrders });
   };
-
   const handleDelete = (key) => {
     const newOrders = invoiceData.orders.filter((item) => item.key !== key);
     updateInvoiceData({ orders: newOrders });
@@ -336,7 +350,6 @@ export function GuiTable() {
       dataIndex: "operation",
       width: "7%",
       render: (_, record) =>
-        //订单数量大于等于1时才显示删除按钮
         invoiceData.orders.length >= 1 ? (
           <Popconfirm
             title="Confirm to delete?"
