@@ -4,7 +4,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 4vh;
     flex-direction: column;
     }
 
@@ -15,16 +14,53 @@
     align-items: center;
     gap: 3vh;
     flex-direction: column;
+    padding-top: 4vh;
+    padding-bottom: 4vh;
 
 }
 .title {
     font-size: calc(2.2vw + 2.2vh);
-    font-weight: 800;
+    font-weight: 700;
     color: #333;
-    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    font-family:'Lexend Deca', sans-serif;
     }
 
 .type{
     color: #A7A7A7;
     font-size: calc(0.9vw + 0.9vh);
+    font-weight: 300;
+    font-family:'Lexend Deca', sans-serif;
+}
+
+.GUIlayout{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+	border-radius: 8px;
+    width: 100%;
+    height:73vh;
+    position: relative;
+}
+
+.GUIlayout::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15%; /* 覆盖底部 10% 的区域 */
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+    pointer-events: none;
+}
+
+.GUIform{
+    height: 100%;
+    width: 52%;
+}
+
+.GUIpreview{
+    height: 100%;
+    width: 48%;
+    background-color: #F6F8FA;
 }
