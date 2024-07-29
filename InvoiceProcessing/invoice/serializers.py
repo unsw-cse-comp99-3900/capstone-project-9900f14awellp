@@ -111,7 +111,11 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
             return "gui"
         return "upload"
 
-
+class DraftRecording(serializers.ModelSerializer):
+    class Meta:
+        model = Draft
+        fields = ['id','invoice_num','create_date','update_date']
+        
 class UserInfoSerializer(serializers.ModelSerializer):
     # 你需要将company字段重定义为SerializerMethodField，而不是直接使用模型字段。这将确保在序列化时调用你定义的get_company方法。以下是修改后的代码：
     company = serializers.SerializerMethodField()
@@ -213,7 +217,7 @@ class OrderSerializer(serializers.ModelSerializer):
                
 class DraftGUISerializer(serializers.ModelSerializer):
     #invoice_name = serializers.CharField(required=True)
-    #uuid = serializers.CharField(required=True)
+    invoice_num = serializers.CharField(required=True)
     userid = serializers.PrimaryKeyRelatedField(read_only=True)  # 设置为只读
     orders = OrderSerializer(many=True)
     class Meta:

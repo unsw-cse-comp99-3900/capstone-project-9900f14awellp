@@ -39,7 +39,7 @@ from rest_framework.parsers import MultiPartParser
 
 from .serializers import CompanySerializer,RegisterSerializer,\
                         FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, InvoiceUpfileSerializer,\
-                        UserInfoSerializer,UserUpdateSerializer,DraftGUISerializer
+                        UserInfoSerializer,UserUpdateSerializer,DraftGUISerializer, DraftRecording
 from .models import Company, User, UpFile, GUIFile,Draft
 from .converter import converter_xml
 from .permission import IsAdminUser,CompanyWorker
@@ -1114,29 +1114,49 @@ class GUIFileDraft(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
             
     @swagger_auto_schema(
-        operation_summary="获取发票数据",
-        operation_description="根据发票名称获取发票数据。",
+        operation_summary='获取草稿报告',
         manual_parameters=[
             openapi.Parameter(
-                'id',
-                openapi.IN_QUERY,
-                description="发票id",
-                type=openapi.TYPE_STRING,
-                required=True
+                'id', openapi.IN_QUERY, description="draft id, 填写的话就返回目标draft的详细信息, 不填写的话则返回该user的全部draft记录", type=openapi.TYPE_INTEGER, required=False
             )
         ],
         responses={
             200: openapi.Response(
-                description="成功",
+                description="成功获取草稿报告",
                 examples={
                     "application/json": {
                         "code": 200,
                         "msg": "success",
-                        "data": {
-                            "invoice_name": "example_invoice",
-                            "uuid": "123",
-                            "my_company_name":"string"
+                        "data": [
+                            {
+                                "id": 1,
+                                "name": "Draft 1",
+                                "content": "Some content"
+                            },
+                            {
+                                "id": 2,
+                                "name": "Draft 2",
+                                "content": "Some content"
                             }
+                        ]
+                    },
+                    "application/json": {
+                        "code": 200,
+                        "msg": "success",
+                        "data": {
+                            "id": 1,
+                            "name": "Draft 1",
+                            "content": "Some content"
+                        }
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="请求无效",
+                examples={
+                    "application/json": {
+                        "code": 400,
+                        "msg": "Invalid request"
                     }
                 }
             )
@@ -1145,12 +1165,17 @@ class GUIFileDraft(APIView):
     def get(self,request):
         fileid = request.GET.get('id')
         if not fileid:
+            draft = Draft.objects.filter(userid=request.user)
+            serializer = DraftRecording(draft,many=True)
+            
             return Response({
-                                "code": 400,
-                                "msg": "File name is required",
+                                "code": 200,
+                                "msg": "success",
+                                "data": serializer.data
                             },
-                            status=status.HTTP_400_BAD_REQUEST)
-        
+                            status=status.HTTP_200_OK
+                            )
+            
         file = Draft.objects.filter(userid=request.user, id=fileid).first()
         file_data = DraftGUISerializer(file).data
         return Response({
