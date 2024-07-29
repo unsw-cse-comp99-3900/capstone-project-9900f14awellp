@@ -43,7 +43,7 @@ export const UserTextField = ({
   );
 };
 
-export const InputTextField = ({ label, id, variant, value, onChange }) => {
+export const InputTextField = ({ label, id, variant, value, onChange, dataTestId }) => {
   return (
     <Box
       component="form"
@@ -57,6 +57,7 @@ export const InputTextField = ({ label, id, variant, value, onChange }) => {
         <TextField
           fullWidth
           id={id}
+          data-testid={dataTestId}
           label={label}
           variant={variant}
           value={value}
@@ -100,6 +101,7 @@ export const MultilineTextFields = ({
 
 export const PasswordTextField = ({
   id,
+  dataTestId,
   label,
   value,
   onChange,
@@ -115,10 +117,12 @@ export const PasswordTextField = ({
     <Box sx={{ display: "flex", flexWrap: "wrap" }}>
       <div>
         <FormControl sx={{ m: 1, width: "25ch" }} variant="outlined">
+          {/* <InputLabel htmlFor={id}>{label}</InputLabel> */}
           <InputLabel htmlFor="all-password">{label}</InputLabel>
           <OutlinedInput
             required
             id={id}
+            data-testid={dataTestId}
             type={showPassword ? "text" : "password"}
             value={value}
             onChange={onChange}

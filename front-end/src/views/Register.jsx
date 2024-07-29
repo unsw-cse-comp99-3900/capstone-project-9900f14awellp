@@ -84,6 +84,7 @@ export default function Register() {
                 <InputTextField 
                 label="Username" 
                 id="Register-Username" 
+                dataTestId="Register-Username" 
                 variant="outlined"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}  
@@ -91,25 +92,29 @@ export default function Register() {
                 <InputTextField 
                 label="Email" 
                 id="Register-Email" 
+                dataTestId="Register-Email" 
                 variant="outlined"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}  
                 />
                 <InputTextField 
                 label="Name" 
-                id="Register-Name" 
+                id="Register-Name"
+                dataTestId="Register-Name"
                 variant="outlined"
                 value={name}
                 onChange={(e) => setName(e.target.value)}  
                 />
                 <PasswordTextField 
                 id="Register-password"
+                dataTestId="Register-password"
                 label="Password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)} 
                 /> 
                 <PasswordTextField
                 id="Register-confirm-password"
+                dataTestId="Register-confirm-password"
                 label="Confirm Password" 
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)} 
