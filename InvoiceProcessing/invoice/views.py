@@ -697,7 +697,6 @@ class GUIFileAPIView(APIView):
                 'account_num': openapi.Schema(type=openapi.TYPE_STRING, description='账户号码'),
                 'bsb_num': openapi.Schema(type=openapi.TYPE_STRING, description='BSB号码'),
                 'account_name': openapi.Schema(type=openapi.TYPE_STRING, description='账户名称'),
-                'bank_branch': openapi.Schema(type=openapi.TYPE_STRING, description='银行分行'),
                 'issue_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='发行日期'),
                 'due_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='到期日期'),
                 'subtotal': openapi.Schema(type=openapi.TYPE_STRING, description='小计'),
