@@ -120,39 +120,45 @@ export function InvoiceManagement() {
           onClose={hideAlert}
         />
       )}
-      <div className="container">
-        <div className="title-container">
-          <div className="invoice-title">Invoices</div>
-          <div className="button-group">
-            <Tooltip title="Export as Excel" arrow>
-              <Button
-                className="second-button"
-                onClick={() => {
-                  handleExport();
-                }}
-              >
-                Export
-              </Button>
-            </Tooltip>
-            <Tooltip title="Download PDFs" arrow>
-              <Button className="second-button">Download</Button>
-            </Tooltip>
-            <Tooltip title="Create a new invoice" arrow>
-              <Button
-                type="primary"
-                onClick={goCreation}
-                className="primary-button"
-              >
-                New Invoice
-              </Button>
-            </Tooltip>
+      {ifAdmin && (
+        <div className="container">
+          <AdminManagementTable />
+        </div>
+      )}
+      {!ifAdmin && (
+        <div className="container">
+          <div className="title-container">
+            <div className="invoice-title">Invoices</div>
+            <div className="button-group">
+              <Tooltip title="Export as Excel" arrow>
+                <Button
+                  className="second-button"
+                  onClick={() => {
+                    handleExport();
+                  }}
+                >
+                  Export
+                </Button>
+              </Tooltip>
+              <Tooltip title="Download PDFs" arrow>
+                <Button className="second-button">Download</Button>
+              </Tooltip>
+              <Tooltip title="Create a new invoice" arrow>
+                <Button
+                  type="primary"
+                  onClick={goCreation}
+                  className="primary-button"
+                >
+                  New Invoice
+                </Button>
+              </Tooltip>
+            </div>
+          </div>
+          <div className="full-table">
+            <ManageTable ref={tableRef} />
           </div>
         </div>
-        <div className="full-table">
-          {ifAdmin && <AdminManagementTable />}
-          {!ifAdmin && <ManageTable ref={tableRef} />}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

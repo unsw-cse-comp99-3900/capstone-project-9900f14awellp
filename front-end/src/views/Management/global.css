@@ -34,8 +34,8 @@
     gap: 10px;
 }
 .invoice-title{
-    font-size: calc(2.2vw + 2.2vh);
-    font-weight: 800;
+    font-size: calc(2.1vw + 2.1vh);
+    font-weight: 500;
     color: #333;
     font-family: 'Lexend Deca', sans-serif;
 }
