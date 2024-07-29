@@ -46,7 +46,7 @@ export default function Register() {
         .then(response => {
             localStorage.setItem('token', response.data.access);
             localStorage.setItem('userid', response.data.userid);
-            console.log(response.data);
+            // console.log(response.data);
             setAlert({ severity: 'success', message: 'Register successfully!'});
             goChoice();
         })
