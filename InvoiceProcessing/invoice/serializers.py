@@ -14,9 +14,12 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     invoice_number = serializers.SerializerMethodField()
     invoice_date = serializers.SerializerMethodField()
     due_date = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
     class Meta:
         model = UpFile
-        fields = ['id', 'timestamp', 'userid', 'uuid', 'file','files_name','supplier','invoice_date','due_date',"invoice_number","total","state","creation_method"]
+        fields = ['id', 'timestamp', 'userid', 'uuid', "avatar","email","name",'file','files_name','supplier','invoice_date','due_date',"invoice_number","total","state","creation_method"]
     
     
     def get_files_name(self, obj):
@@ -26,6 +29,13 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         file_stem = os.path.splitext(file_name)[0]
         return file_stem
     
+    def get_avatar(self, obj):
+        return obj.userid.avatar.url if obj.userid and obj.userid.avatar else None
+    def get_email(self, obj):
+        return obj.userid.email if obj.userid else None
+    def get_name(self, obj):
+        return obj.userid.name if obj.userid else None
+
     def parse_date(self, date_str):
         if not date_str:
             raise ValueError("The date string is empty or None")
@@ -70,21 +80,21 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         data = self.get_file_data(obj)
         nested_form_data = data.get('form_data', {}).get('invoiceNumber', {})
         if not nested_form_data:
-            nested_form_data = data.get('file_id', {})
+            nested_form_data = data.get('invoice_num', {})
         return nested_form_data
     
     def get_supplier(self, obj):
         data = self.get_file_data(obj)
         nested_form_data = data.get('form_data', {}).get('company_invoiced', {})
         if not nested_form_data:
-            nested_form_data = data.get('company_name', {})
+            nested_form_data = data.get('client_company_name', {})
         return nested_form_data
     
     def get_total(self, obj):
         data = self.get_file_data(obj)
         nested_form_data = data.get('form_data', {}).get('total', {})
         if not nested_form_data:
-            nested_form_data = data.get('total_price', {})
+            nested_form_data = data.get('total_amount', {})
         return nested_form_data
     
     def get_state(self, obj):
