@@ -6,8 +6,6 @@ import Register from '../views/Register';
 import { exec } from 'child_process';
 import axios from 'axios';
 
-// vi.mock('axios');
-
 const render_register = () => {
   return render(
     <MemoryRouter>
@@ -16,40 +14,47 @@ const render_register = () => {
   );
 }
 
-test('Register element test', () => {
+test('Register page element test', () => {
   render_register();
 
+  // check h1 text
   expect(screen.getByRole('heading', {name: "Create an account"})).toBeInTheDocument();
 
-  // get username input field
+  // check username input field
   const username_parent = screen.getByTestId("Register-Username");
   const username_field = username_parent.querySelector('#Register-Username');
   expect(username_field).toBeInTheDocument();
 
-  // get email input field
+  // check email input field
   const email_parent = screen.getByTestId("Register-Email");
   const email_field = email_parent.querySelector('#Register-Email');
   expect(email_field).toBeInTheDocument();
 
-  // get name input field
+  // check name input field
   const name_parent = screen.getByTestId("Register-Name");
   const name_field = name_parent.querySelector('#Register-Name');
   expect(name_field).toBeInTheDocument();
 
-  // get password input field
+  // check password input field
   const password_parent_P = screen.getByTestId("Register-password");
   const password_field_P = password_parent_P.querySelector('#Register-password');
   expect(password_field_P).toBeInTheDocument();
 
-  // get confirm password input field
+  // check confirm password input field
   const password_parent_CP = screen.getByTestId("Register-confirm-password");
   const password_field_CP = password_parent_CP.querySelector('#Register-confirm-password');
   expect(password_field_CP).toBeInTheDocument();
 
+  // check button 
+  // toggle ...
   expect(screen.getAllByRole('button', {name: "toggle password visibility"})[0]).toBeInTheDocument();
+  // Sign-up
   expect(screen.getByTestId('Sign-up-btn')).toBeInTheDocument();
 
+  // check link
+  // navigate to Login page
   expect(screen.getByRole('link', {name: "Have an account? Go Login"})).toBeInTheDocument();
+  // information
   expect(screen.getByRole('link', {name: "By clicking Login, you agree to our Terms of Service and Privacy Policy"})).toBeInTheDocument();
 });
 
@@ -139,7 +144,8 @@ const exec_async = (command) => {
 describe('complete form test', () => {
   test('successful register', async () => {
     render_register();
-    
+    // delete the record in sqlite if username and email have been used
+    await exec_async('python3 src/__tests__/sqlite3_read_script.py');
     // get username input field
     const username_parent = screen.getByTestId("Register-Username");
     const username_field = username_parent.querySelector('#Register-Username');
@@ -167,12 +173,43 @@ describe('complete form test', () => {
     fireEvent.change(password_field_CP, { target: { value: '123456' } });
     fireEvent.click(screen.getByTestId('Sign-up-btn'));
     
-    // expect(true).toBe(true)
-    
     await waitFor(() => {
       expect(screen.getByText('Register successfully!')).toBeInTheDocument();
     });
+    // delete the record in sqlite if successfully register
+    await exec_async('python3 src/__tests__/sqlite3_read_script.py');
+  });
+
+  test('password & confirm password not the same', async () => {
+    render_register();
+
     await exec_async('python3 src/__tests__/sqlite3_read_script.py');
     
+    const username_parent = screen.getByTestId("Register-Username");
+    const username_field = username_parent.querySelector('#Register-Username');
+    
+    const email_parent = screen.getByTestId("Register-Email");
+    const email_field = email_parent.querySelector('#Register-Email');
+    
+    const name_parent = screen.getByTestId("Register-Name");
+    const name_field = name_parent.querySelector('#Register-Name');
+    
+    const password_parent_P = screen.getByTestId("Register-password");
+    const password_field_P = password_parent_P.querySelector('#Register-password');
+    
+    const password_parent_CP = screen.getByTestId("Register-confirm-password");
+    const password_field_CP = password_parent_CP.querySelector('#Register-confirm-password');
+
+    fireEvent.change(username_field, { target: { value: "test-user" } });
+    fireEvent.change(email_field, { target: { value: "test-email@gmail.com" } });
+    fireEvent.change(name_field, { target: { value: 'test-name' } });
+    fireEvent.change(password_field_P, { target: { value: '123456' } });
+    // wrong confirm password
+    fireEvent.change(password_field_CP, { target: { value: '1' } });
+    fireEvent.click(screen.getByTestId('Sign-up-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
+    });
   });
 });
