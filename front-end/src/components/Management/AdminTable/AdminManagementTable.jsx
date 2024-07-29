@@ -36,6 +36,8 @@ import { SearchOutlined } from "@ant-design/icons";
 import { invoiceAdminManage } from "@/apis/management";
 import { getValue } from "@testing-library/user-event/dist/utils";
 
+import "./AdminManagementTable.css";
+
 // 映射状态
 // Status mapping
 const statusMapping = {
@@ -318,7 +320,7 @@ export function AdminManagementTable() {
   };
 
   return (
-    <div className="table-container">
+    <div className="admin-table-container">
       <div className="pagination-group">
         <div className="total-info">
           {`showing ${start}-${end} of ${total} items`}
