@@ -118,7 +118,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['username', 'email', 'name', 'company', 'avatar', 'bio', 'is_staff', 'create_date', 'update_date']
+        fields = ['id', 'username', 'email', 'name', 'company', 'avatar', 'bio', 'is_staff', 'create_date', 'update_date',"login_date","join_company_date"]
         
     def get_company(self, obj):
             return obj.company.name if obj.company else None
