@@ -13,8 +13,11 @@ RUN npm install
 # 复制项目文件到工作目录
 COPY . .
 
+<<<<<<< HEAD
 ENV NODE_ENV=development
 
+=======
+>>>>>>> b05de4a (docker configered)
 RUN npm run build
  
 # 暴露容器的端口号

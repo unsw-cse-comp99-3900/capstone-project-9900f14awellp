@@ -18,7 +18,11 @@ services:
       context: front-end
       dockerfile: Dockerfile
     volumes:
+<<<<<<< HEAD
       - ./front-end:/app
       - /app/node_modules
+=======
+      - ./front-end:/FRONT_END
+>>>>>>> b05de4a (docker configered)
     ports:
       - "3000:3000"
