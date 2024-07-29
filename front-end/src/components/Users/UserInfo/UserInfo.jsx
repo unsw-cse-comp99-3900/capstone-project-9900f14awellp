@@ -24,9 +24,9 @@ export function UserInfo({ email, username, avatar }) {
           e.target.src = defaultAvatarImage;
         }}
       />
-      <div className="user-details">
-        <p className="user-name">{username || "Unknown User"}</p>
-        <p className="user-email">{email || "No email provided"}</p>
+      <div className="user-details-in-table">
+        <p className="user-name-in-table">{username || "Unknown User"}</p>
+        <p className="user-email-in-table">{email || "No email provided"}</p>
       </div>
     </div>
   );
