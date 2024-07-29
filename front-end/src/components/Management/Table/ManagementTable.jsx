@@ -59,6 +59,9 @@ const formatDate = (dateString) => {
 // Format total
 const formatPrice = (price) => {
   if (price === null || price === undefined) return "";
+  if (typeof price === "string" && price.startsWith("$")) {
+    price = price.slice(1);
+  }
   return `$${Number(price).toFixed(2)}`;
 };
 

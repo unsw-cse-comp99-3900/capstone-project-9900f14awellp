@@ -31,10 +31,10 @@ import {
   StatusTag,
   StatusClosableTag,
 } from "@/components/Management/StatusTag/StatusTag";
-import { SearchOutlined } from "@ant-design/icons";
+
+import { UserInfo } from "@/components/Users/UserInfo/UserInfo";
 
 import { invoiceAdminManage } from "@/apis/management";
-import { getValue } from "@testing-library/user-event/dist/utils";
 
 import "./AdminManagementTable.css";
 
@@ -50,6 +50,9 @@ const statusMapping = {
 // Format total
 const formatPrice = (price) => {
   if (price === null || price === undefined) return "";
+  if (typeof price === "string" && price.startsWith("$")) {
+    price = price.slice(1);
+  }
   return `$${Number(price).toFixed(2)}`;
 };
 
@@ -223,7 +226,11 @@ export function AdminManagementTable() {
       header: "Uploader",
       enableSorting: true,
       enableColumnFilter: false,
-      cell: (info) => info.getValue(),
+      cell: ({ row }) => {
+        const { email, name, avatar } = row.original || {};
+        // console.log(row.original.avatar);
+        return <UserInfo username={name} email={email} avatar={avatar} />;
+      },
     }),
     columnHelper.accessor("total", {
       header: "Price",
