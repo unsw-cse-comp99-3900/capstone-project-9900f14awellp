@@ -401,6 +401,68 @@ class CompanyWorkersInfo(APIView):
         
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    
+    @swagger_auto_schema(
+        operation_summary='更新用户信息（提升或解雇）',
+        manual_parameters=[
+            openapi.Parameter(
+                'id', openapi.IN_QUERY, description="用户 ID", type=openapi.TYPE_INTEGER, required=True
+            ),
+            openapi.Parameter(
+                'promotion', openapi.IN_QUERY, description="提升用户为管理员（任何值表示提升）", type=openapi.TYPE_STRING, required=False
+            ),
+            openapi.Parameter(
+                'fire', openapi.IN_QUERY, description="解雇用户（任何值表示解雇）", type=openapi.TYPE_STRING, required=False
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="用户信息更新成功",
+                examples={
+                    "application/json": {
+                        "message": "User updated successfully"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="请求无效",
+                examples={
+                    "application/json": {
+                        "error": "id field is required"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="用户不存在",
+                examples={
+                    "application/json": {
+                        "error": "User does not exist"
+                    }
+                }
+            )
+        }
+    )
+    def post(self,request):
+        userid = request.GET.get('id')
+        promotion = request.GET.get('promotion')
+        fire = request.GET.get('fire')
+        if not userid:
+            return Response({'error': 'id field is required'}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.filter(id=userid, company_id=request.user.company_id).first()
+        if not user:
+            return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if promotion:
+            user.is_staff = True
+        elif fire:
+            user.is_staff = False
+            user.company_id = None
+            Draft.objects.filter(userid=user.id).delete()
+            
+            
+        user.save()
+        return Response({'success': 'User updated successfully'}, status=status.HTTP_200_OK)
+
+        
 class JoinCompanyView(APIView):
     permission_classes = [IsAuthenticated,]
     # permission_classes = [IsAdminUser] # 判断 is_staff 是不是1
@@ -1184,6 +1246,99 @@ class GUIFileDraft(APIView):
                             },
             )
 
+class FileReport(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [CompanyWorker]
+    
+    @swagger_auto_schema(
+        operation_summary='获取文件报告',
+        manual_parameters=[
+            openapi.Parameter(
+                'uuid', openapi.IN_QUERY, description="文件 UUID", type=openapi.TYPE_STRING, required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="成功获取文件报告",
+                examples={
+                    "application/json": {
+                        "code": 200,
+                        "msg": "success",
+                        "data": "staticfiles/1/file_report.json"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="请求无效",
+                examples={
+                    "application/json": {
+                        "code": 400,
+                        "msg": "File id is required"
+                    },
+                    "application/json": {
+                        "code": 400,
+                        "msg": "File is not validated"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="文件未找到",
+                examples={
+                    "application/json": {
+                        "code": 404,
+                        "msg": "File not found"
+                    },
+                    "application/json": {
+                        "code": 404,
+                        "msg": "Report file not found"
+                    }
+                }
+            )
+        }
+    )
+    def get(self,request):
+        fileid = request.GET.get('uuid')
+        if not fileid:
+            return Response({
+                                "code": 400,
+                                "msg": "File id is required",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        file = UpFile.objects.filter(userid=request.user.id, uuid=fileid).first()
+        if not file:
+            return Response({
+                                "code": 404,
+                                "msg": "File not found",
+                            },
+                            status=status.HTTP_404_NOT_FOUND
+                            )
+        if file.is_validated == 0:
+            return Response({
+                                "code": 400,
+                                "msg": "File is not validated",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST
+                            )
+            
+        file_name = os.path.basename(str(file.file))
+        file_stem = os.path.splitext(file_name)[0]
+        
+        file_path = f"staticfiles/{request.user.id}/{file_stem}_report.json"
+        if not os.path.isfile(file_path):
+            return Response({
+                                "code": 404,
+                                "msg": "Report file not found",
+                            },
+                            status=status.HTTP_404_NOT_FOUND
+                            )
+        return Response({
+                            "code": 200,
+                            "msg": "success",
+                            "data": file_path
+                        },
+                        status=status.HTTP_200_OK
+                        )
 class DeleteFileAPIView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
