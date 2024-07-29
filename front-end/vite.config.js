@@ -13,6 +13,9 @@ export default defineConfig({
   },
   plugins: [react()],
   server: {
+    watch: {
+      usePolling: true,
+    },
     host: '0.0.0.0', // 添加这一行以确保 Vite 服务器绑定到所有网络接口
     port: 3000,
   },
