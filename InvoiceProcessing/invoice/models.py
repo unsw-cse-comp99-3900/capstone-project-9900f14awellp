@@ -54,6 +54,8 @@ class User(AbstractBaseUser):
     reset_password_sent_at = models.DateTimeField(null=True, blank=True, verbose_name='Reset Password Sent At')
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
     update_date = models.DateTimeField(auto_now=True, verbose_name='Update Date')
+    login_date = models.DateTimeField(auto_now=True, verbose_name='Login Date')  # 添加 login_date 字段
+    join_company_date = models.DateTimeField(null=True, blank=True, verbose_name='Join Company Date')  # 添加 join_company_date 字段
 
     objects = UserManager()
     
