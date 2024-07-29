@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import { createMemoryRouter, MemoryRouter } from 'react-router-dom';
 import Register from '../views/Register';
@@ -211,8 +211,15 @@ describe('complete form test', () => {
     await waitFor(() => {
       expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
     });
+    
   });
 });
 
+// sqlite3 ../../../db.splite3
+// drop table if exists invoice_user; 
 // CREATE TABLE IF NOT EXISTS "invoice_user" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "last_login" datetime NULL, "username" varchar(255) NOT NULL UNIQUE, "password" varchar(255) NOT NULL, "name" varchar(255) NOT NULL, "email" varchar(254) NOT NULL UNIQUE, "create_date" datetime NOT NULL, "update_date" datetime NOT NULL, "company_id" bigint NULL REFERENCES "invoice_company" ("id") DEFERRABLE INITIALLY DEFERRED, "reset_password_sent_at" datetime NULL, "reset_password_token" varchar(255) NULL, "is_staff" bool NOT NULL, "avatar" varchar(100) NULL, "bio" text NOT NULL);
+// .exit
+
+
+
 // CREATE INDEX "invoice_user_company_id_f0531d06" ON "invoice_user" ("company_id");
