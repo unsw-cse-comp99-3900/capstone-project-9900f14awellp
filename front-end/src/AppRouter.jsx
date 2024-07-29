@@ -10,7 +10,7 @@ import Create from "@/views/Creation/Create";
 import Upload from "@/views/Creation/Upload";
 import GUI from "@/views/Creation/GUI";
 import Sending from "@/views/sending";
-import InvoiceManagement from "@/views/Management/InvoiceManagement";
+import { InvoiceManagement } from "@/views/Management/InvoiceManagement";
 import Draft from "@/views/Draft";
 import Profile from "@/views/Profile";
 import Validation from "@/views/Validation";
