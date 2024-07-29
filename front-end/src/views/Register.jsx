@@ -46,7 +46,7 @@ export default function Register() {
         .then(response => {
             localStorage.setItem('token', response.data.access);
             localStorage.setItem('userid', response.data.userid);
-            console.log(response.data);
+            // console.log(response.data);
             setAlert({ severity: 'success', message: 'Register successfully!'});
             goChoice();
         })
@@ -119,7 +119,7 @@ export default function Register() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)} 
                 /> 
-                <ButtonSizes onClick={handleRegister}>
+                <ButtonSizes dataTestId="Sign-up-btn" onClick={handleRegister}>
                     Sign up
                 </ButtonSizes>
                 <UnderlineLink onClick={goLogin}  fontsize='10px'>

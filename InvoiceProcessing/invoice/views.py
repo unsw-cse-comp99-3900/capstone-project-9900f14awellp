@@ -116,7 +116,6 @@ class RegisterView(APIView):
     )
     def post(self, request):
         ser = RegisterSerializer(data=request.data)
-        print(ser)
         if ser.is_valid():
             ser.validated_data.pop('confirm_password')
             ser.validated_data['password'] = make_password(ser.validated_data['password'])
@@ -190,6 +189,9 @@ class LoginView(APIView):
         user = authenticate(username=username, password=password)
         
         if user is not None:
+            user.login_date = datetime.now()
+            user.save()
+            
             refresh = RefreshToken.for_user(user)
             return Response({
                 'state':"Login success",
@@ -201,6 +203,7 @@ class LoginView(APIView):
             }, status=status.HTTP_200_OK)
         return Response({'detail': 'User not exists or password is wrong, please check your input.'}, status=status.HTTP_401_UNAUTHORIZED)
     
+
 class UserInfo(APIView):
     authentication_classes = [JWTAuthentication]
 
@@ -354,13 +357,50 @@ class CreateCompanyView(APIView):
             )
             company.save()
             request.user.company = company
+            request.user.join_company_date = datetime.now()
             request.user.is_staff = True
             request.user.save()
 
             return Response({"success": "Company created successfully"}, status=status.HTTP_201_CREATED)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class CompanyWorkersInfo(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, CompanyWorker]
 
+    @swagger_auto_schema(
+        operation_summary='获取公司员工信息',
+        responses={
+            200: openapi.Response(
+                description="成功获取公司员工信息",
+                schema=UserInfoSerializer(many=True)
+            ),
+            401: openapi.Response(
+                description="未经授权",
+                examples={
+                    "application/json": {
+                        "detail": "Authentication credentials were not provided."
+                    }
+                }
+            ),
+            403: openapi.Response(
+                description="权限不足",
+                examples={
+                    "application/json": {
+                        "detail": "You do not have permission to perform this action."
+                    }
+                }
+            )
+        }
+    )
+    def get(self,request):
+        company_id = request.user.company_id
+        workers = User.objects.filter(company_id=company_id)
+        
+        serializer = UserInfoSerializer(workers, many=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
 class JoinCompanyView(APIView):
     permission_classes = [IsAuthenticated,]
     # permission_classes = [IsAdminUser] # 判断 is_staff 是不是1
@@ -455,6 +495,7 @@ class JoinCompanyView(APIView):
             return Response({'error': 'You have created a company, you cannot join another company.'}, status=status.HTTP_400_BAD_REQUEST)
         # 暂时先不处理[重复加入公司的情况，用户后面再加上
         request.user.company = company
+        request.user.join_company_date = datetime.now()
         request.user.save()
         return Response({'success': 'Joined the company successfully'}, status=status.HTTP_200_OK)
 
