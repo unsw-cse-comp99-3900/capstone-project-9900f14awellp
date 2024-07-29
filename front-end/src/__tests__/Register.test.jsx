@@ -141,7 +141,8 @@ const exec_async = (command) => {
   });
 };
 
-describe('complete form test', () => {
+describe('complete form test', async () => {
+  
   test('successful register', async () => {
     render_register();
     // delete the record in sqlite if username and email have been used
