@@ -207,10 +207,22 @@ class UserInfo(APIView):
 
     @swagger_auto_schema(
         operation_summary='获取用户信息',
-        responses={200: UserInfoSerializer()}
+        manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_QUERY,
+                description="用户 ID, not required, 如果标注id则会返回具体这个id对应的用户信息, 不标注则会返回当前用户",
+                type=openapi.TYPE_INTEGER
+            )
+        ],
+        responses={200: UserInfoSerializer}
     )
     def get(self, request):
-        user = request.user
+        id = request.GET.get('id')
+        if not id:
+            user = request.user
+        else:
+            user = User.objects.filter(id=id).first()
         serializer = UserInfoSerializer(user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -697,7 +709,6 @@ class GUIFileAPIView(APIView):
                 'account_num': openapi.Schema(type=openapi.TYPE_STRING, description='账户号码'),
                 'bsb_num': openapi.Schema(type=openapi.TYPE_STRING, description='BSB号码'),
                 'account_name': openapi.Schema(type=openapi.TYPE_STRING, description='账户名称'),
-                'bank_branch': openapi.Schema(type=openapi.TYPE_STRING, description='银行分行'),
                 'issue_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='发行日期'),
                 'due_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='到期日期'),
                 'subtotal': openapi.Schema(type=openapi.TYPE_STRING, description='小计'),
