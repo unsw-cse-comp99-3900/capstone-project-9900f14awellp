@@ -6,12 +6,13 @@ import SendIcon from '@mui/icons-material/Send';
 import Stack from '@mui/material/Stack';
 
 
-export const ButtonSizes = ({onClick, children}) => {
+export const ButtonSizes = ({ dataTestId, onClick, children }) => {
   return (
     <Box sx={{ '& button': { m: 1} }}>
       <div>
         <Button 
         fullWidth
+        data-testid={dataTestId}
         onClick={onClick} 
         variant="contained" 
         size="small" 
