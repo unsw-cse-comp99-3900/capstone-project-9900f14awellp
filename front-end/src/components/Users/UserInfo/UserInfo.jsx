@@ -7,8 +7,6 @@ export function UserInfo({ email, username, avatar }) {
   //   console.log("API URL:", import.meta.env.VITE_API_URL);
 
   const getAvatarUrl = (avatarPath) => {
-    if (!avatarPath || typeof avatarPath !== "string")
-      return defaultAvatarImage;
     return `${import.meta.env.VITE_API_URL}${avatarPath}`;
   };
 
@@ -20,7 +18,7 @@ export function UserInfo({ email, username, avatar }) {
       <img
         src={avatarUrl}
         alt={`${username || "User"}'s avatar`}
-        className="user-avatar"
+        className="user-avatar-in-table"
         onError={(e) => {
           console.log("Image load error, using default");
           e.target.src = defaultAvatarImage;
