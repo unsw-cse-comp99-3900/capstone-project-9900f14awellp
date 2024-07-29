@@ -119,7 +119,7 @@ export default function Register() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)} 
                 /> 
-                <ButtonSizes onClick={handleRegister}>
+                <ButtonSizes dataTestId="Sign-up-btn" onClick={handleRegister}>
                     Sign up
                 </ButtonSizes>
                 <UnderlineLink onClick={goLogin}  fontsize='10px'>

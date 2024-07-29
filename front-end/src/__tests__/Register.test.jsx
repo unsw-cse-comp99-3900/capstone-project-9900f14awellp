@@ -21,49 +21,37 @@ test('Register element test', () => {
 
   expect(screen.getByRole('heading', {name: "Create an account"})).toBeInTheDocument();
 
-  expect(screen.getByRole('textbox', {name: "Username"})).toBeInTheDocument();
-  expect(screen.getByRole('textbox', {name: "Email"})).toBeInTheDocument();
-  expect(screen.getByRole('textbox', {name: "Name"})).toBeInTheDocument();
+  // get username input field
+  const username_parent = screen.getByTestId("Register-Username");
+  const username_field = username_parent.querySelector('#Register-Username');
+  expect(username_field).toBeInTheDocument();
 
-  expect(screen.getByText("Password")).toBeInTheDocument();
-  expect(screen.getByText("Confirm Password")).toBeInTheDocument();
+  // get email input field
+  const email_parent = screen.getByTestId("Register-Email");
+  const email_field = email_parent.querySelector('#Register-Email');
+  expect(email_field).toBeInTheDocument();
+
+  // get name input field
+  const name_parent = screen.getByTestId("Register-Name");
+  const name_field = name_parent.querySelector('#Register-Name');
+  expect(name_field).toBeInTheDocument();
+
+  // get password input field
+  const password_parent_P = screen.getByTestId("Register-password");
+  const password_field_P = password_parent_P.querySelector('#Register-password');
+  expect(password_field_P).toBeInTheDocument();
+
+  // get confirm password input field
+  const password_parent_CP = screen.getByTestId("Register-confirm-password");
+  const password_field_CP = password_parent_CP.querySelector('#Register-confirm-password');
+  expect(password_field_CP).toBeInTheDocument();
 
   expect(screen.getAllByRole('button', {name: "toggle password visibility"})[0]).toBeInTheDocument();
-  expect(screen.getByRole('button', {name: "Sign up"})).toBeInTheDocument();
+  expect(screen.getByTestId('Sign-up-btn')).toBeInTheDocument();
 
   expect(screen.getByRole('link', {name: "Have an account? Go Login"})).toBeInTheDocument();
   expect(screen.getByRole('link', {name: "By clicking Login, you agree to our Terms of Service and Privacy Policy"})).toBeInTheDocument();
 });
-
-// describe('completed form submit test', () => {
-//   beforeAll(() => {
-//     localStorage.clear();
-//     vi.resetAllMocks();
-//   })
-
-//   test('successful login', () => {
-//     axios.post.mockResolvedValue({
-//       data: {
-//         'token': 'mock_token',
-//         'userid': 'mock_userid',
-//       },
-//     });
-
-//     render(
-//       <MemoryRouter>
-//         <Register />
-//       </MemoryRouter>
-//     )
-
-
-
-//   })
-// })
-    
-
-
-
-
 
 
 describe('incomplete form test', () => {
@@ -139,7 +127,6 @@ const exec_async = (command) => {
       if (error) {
         rej(error);
       } else if (stderr) {
-        console.log('asdflkj')
         rej(stderr);
       } else {
         res(stdout);
@@ -174,11 +161,13 @@ describe('complete form test', () => {
     const password_field_CP = password_parent_CP.querySelector('#Register-confirm-password');
     
     fireEvent.change(username_field, { target: { value: "test-user" } });
-    fireEvent.change(email_field, { target: { value: "test-email@gamil.com" } });
+    fireEvent.change(email_field, { target: { value: "test-email@gmail.com" } });
     fireEvent.change(name_field, { target: { value: 'test-name' } });
     fireEvent.change(password_field_P, { target: { value: '123456' } });
     fireEvent.change(password_field_CP, { target: { value: '123456' } });
-    fireEvent.click(screen.getByRole('button', {name: "Sign up"}));
+    fireEvent.click(screen.getByTestId('Sign-up-btn'));
+    
+    // expect(true).toBe(true)
     
     await waitFor(() => {
       expect(screen.getByText('Register successfully!')).toBeInTheDocument();
