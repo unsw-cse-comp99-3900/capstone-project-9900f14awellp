@@ -6,9 +6,6 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { invoiceBasicInfo } from "@/apis/management";
-import { StatusTag, StatusClosableTag } from "../StatusTag/StatusTag";
-
 import {
   createColumnHelper,
   flexRender,
@@ -20,7 +17,6 @@ import {
 } from "@tanstack/react-table";
 
 import { Checkbox } from "@mui/material";
-
 import {
   DatePicker,
   Select,
@@ -31,9 +27,14 @@ import {
   InputNumber,
 } from "antd";
 
+import {
+  StatusTag,
+  StatusClosableTag,
+} from "@/components/Management/StatusTag/StatusTag";
 import { SearchOutlined } from "@ant-design/icons";
 
-import "./global.css";
+import { invoiceAdminManage } from "@/apis/management";
+import { getValue } from "@testing-library/user-event/dist/utils";
 
 // 映射状态
 // Status mapping
@@ -43,38 +44,11 @@ const statusMapping = {
   Passed: "Success",
 };
 
-// 格式化日期
-// Format date
-const formatDate = (dateString) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  }).format(date);
-};
-
 // 格式化total
 // Format total
 const formatPrice = (price) => {
   if (price === null || price === undefined) return "";
   return `$${Number(price).toFixed(2)}`;
-};
-
-// 截断单元格
-// Truncate cell
-const TruncatedCell = ({ content, maxLength = 20 }) => {
-  if (content.length <= maxLength) return content;
-
-  const start = content.slice(0, Math.floor(maxLength / 2));
-  const end = content.slice(-Math.floor(maxLength / 2));
-
-  return (
-    <span title={content}>
-      {start}...{end}
-    </span>
-  );
 };
 
 const tagRender = (props) => {
@@ -89,22 +63,29 @@ const tagRender = (props) => {
   );
 };
 
-export const ManageTable = forwardRef((props, ref) => {
-  // const data = defaultData;
-  const [data, _setData] = React.useState([]);
-  // const rerender = React.useReducer(() => ({}), {})[1];
-  const [searchValue, setSearchValue] = useState("");
-  //eslint-disable-next-line
-  const [selectedDate, setSelectedDate] = useState(null);
-  //eslint-disable-next-line
-  const [selectedDueDate, setSelectedDueDate] = useState(null);
-  //eslint-disable-next-line
-  const [selectedState, setSelectedState] = useState([]);
-  const [columnFilters, setColumnFilters] = useState([]);
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 8,
-  });
+//TODO: 这个table包括
+//TODO：1. 发票id（不用发票名称）
+//TODO：2. 客户名称
+//TODO：3. 发票状态
+//TODO：4. 发票创建的timestamp
+//TODO：5. 是谁创建的
+//TODO：6. 发票金额
+//TODO：7. 操作（查看，验证，发送，删除）
+export function AdminManagementTable() {
+  //*获取数据
+  const [data, _setData] = useState([]);
+  console.log(data);
+  useEffect(() => {
+    invoiceAdminManage()
+      .then((response) => {
+        _setData(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
+  //* 操作列的方法
   const navigate = useNavigate();
   const goValidate = (uuid) => {
     navigate(`/validate/id=${uuid}`);
@@ -113,6 +94,7 @@ export const ManageTable = forwardRef((props, ref) => {
     navigate(`/send/id=${uuid}`);
   };
 
+  //* 操作列的具体内容
   const items = [
     {
       key: "1",
@@ -130,8 +112,16 @@ export const ManageTable = forwardRef((props, ref) => {
         goSend(uuid);
       },
     },
+    {
+      key: "3",
+      label: "Delete",
+      onClick: (uuid) => {
+        //TODO: 删除发票
+      },
+    },
   ];
-  //info是 Ant Design 的 Dropdown 组件在菜单项被点击时自动传递的对象
+
+  //* 点击下拉按钮后使用的方法
   const onMenuClick = (info, uuid) => {
     //const { key } = info; 这行代码使用了 JavaScript 的解构赋值（Destructuring assignment）语法。这是 ES6 （ECMAScript 2015）引入的一个特性，允许我们从对象或数组中提取值，赋给变量
     //这行代码等同于：const key = info.key;
@@ -143,34 +133,7 @@ export const ManageTable = forwardRef((props, ref) => {
     }
   };
 
-  //*获取数据
-  useEffect(() => {
-    invoiceBasicInfo()
-      .then((response) => {
-        _setData(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
-
-  //TODO: 目前使用浏览器内置的PDF查看器，之后可以使用pdf.js
-  //TODO: 目前找不到PDF，显示404，需要修改
-  const handleViewClick = (path) => {
-    try {
-      const pdfUrl = path;
-      console.log(pdfUrl);
-      const realUrl = `capstone-project-9900f14awellp/InvoiceProcessing${path}`;
-
-      // 在新标签页中打开 PDF
-      window.open(realUrl, "_blank");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const columnHelper = createColumnHelper();
-
   const columns = [
     columnHelper.display({
       id: "select",
@@ -220,21 +183,7 @@ export const ManageTable = forwardRef((props, ref) => {
       enableColumnFilter: false,
       cell: (info) => (info.getValue() ? info.getValue() : "Unknown"),
     }),
-    columnHelper.accessor("files_name", {
-      header: "Invoice",
-      enableSorting: false,
-      enableColumnFilter: false,
-      cell: ({ getValue }) => {
-        const value = getValue();
-        return value ? (
-          <div className="bold-text">
-            <TruncatedCell content={getValue()} maxLength={25} />
-          </div>
-        ) : (
-          "Unknown"
-        );
-      },
-    }),
+
     columnHelper.accessor("supplier", {
       header: "Customer",
       enableSorting: false,
@@ -257,27 +206,22 @@ export const ManageTable = forwardRef((props, ref) => {
         return <StatusTag value={displayValue} label={displayValue} />;
       },
     }),
-    columnHelper.accessor("invoice_date", {
-      header: "Invoice Date",
+    columnHelper.accessor("timestamp", {
+      header: "Create At",
       enableSorting: true,
       enableColumnFilter: false,
-      sortingFn: (rowA, rowB, columnId) => {
-        const dateA = new Date(rowA.getValue(columnId));
-        const dateB = new Date(rowB.getValue(columnId));
-        return dateA.getTime() - dateB.getTime();
-      },
-      cell: ({ getValue }) => formatDate(getValue()),
+      //   sortingFn: (rowA, rowB, columnId) => {
+      //     const dateA = new Date(rowA.getValue(columnId));
+      //     const dateB = new Date(rowB.getValue(columnId));
+      //     return dateA.getTime() - dateB.getTime();
+      //   },
+      cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor("due_date", {
-      header: "Payment Due",
+    columnHelper.accessor("userid", {
+      header: "Uploader",
       enableSorting: true,
       enableColumnFilter: false,
-      sortingFn: (rowA, rowB, columnId) => {
-        const dateA = new Date(rowA.getValue(columnId));
-        const dateB = new Date(rowB.getValue(columnId));
-        return dateA.getTime() - dateB.getTime();
-      },
-      cell: ({ getValue }) => formatDate(getValue()),
+      cell: (info) => info.getValue(),
     }),
     columnHelper.accessor("total", {
       header: "Price",
@@ -309,6 +253,15 @@ export const ManageTable = forwardRef((props, ref) => {
       ),
     }),
   ];
+  //*分页
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 8,
+  });
+
+  //* 导出excel的选中数据
+  //eslint-disable-next-line
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const table = useReactTable({
     data,
@@ -319,27 +272,16 @@ export const ManageTable = forwardRef((props, ref) => {
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     state: {
-      globalFilter: searchValue,
-      columnFilters,
       pagination,
-    },
-    onGlobalFilterChange: setSearchValue,
-    onColumnFiltersChange: setColumnFilters,
-    globalFilterFn: (row, columnId, filterValue) => {
-      const escapedValue = filterValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const searchRegex = new RegExp(escapedValue, "i");
-      return (
-        searchRegex.test(row.getValue("files_name")) ||
-        searchRegex.test(row.getValue("supplier"))
-      );
     },
   });
 
-  useImperativeHandle(ref, () => ({
-    getSelectedData: () => {
-      return table.getSelectedRowModel().rows.map((row) => row.original);
-    },
-  }));
+  //* 导出excel的方法
+  //   useImperativeHandle(ref, () => ({
+  //     getSelectedData: () => {
+  //       return table.getSelectedRowModel().rows.map((row) => row.original);
+  //     },
+  //   }));
 
   const [customPageSize, setCustomPageSize] = useState(
     table.getState().pagination.pageSize
@@ -369,74 +311,14 @@ export const ManageTable = forwardRef((props, ref) => {
   const start = pageIndex * pageSize + 1;
   const end = Math.min((pageIndex + 1) * pageSize, total);
 
-  const handleInvoiceDateChange = (date, dateString) => {
-    // console.log('Selected date:', dateString);
-    setSelectedDate(dateString);
-    table.getColumn("invoice_date").setFilterValue(dateString);
-  };
-
-  const handleDueDateChange = (date, dateString) => {
-    // console.log('Selected date:', dateString);
-    setSelectedDueDate(dateString);
-    table.getColumn("due_date").setFilterValue(dateString);
-  };
-
+  const [selectedState, setSelectedState] = useState([]);
   const handleStateChange = (value) => {
     setSelectedState(value);
     table.getColumn("state").setFilterValue(value);
   };
+
   return (
     <div className="table-container">
-      <div className="search-bar">
-        <div className="primary-search">
-          <Input
-            placeholder="Search anything..."
-            className="search-input"
-            prefix={
-              <SearchOutlined
-                style={{
-                  color: "rgba(0,0,0,.25)",
-                }}
-              />
-            }
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-        </div>
-        <div className="second-search">
-          <DatePicker
-            onChange={handleInvoiceDateChange}
-            className="date-picker search-input"
-            placeholder="Invoice Date"
-          />
-          <DatePicker
-            onChange={handleDueDateChange}
-            className="date-picker search-input"
-            placeholder="Payment Due"
-          />
-          <Select
-            placeholder="Status"
-            className="search-input state-select"
-            mode="multiple"
-            tagRender={tagRender}
-            options={[
-              {
-                value: "Success",
-                label: "Success",
-              },
-              {
-                value: "Rejected",
-                label: "Rejected",
-              },
-              {
-                value: "Unvalidated",
-                label: "Unvalidated",
-              },
-            ]}
-            onChange={handleStateChange}
-          />
-        </div>
-      </div>
       <div className="pagination-group">
         <div className="total-info">
           {`showing ${start}-${end} of ${total} items`}
@@ -505,4 +387,4 @@ export const ManageTable = forwardRef((props, ref) => {
       </div>
     </div>
   );
-});
+}
