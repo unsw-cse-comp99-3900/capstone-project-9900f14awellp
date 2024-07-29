@@ -13,6 +13,8 @@ RUN npm install
 # 复制项目文件到工作目录
 COPY . .
 
+ENV NODE_ENV=development
+
 RUN npm run build
  
 # 暴露容器的端口号
