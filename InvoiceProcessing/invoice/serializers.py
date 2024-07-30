@@ -73,7 +73,7 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         data = self.get_file_data(obj)
         nested_form_data = data.get('invoiceForm', {}).get('paymentDate', {})
         if not nested_form_data:
-            nested_form_data = data.get('issue_date', {})
+            nested_form_data = data.get('due_date', {})
         return self.parse_date(nested_form_data)
 
     def get_invoice_number(self, obj):
