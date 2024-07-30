@@ -5,10 +5,6 @@ import { useNavigate, MemoryRouter, Route, Routes } from 'react-router-dom';
 import Register from '../views/Register';
 import Login from '../views/Login';
 import { exec } from 'child_process';
-// import { routes } from "../AppRouter"
-// import axios from 'axios';
-// import { type } from 'os';
-// import { watch } from 'less';
 
 const render_register = () => {
   return render(
