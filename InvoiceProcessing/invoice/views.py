@@ -15,6 +15,7 @@ from django.http import JsonResponse
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.db.models.signals import post_save # 用户已经建好了，才触发generate_token函数生成token
+from django.core.validators import validate_email, ValidationError
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -116,6 +117,15 @@ class RegisterView(APIView):
     )
     def post(self, request):
         ser = RegisterSerializer(data=request.data)
+
+        if User.objects.filter(username=request.data.get('username')).exists():
+            return Response({"error": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        if request.data.get('password') != request.data.get('confirm_password'):
+            return Response({"error": "Passwords do not match"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_email(request.data.get('email'))
+        except ValidationError:
+            return Response({"error": "Please enter a valid email address."}, status=status.HTTP_400_BAD_REQUEST)
         if ser.is_valid():
             ser.validated_data.pop('confirm_password')
             ser.validated_data['password'] = make_password(ser.validated_data['password'])
@@ -650,10 +660,10 @@ class UpFileAPIView(APIView):
                     converter_xml(f"staticfiles/{request.user.id}/{file_stem}.xml")
             elif str(file.file).endswith('.pdf'):
                 url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
-                api_key = {'APIKey': 'f97106de-6723-4665-a890-d247f58ea44d'}
-                payload = {'user': 'Lianqiangzhao',
-                        'pwd': 'Zlq641737796',
-                        'APIKey': 'f97106de-6723-4665-a890-d247f58ea44d'}
+                api_key = {'APIKey': 'aeff7b2f-3554-45ee-8d36-cc6fd5984c28'}
+                payload = {'user': 'xxxx',
+                        'pwd': 'Xxxx1234',
+                        'APIKey': 'aeff7b2f-3554-45ee-8d36-cc6fd5984c28'}
                 # 保留cookie
                 r = requests.get(url + '/Login', params=payload)
                 
@@ -675,7 +685,7 @@ class UpFileAPIView(APIView):
                     invoiceID = str(r2.json().get("invoice_id"))
                 # 1.3 获得传回的json数据
                 payload2 = {'invoiceid':invoiceID,
-                            'APIKey': 'f97106de-6723-4665-a890-d247f58ea44d'}
+                            'APIKey': 'aeff7b2f-3554-45ee-8d36-cc6fd5984c28'}
             
                 sleep(60)
                 r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
@@ -1368,7 +1378,7 @@ class DeleteFileAPIView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
     @swagger_auto_schema(
-        operation_summary='删除发票文件',
+        operation_summary='管理员删除公司发票文件',
         manual_parameters=[
             openapi.Parameter('uuid', openapi.IN_QUERY, description="File UUID", type=openapi.TYPE_STRING)
         ],
@@ -1412,7 +1422,7 @@ class DeleteFileAPIView(APIView):
                             },
                             status=status.HTTP_400_BAD_REQUEST)
         
-        file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
+        file = UpFile.objects.filter(uuid=uuid).first()
         if file is None:
             return Response({
                                 "code": 404,
@@ -1420,7 +1430,7 @@ class DeleteFileAPIView(APIView):
                             },
                             status=status.HTTP_404_NOT_FOUND
                             )
-        file_gui = GUIFile.objects.filter(userid=request.user, uuid=file.uuid).first()
+        file_gui = GUIFile.objects.filter(uuid=file.uuid).first()
 
         if file_gui is not None:
             file_gui.delete()
