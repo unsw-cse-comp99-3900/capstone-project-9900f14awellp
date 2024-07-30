@@ -14,3 +14,6 @@ dump.rdb
 # Ignore compiled Python files
 *.pyc
 __pycache__/
+
+# Ignore vitest coverage file
+coverage
