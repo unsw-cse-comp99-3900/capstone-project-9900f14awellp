@@ -14,3 +14,6 @@ dump.rdb
 # Ignore compiled Python files
 *.pyc
 __pycache__/
+
+# Ignore testing coverage file 
+coverage
