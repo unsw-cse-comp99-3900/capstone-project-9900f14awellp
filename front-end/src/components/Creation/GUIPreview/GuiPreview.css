@@ -84,7 +84,11 @@
 }
 
 .bill-from-to-info {
-  width: 50%;
+  width: 60%;
+}
+
+.bill-info{
+  width: 40%;
 }
 
 .preview-products-row {

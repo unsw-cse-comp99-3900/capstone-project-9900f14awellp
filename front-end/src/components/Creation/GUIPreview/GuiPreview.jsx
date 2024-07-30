@@ -64,7 +64,7 @@ export function GuiPreview() {
               <div>{invoiceData.my_address}</div>
             </div>
           </div>
-          <div className="bill-from-to-info">
+          <div className="bill-info">
             <div className="preview-second-row-title">Invoice Subject: </div>
             <div className="preview-second-row-content">
               <div>{invoiceData.invoice_name}</div>
