@@ -112,10 +112,23 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         return "upload"
 
 class DraftRecording(serializers.ModelSerializer):
+    prograss = serializers.SerializerMethodField()
     class Meta:
         model = Draft
-        fields = ['id','invoice_num','create_date','update_date']
+        fields = ['id','invoice_num','create_date','update_date','prograss']
+    
+    def get_prograss(self, obj):
+        # 全部字段数量
+        all_fields = [field.name for field in Draft._meta.get_fields()]
+        total_fields = len(all_fields)
         
+        # 为空的字段数量
+        non_empty_fields = [field for field in all_fields if getattr(obj, field)]
+        non_empty_count = len(non_empty_fields)
+        # 计算百分比
+        empty_percentage = (non_empty_count / total_fields) * 100
+        return f"{empty_percentage:.2f}%"
+    
 class UserInfoSerializer(serializers.ModelSerializer):
     # 你需要将company字段重定义为SerializerMethodField，而不是直接使用模型字段。这将确保在序列化时调用你定义的get_company方法。以下是修改后的代码：
     company = serializers.SerializerMethodField()
@@ -166,7 +179,23 @@ class RegisterSerializer(serializers.ModelSerializer):
             "id": {"read_only": True,},
             'password': {'write_only': True},
         }
-
+        
+        
+        """
+        自定义验证方法 validate_<field_name> 会在调用 is_valid() 方法时自动被调用。
+        """
+    def validate_password(self, value):
+        return value
+    
+    """
+    value：在 validate_confirm_password 方法中value 是用户输入的 confirm_password 字段的值。
+    因为这个方法的命名规则是 validate_<field_name>，DRF 会自动将 confirm_password 字段的值传递给 validate_confirm_password 方法。
+    """
+    def validate_confirm_password(self, value):
+        password = self.initial_data.get('password')
+        if value != password:
+            raise exceptions.ValidationError("Passwords do not match")
+        return value
     
 
     
