@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
 const getToken = () => {
   const token = localStorage.getItem("token");
@@ -9,7 +9,7 @@ const getToken = () => {
 export function RouterAuth({ children }) {
   const token = getToken();
   if (token) {
-    return <>{children}</>;
+    return children ? children : <Outlet />;
   } else {
     return <Navigate to="/login" />;
   }
