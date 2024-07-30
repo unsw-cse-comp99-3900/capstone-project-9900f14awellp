@@ -2,7 +2,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   font-family: "Lexend Deca", sans-serif;
 }
 
@@ -78,13 +78,16 @@
   color: #333;
   font-family: "Lexend Deca", sans-serif;
   padding-top: 10px;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
+  display: flex;
+  flex-direction: row;
+  gap:10px;
 }
 .statistics-box {
   display: flex;
   flex-direction: row;
   gap: 15px;
-  height: 20vh;
+  height: calc(9.3vh + 6vw);
 }
 
 .statistics-box-inside {
@@ -92,7 +95,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding-top: 5%;
+  padding-top: 3.5%;
   padding-left: 4%;
   padding-right: 3.5%;
   gap: 5px;
@@ -102,6 +105,7 @@
   width: 100%;
   color: rgba(172, 172, 172, 0.9);
   font-weight: 330;
+  font-size: calc(0.6vw + 0.55vh);
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -112,23 +116,43 @@
 	border-radius: 50%;
 	background-color: #E7F7EC;
 	padding: 10px;
+  height: 4.5vh;
+  width: 4.5vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .statistics-loading-icon{
 	border-radius: 50%;
 	background-color: #FFD4D4;
 	padding: 10px;
+  height: 4.5vh;
+  width: 4.5vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .statistics-dollor-icon{
 	border-radius: 50%;
 	background-color: #FFF5E7;
 	padding: 10px;
+  height: 4.5vh;
+  width: 4.5vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .statistics-user-icon{
 	border-radius: 50%;
 	background-color: #F9F9F9;
 	padding: 10px;
+  height: 4.5vh;
+  width: 4.5vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .statistics-amount {
@@ -146,4 +170,99 @@
   padding: 2px 8px;
   border-radius: 15px;
   background-color: #f9f9f9;
+}
+
+.admin-search-row{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 3px;
+}
+
+.payment-search{
+  display: flex;
+  flex-direction: row;
+  gap: 25px;
+  align-items: center;
+  font-weight: 300;
+  border-bottom: #e0e0e0 1px solid;
+  padding-bottom: 15px;
+}
+
+.payment-status-box{
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: end;
+  cursor: pointer;
+  position: relative;
+}
+
+.payment-status-box.selected::after {
+  content: '';
+  position: absolute;
+  bottom: -16.5px;
+  left: 0;
+  width: 100%;
+  height: 2.5px;
+  background-color: #333;
+}
+
+.bold-text {
+  font-weight: 500;
+}
+
+.all-payment-tag{
+  display: inline-block;
+  width: fit-content;
+  color: #333;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 15px;
+  background-color: #f9f9f9;
+}
+
+.paid-payment-tag{
+  display: inline-block;
+  width: fit-content;
+  color: #18601F;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 15px;
+  background-color: #E7F7EC;
+}
+
+.unpaid-payment-tag{
+  display: inline-block;
+  width: fit-content;
+  color: #7C4706;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 15px;
+  background-color: #FFF5E7;
+}
+
+.overview-info-icon{
+  color: #333;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.admin-search-row-left{
+  display: flex;
+  flex-direction: row;
+  gap: 35px;
+  align-items: center;
+}
+
+.admin-search-input{
+  width: 19vw;
+}
+
+.admin-search-row-right{
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  align-items: center;
 }
