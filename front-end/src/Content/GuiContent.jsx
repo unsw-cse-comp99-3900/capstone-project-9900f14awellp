@@ -1,6 +1,7 @@
 // src/context/InvoiceContext.js
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 
+import { CompanyInfo } from "@/apis/gui";
 const InvoiceContext = createContext();
 
 export function InvoiceProvider({ children }) {
@@ -36,6 +37,24 @@ export function InvoiceProvider({ children }) {
     note: "",
     orders: [],
   });
+
+  useEffect(() => {
+    const fetchCompanyInfo = async () => {
+      try {
+        const res = await CompanyInfo();
+        setInvoiceData((prevData) => ({
+          ...prevData,
+          my_company_name: res.data.name,
+          my_address: res.data.address,
+          my_ABN: res.data.ABN,
+          my_email: res.data.email,
+        }));
+      } catch (error) {
+        console.warning("Failed to fetch company info:", error);
+      }
+    };
+    fetchCompanyInfo();
+  }, []);
 
   const updateInvoiceData = (newData) => {
     setInvoiceData((prevData) => ({ ...prevData, ...newData }));

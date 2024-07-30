@@ -189,6 +189,11 @@ export default function Create() {
         );
         return;
       }
+      //点击Continue按钮时，如果invoiceData中没有uuid，则生成一个uuid
+      if (invoiceData.uuid === "") {
+        const newUuid = uuidv4();
+        updateInvoiceData({ uuid: newUuid });
+      }
 
       try {
         await submitInvoice(invoiceData);
