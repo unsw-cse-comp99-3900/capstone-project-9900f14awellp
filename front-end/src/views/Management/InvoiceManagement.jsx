@@ -34,7 +34,6 @@ export function InvoiceManagement() {
     setAlert({ ...alert, show: false });
   };
 
-  //TODO: 导出excel这里admin和普通user的逻辑不一样，需要修改
   const handleExport = async () => {
     //console.log('Export button clicked');
 

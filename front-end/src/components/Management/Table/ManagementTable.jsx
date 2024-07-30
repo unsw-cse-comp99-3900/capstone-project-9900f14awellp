@@ -393,6 +393,7 @@ export const ManageTable = forwardRef((props, ref) => {
       <div className="search-bar">
         <div className="primary-search">
           <Input
+            allowClear
             placeholder="Search anything..."
             className="search-input"
             prefix={

@@ -11,6 +11,7 @@ import Upload from "@/views/Creation/Upload";
 import GUI from "@/views/Creation/GUI";
 import Sending from "@/views/sending";
 import { InvoiceManagement } from "@/views/Management/InvoiceManagement";
+import InvoiceDetails from "./views/Management/InvoiceDetails";
 import Draft from "@/views/Draft";
 import Profile from "@/views/Profile";
 import Validation from "@/views/Validation";
@@ -18,7 +19,6 @@ import NotFound from "@/views/NotFound";
 import Choice from "@/views/ChoiceCompany";
 import CompanyDetails from "@/views/CompanyDetails";
 import { RouterAuth } from "@/router/RouterAuth";
-
 // 定义路由配置
 export const routes = [
   { path: "/", element: <Welcome /> },
@@ -52,11 +52,11 @@ export const routes = [
   },
   {
     path: "/manage",
-    element: (
-      <RouterAuth>
-        <InvoiceManagement />
-      </RouterAuth>
-    ),
+    element: <RouterAuth />,
+    children: [
+      { index: true, element: <InvoiceManagement /> },
+      { path: ":id", element: <InvoiceDetails /> },
+    ],
   },
   {
     path: "/send",
