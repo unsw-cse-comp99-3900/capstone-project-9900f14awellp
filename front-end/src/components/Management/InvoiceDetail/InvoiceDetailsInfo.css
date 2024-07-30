@@ -1,5 +1,26 @@
-.info-details-header-row{
+.info-detail-view{
     display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: start;
+    background-color: #F6F8FA;
+}
+
+.info-details-header-row{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
     justify-content: space-between;
     margin-bottom: 20px;
 }
+.info-details-header-row-left{
+    display: flex;
+    flex-direction: row;
+}
+.info-details-header-row-left{
+    display: flex;
+    flex-direction: row;
+}
+

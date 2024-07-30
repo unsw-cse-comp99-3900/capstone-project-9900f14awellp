@@ -8,7 +8,5 @@ import "./assets/style/font.less";
 const router = createAppRouter();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <App router={router} />
-  </React.StrictMode>
+  <App router={router} />
 );

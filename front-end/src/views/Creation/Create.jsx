@@ -1,4 +1,4 @@
-import { React, useEffect, useState } from "react";
+import { React, useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
@@ -78,7 +78,7 @@ function validateInvoiceData(data) {
 
 export default function Create() {
   const { invoiceData, clearInvoiceData, updateInvoiceData } = useInvoice();
-  console.log("invoiceData", invoiceData);
+  // console.log("invoiceData", invoiceData);
 
   const [selectedCard, setSelectedCard] = useState(null);
   const [showCardSelector, setShowCardSelector] = useState(true);
@@ -89,6 +89,8 @@ export default function Create() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
+  const outletRef = useRef();
+  const [isBlocking, setIsBlocking] = useState(true);
 
   // useEffect(() => {
   //   console.log("Current step changed:", currentStep);
@@ -198,7 +200,14 @@ export default function Create() {
       try {
         await submitInvoice(invoiceData);
         showAlert("submit successful", "success");
-        setCurrentStep(2); // 移动到下一步
+        setCurrentStep(2);
+        setIsBlocking(false);
+
+        // 调用 GUI 组件的 handleFormSubmit 函数
+        if (outletRef.current && outletRef.current.handleFormSubmit) {
+          await outletRef.current.handleFormSubmit();
+        }
+
         setTimeout(() => {
           navigate("/home");
           clearInvoiceData();
@@ -288,7 +297,15 @@ export default function Create() {
       )}
 
       {!showCardSelector && (
-        <Outlet context={{ showAlert, setUploadComplete, setUploadProgress }} />
+        <Outlet
+          context={{
+            showAlert,
+            setUploadComplete,
+            setUploadProgress,
+            setIsBlocking,
+            ref: outletRef,
+          }}
+        />
       )}
 
       <ProgressIndicator
