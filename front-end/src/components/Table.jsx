@@ -17,6 +17,7 @@ import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import { Progress } from 'antd';
@@ -161,7 +162,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected } = props;
+    const { numSelected, selected, handleDelete } = props;
 
   return (
     <Toolbar
@@ -195,11 +196,13 @@ function EnhancedTableToolbar(props) {
       )}
 
       {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton>
-            <EditIcon />
-          </IconButton>
-        </Tooltip>
+         <>
+         <Tooltip title="Delete">
+         <IconButton onClick={() => handleDelete(selected)}>
+             <DeleteIcon />
+           </IconButton>
+         </Tooltip>
+       </>
       ) : (
         <Tooltip title="Filter list">
           <IconButton>
@@ -212,8 +215,11 @@ function EnhancedTableToolbar(props) {
 }
 
 EnhancedTableToolbar.propTypes = {
-  numSelected: PropTypes.number.isRequired,
-};
+    numSelected: PropTypes.number.isRequired,
+    selected: PropTypes.array.isRequired,
+    handleDelete: PropTypes.func.isRequired,
+  };
+  
 
 export default function EnhancedTable() {
   const [order, setOrder] = React.useState('asc');
@@ -240,6 +246,7 @@ export default function EnhancedTable() {
     if (event.target.checked) {
       const newSelected = rows.map((n) => n.id);
       setSelected(newSelected);
+      console.log('Selected IDs:', newSelected); // Log selected IDs
       return;
     }
     setSelected([]);
@@ -262,6 +269,7 @@ export default function EnhancedTable() {
       );
     }
     setSelected(newSelected);
+    console.log('Selected IDs:', newSelected); // Log selected IDs
   };
 
   const handleChangePage = (event, newPage) => {
@@ -272,6 +280,18 @@ export default function EnhancedTable() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  const handleEdit = (selectedIds) => {
+    // Add your edit logic here
+    console.log('Editing IDs:', selectedIds);
+  };
+
+  const handleDelete = (selectedIds) => {
+    // Add your delete logic here
+    
+    console.log('Deleting IDs:', selectedIds);
+  };
+
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
@@ -336,7 +356,11 @@ useEffect(() => {
       )}
         <Box sx={{ width: '100%', marginTop: "10px",}}>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar 
+        numSelected={selected.length} 
+        selected={selected}
+        handleDelete={handleDelete} 
+        />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -370,6 +394,7 @@ useEffect(() => {
                       <Checkbox
                         color="primary"
                         checked={isItemSelected}
+                        onClick={(event) => handleClick(event, row.id)} // Attach handleClick to checkbox
                         inputProps={{
                           'aria-labelledby': labelId,
                         }}
@@ -384,12 +409,12 @@ useEffect(() => {
                       {row.invoiceNumber}
                     </TableCell>
                     <TableCell align="right">
-                      <Progress percent={row.progress} size="small" strokeColor={Colors}/>
+                      <Progress percent={row.progress} size="small" strokeColor={Colors} status="active"/>
                     </TableCell>
                     <TableCell align="right">{row.createTime}</TableCell>
                     <TableCell align="right">{row.updateTime}</TableCell>
                     <TableCell align="right">
-                      <IconButton>
+                      <IconButton onClick={() => handleEdit([row.id])}>
                         <EditIcon />
                       </IconButton>
                     </TableCell>
