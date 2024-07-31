@@ -10,7 +10,7 @@ from types import SimpleNamespace
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from datetime import datetime
-
+import fitz  # PyMuPDF
 
 from django.http import JsonResponse
 from django.core.mail import EmailMessage
@@ -791,6 +791,24 @@ class UpFileAPIView(APIView):
             "msg":"success",
         })"""
         
+        
+        
+
+
+def pdf_to_png(pdf_path, output_dir):
+    # 打开PDF文件
+    pdf_document = fitz.open(pdf_path)
+    for page_number in range(len(pdf_document)):
+        # 获取页面
+        page = pdf_document.load_page(page_number)
+        # 将页面转换为图像
+        pix = page.get_pixmap()
+        # 保存图像为PNG文件
+        image_path = os.path.join(output_dir)
+        pix.save(image_path)
+    pdf_document.close()
+
+
 class GUIFileAPIView(APIView):
     # authentication_classes = [MyAhenAuthentication]
     authentication_classes = [JWTAuthentication]
@@ -948,6 +966,9 @@ class GUIFileAPIView(APIView):
                 )
             
             
+            pdf_path = f"staticfiles/{request.user.id}/{filename}.pdf"
+
+            pdf_to_png(pdf_path, f"staticfiles/{request.user.id}/{filename}.png")
             
             
             return Response({
@@ -1452,6 +1473,8 @@ class DeleteFileAPIView(APIView):
             os.remove(f"staticfiles/{request.user.id}/{file_stem}.xml")
         if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}_report.json"):
             os.remove(f"staticfiles/{request.user.id}/{file_stem}_report.json")
+        if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}_report.png"):
+            os.remove(f"staticfiles/{request.user.id}/{file_stem}_report.png")
             
         file.delete()
         return Response({
