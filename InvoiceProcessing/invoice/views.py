@@ -1318,6 +1318,85 @@ class GUIFileDraft(APIView):
                             },
             )
 
+
+
+    @swagger_auto_schema(
+        operation_summary="删除一个或多个发票",
+        operation_description="根据发票ID列表删除一个或多个发票。",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'ids': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_STRING),
+                    description='发票ID列表'
+                )
+            }
+        ),
+        responses={
+            200: openapi.Response(
+                description="删除成功",
+                examples={
+                    "application/json": {
+                        "code": 200,
+                        "msg": "success",
+                        "data": "Files have been deleted"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="请求错误",
+                examples={
+                    "application/json": {
+                        "code": 400,
+                        "msg": "IDs are required"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="未找到文件",
+                examples={
+                    "application/json": {
+                        "code": 404,
+                        "msg": "Some files not found"
+                    }
+                }
+            ),
+        }
+    )
+    def delete(self, request):
+        ids = request.data.get('ids')
+        if not ids:
+            return Response({
+                                "code": 400,
+                                "msg": "IDs are required",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        not_found_ids = []
+        for draftid in ids:
+            file = Draft.objects.filter(userid=request.user, id=draftid).first()
+            if not file:
+                not_found_ids.append(draftid)
+            else:
+                file.delete()
+
+        if not_found_ids:
+            return Response({
+                                "code": 404,
+                                "msg": "Some files not found",
+                                "not_found_ids": not_found_ids
+                            },
+                            status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({
+                            "code": 200,
+                            "msg": "success",
+                            "data": "Files have been deleted"
+                        },
+                        status=status.HTTP_200_OK)
+
+
 class FileReport(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [CompanyWorker]

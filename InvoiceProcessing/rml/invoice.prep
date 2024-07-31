@@ -23,6 +23,8 @@
     <paraStyle name="footer" parent="normal" fontSize="9" leading="10"/>
     <paraStyle name="table_normal" fontName="Helvetica" fontSize="11" leading="13"/>
     <paraStyle name="table_desc_pt2" fontName="Helvetica" fontSize="9" leading="11"/>
+    <paraStyle name="table_desc_black" fontName="Helvetica" fontSize="11" leading="13" textColor="black"/>
+
 
     <!--Table for bank details-->
     <blockTableStyle id="detailtable" spaceAfter="10">
@@ -69,7 +71,8 @@
 <blockTable style="detailtable" colWidths="60%, 40%">
     <tr>
         <td leftPadding="0">
-            <para style="normal" leading="20" fontSize="17"><b>Company:{{data.my_company_name}}</b><br/></para>
+            
+            <pre style="normal">Company:{{data.my_company_name}}</pre>
             <pre style="normal">Address:{{data.my_address}}</pre>
             <pre style="normal">Email:{{data.my_email}}</pre>
         </td>
