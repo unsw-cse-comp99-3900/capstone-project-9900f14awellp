@@ -10,7 +10,9 @@ COPY . /INVOICE_PROCESSING/
 # 安装系统依赖
 RUN apt-get update && apt-get install -y \
     build-essential \
-    && apt-get clean
+    && apt-get clean \
+    && apt-get install -y libmupdf-dev
+
 # 安装Python依赖
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
