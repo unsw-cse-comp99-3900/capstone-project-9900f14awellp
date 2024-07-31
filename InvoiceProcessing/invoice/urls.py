@@ -40,6 +40,7 @@ urlpatterns = [
     path('invoice-draft',views.GUIFileDraft.as_view(),name='invoice-draft'),
     path('invoice-time',views.TimeOfInvoice.as_view(),name='invoice-draft'),
     path('invoice-report',views.FileReport.as_view(),name='invoice-report'),
+    path('invoice-number',views.FileNumber.as_view(),name='invoice-number'),
     path('company-invoice-info/',views.CompanyFileInfoAPIView.as_view(),name='company-invoice-info'),
     path('company-info/',views.CompanyInfo.as_view(),name='company-info'),
     path('company-workers-info/',views.CompanyWorkersInfo.as_view(),name='company-workers-info'),
