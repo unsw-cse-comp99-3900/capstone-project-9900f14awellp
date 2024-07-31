@@ -8,12 +8,25 @@ import axios from "axios";
 import OutlinedAlerts from "../components/Alert";
 import FormDialog from "../components/Model";
 import loading from "../assets/loading.gif";
+import { CompanyInfo } from "@/apis/gui";
+import { useInvoice } from "@/Content/GuiContent";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showIcon, setShowIcon] = useState(false);
   const [alert, setAlert] = useState(null); // 初始状态设置为null
+  const { updateInvoiceData } = useInvoice();
+
+  const updateCompanyInfo = (companyData) => {
+    updateInvoiceData({
+      my_company_name: companyData.name,
+      my_address: companyData.address,
+      my_ABN: companyData.ABN,
+      my_email: companyData.email,
+    });
+  };
+
   //* 路由跳转
   const navigate = useNavigate();
   const goRegister = () => {
@@ -40,8 +53,14 @@ export default function Login() {
         localStorage.setItem("userid", response.data.userid);
         localStorage.setItem("is_admin", response.data.is_admin);
         // alert(response.data.state);
-        goDashboard();
         setAlert({ severity: "success", message: "Login successfully!" });
+        return CompanyInfo();
+      })
+      .then((companyInfoResponse) => {
+        // 处理公司信息
+        const companyData = companyInfoResponse.data;
+        updateCompanyInfo(companyData);
+        goDashboard();
       })
       .catch((error) => {
         if (error.response) {
