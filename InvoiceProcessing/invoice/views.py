@@ -939,7 +939,6 @@ class GUIFileAPIView(APIView):
             file_data = FileGUISerializer(file_instance).data
             # 把title和userid pop掉，存到文件中
             #file_data.pop('id', None)
-            file_data.pop('invoice_name', None)
             file_data.pop('uuid', None)
             file_data.pop('userid', None)
 
