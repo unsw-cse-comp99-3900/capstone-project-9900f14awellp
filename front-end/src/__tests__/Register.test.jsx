@@ -5,18 +5,11 @@ import { useNavigate, MemoryRouter, Route, Routes } from 'react-router-dom';
 import Register from '../views/Register';
 import Login from '../views/Login';
 import { exec } from 'child_process';
-
-const render_register = () => {
-  return render(
-    <MemoryRouter initialEntries={['/register']}>
-        <Register />
-    </MemoryRouter>
-  );
-};
+import { render_page } from './render_page_for_test';
 
 describe('Register unit test', () => {
     test('Register page element test', () => {
-      render_register();
+      render_page(Register, 'register');
     
       // check h1 text
       expect(screen.getByRole('heading', {name: "Create an account"})).toBeInTheDocument();
@@ -60,7 +53,7 @@ describe('Register unit test', () => {
     });
 
     test('toggle password visibility button function', () => {
-      render_register();
+      render_page(Register, 'register');
 
       const password_parent_P = screen.getByTestId("Register-password");
       const input_field = password_parent_P.querySelector("#Register-password");
@@ -85,7 +78,7 @@ describe('Register unit test', () => {
 
     test('toggle confirm password visibility button function', () => {
       // same as the above, but on confirm password
-      render_register();
+      render_page(Register, 'register');
 
       const password_parent_CP = screen.getByTestId("Register-confirm-password");
       const input_field = password_parent_CP.querySelector("#Register-confirm-password");
@@ -124,7 +117,7 @@ describe('Register unit test', () => {
     });
 
     test('show agreement modal', () => {
-        render_register();
+        render_page(Register, 'register');
         const TSPP = screen.getByText("By clicking Login, you agree to our Terms of Service and Privacy Policy");
         expect(TSPP).toBeInTheDocument();
         fireEvent.click(TSPP);
@@ -143,7 +136,7 @@ describe('Register unit test', () => {
 
 describe('incomplete form test', () => {
   test('only enter Username', async () => {
-    render_register();
+    render_page(Register, 'register');
 
     // get username input field
     const username_parent = screen.getByTestId("Register-Username");
@@ -158,7 +151,7 @@ describe('incomplete form test', () => {
   });
 
   test('only enter Email will show failed', async () => {
-    render_register();
+    render_page(Register, 'register');
 
     // get email input field
     const email_parent = screen.getByTestId("Register-Email");
@@ -173,7 +166,7 @@ describe('incomplete form test', () => {
   });
 
   test('only enter Name will show failed', async () => {
-    render_register();
+    render_page(Register, 'register');
 
     // get name input field
     const name_parent = screen.getByTestId("Register-Name");
@@ -188,7 +181,7 @@ describe('incomplete form test', () => {
   });
 
   test('only enter Passwords will show failed', async () => {
-    render_register();
+    render_page(Register, 'register');
 
     // get password input field
     const password_parent_P = screen.getByTestId("Register-password");
@@ -225,7 +218,7 @@ const exec_async = (command) => {
 
 describe('complete form test', () => {
   test('successful register', async () => {
-    render_register();
+    render_page(Register, 'register');
     // delete the record in sqlite if username and email have been used
     await exec_async('python3 src/__tests__/sqlite3_read_script.py');
     // get username input field
@@ -263,7 +256,7 @@ describe('complete form test', () => {
   });
 
   test('password & confirm password not the same', async () => {
-    render_register();
+    render_page(Register, 'register');
 
     await exec_async('python3 src/__tests__/sqlite3_read_script.py');
     

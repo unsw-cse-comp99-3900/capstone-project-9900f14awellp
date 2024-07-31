@@ -163,12 +163,14 @@ export default function Login() {
         <InputTextField
           label="username"
           id="Login-username"
+          dataTestId="Login-username"
           defaultValue="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <PasswordTextField
           id="Login-password"
+          dataTestId="Login-password"
           label="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
