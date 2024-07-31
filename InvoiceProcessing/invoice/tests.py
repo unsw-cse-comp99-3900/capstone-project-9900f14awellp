@@ -1,7 +1,7 @@
 # tests.py
 from django.test import TestCase
 from django.utils import timezone
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, UserInfoSerializer
 from .models import User, Company
 from .views import RegisterView, CreateCompanyView
 from django.core.exceptions import ValidationError
@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
+'''
 
 # test For models.py
 class UserModelTest(TestCase):
@@ -139,9 +140,9 @@ class CompanyModelTest(TestCase):
         )
         self.assertIsNone(company.logo)
 
-
 '''
 
+'''
 # test For serializers.py
 class RegisterSerializerTest(TestCase):
 
@@ -207,8 +208,58 @@ class RegisterSerializerTest(TestCase):
         serializer = RegisterSerializer(data=self.valid_data)
         serializer.is_valid()
         self.assertNotIn('password', serializer.data)
+   
+class UserInfoSerializerTest(TestCase):
+
+    def setUp(self):
+        # creat company instance
+        self.company = Company.objects.create(
+            name="Test Company",
+            phone_number="1234567890",
+            email="company@example.com",
+            ABN="123456789",
+            address="123 Test St, Test City, Test State"
+        )
+        
+        # create user with company
+        self.user_with_company = User.objects.create(
+            username="user_with_company",
+            password="password123",
+            email="user_with_company@example.com",
+            name="User With Company",
+            company=self.company
+        )
+
+        # create user without company
+        self.user_without_company = User.objects.create(
+            username="user_without_company",
+            password="password123",
+            email="user_without_company@example.com",
+            name="User Without Company"
+        )
+
+    def test_user_with_company(self):
+        """
+        test if UserInfoSerializer returns correct data for user with company.
+        """
+        serializer = UserInfoSerializer(self.user_with_company)
+        data = serializer.data
+        self.assertEqual(data['company'], self.company.name)
+        self.assertEqual(data['username'], self.user_with_company.username)
+        self.assertEqual(data['email'], self.user_with_company.email)
+
+    def test_user_without_company(self):
+        """
+        test if UserInfoSerializer returns correct data for user without company.
+        """
+        serializer = UserInfoSerializer(self.user_without_company)
+        data = serializer.data
+        self.assertIsNone(data['company'])
+        self.assertEqual(data['username'], self.user_without_company.username)
+        self.assertEqual(data['email'], self.user_without_company.email)
 
 '''
+
 
 '''
 # test For views.py

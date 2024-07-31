@@ -166,7 +166,6 @@ class CompanySerializer(serializers.ModelSerializer):
         model = Company
         fields = '__all__'
 
-
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
     
@@ -180,21 +179,20 @@ class RegisterSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
         }
 
-    
-
+    def validate_confirm_password(self, value):
+        password = self.initial_data.get('password')
+        if value != password:
+            raise exceptions.ValidationError("Passwords do not match")
+        return value
     
 class PasswordResetSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
-    
-    
+      
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = '__all__'
-
-
-
 
 # only data of uploading files need to be serialized
 class FileUploadSerializer(serializers.ModelSerializer):
@@ -205,7 +203,6 @@ class FileUploadSerializer(serializers.ModelSerializer):
         # Set is_validated to True when creating a new UpFile instance
         validated_data['is_validated'] = True
         return super().create(validated_data)"""
- 
  
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:

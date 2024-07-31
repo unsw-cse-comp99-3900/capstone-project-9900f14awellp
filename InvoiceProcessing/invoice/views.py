@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from datetime import datetime
 
+
 from django.http import JsonResponse
 from django.core.mail import EmailMessage
 from django.conf import settings
@@ -126,6 +127,7 @@ class RegisterView(APIView):
             validate_email(request.data.get('email'))
         except ValidationError:
             return Response({"error": "Please enter a valid email address."}, status=status.HTTP_400_BAD_REQUEST)
+        
         if ser.is_valid():
             ser.validated_data.pop('confirm_password')
             ser.validated_data['password'] = make_password(ser.validated_data['password'])
@@ -930,6 +932,7 @@ class GUIFileAPIView(APIView):
                 json.dump(file_data, f, ensure_ascii=False, indent=4)
             xml_elem = json_to_xml(file_data)
             xml_str = prettify(xml_elem)
+            
             with open(f"staticfiles/{request.user.id}/{filename}.xml", "w", encoding="utf-8") as f:
                 f.write(xml_str)
             """output_dir = f"staticfiles/{request.user.id}"
@@ -943,6 +946,8 @@ class GUIFileAPIView(APIView):
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE
                 )
+            
+            
             
             
             return Response({

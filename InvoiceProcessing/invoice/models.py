@@ -62,7 +62,6 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 
-
 # use userid to bind user and file
 class UpFile(models.Model):
     file = models.FileField(upload_to=user_directory_path)
@@ -78,8 +77,6 @@ class UpFile(models.Model):
     
     class Meta:
         unique_together = ('userid', 'file')
-
-
 
 class Order(models.Model):
     description = models.CharField(max_length=255,default="")
@@ -149,11 +146,7 @@ class Draft(models.Model):
         if not self.total_amount.startswith('$'):
             self.total_amount = f"\u0024{self.total_amount}"         
  
-        super().save(*args, **kwargs)
-    
-    
-    
-    
+        super().save(*args, **kwargs)  
     
 class GUIFile(models.Model):
     invoice_name = models.CharField(max_length=30)
