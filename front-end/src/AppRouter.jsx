@@ -18,6 +18,7 @@ import Validation from "@/views/Validation";
 import NotFound from "@/views/NotFound";
 import Choice from "@/views/ChoiceCompany";
 import CompanyDetails from "@/views/CompanyDetails";
+import UserManage from "./views/User/UserManage";
 import { RouterAuth } from "@/router/RouterAuth";
 // 定义路由配置
 export const routes = [
@@ -99,6 +100,14 @@ export const routes = [
     element: (
       <RouterAuth>
         <CompanyDetails />
+      </RouterAuth>
+    ),
+  },
+  {
+    path: "/employee-management",
+    element: (
+      <RouterAuth>
+        <UserManage />
       </RouterAuth>
     ),
   },

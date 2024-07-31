@@ -16,6 +16,15 @@ import AdbIcon from "@mui/icons-material/Adb";
 
 const pages = ["Create", "Validate", "Send", "Manage"];
 const settings = ["Profile", "Draft", "Company Details", "Logout"];
+const admin_settings = [
+  "Profile",
+  "Draft",
+  "Company Details",
+  "Employee Management",
+  "Logout",
+];
+
+const is_admin = localStorage.getItem("is_admin") === "true";
 
 export const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -170,14 +179,24 @@ export const ResponsiveAppBar = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem
-                  key={setting}
-                  onClick={() => handleNavigateProfile(setting)}
-                >
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              {!is_admin &&
+                settings.map((setting) => (
+                  <MenuItem
+                    key={setting}
+                    onClick={() => handleNavigateProfile(setting)}
+                  >
+                    <Typography textAlign="center">{setting}</Typography>
+                  </MenuItem>
+                ))}
+              {is_admin &&
+                admin_settings.map((setting) => (
+                  <MenuItem
+                    key={setting}
+                    onClick={() => handleNavigateProfile(setting)}
+                  >
+                    <Typography textAlign="center">{setting}</Typography>
+                  </MenuItem>
+                ))}
             </Menu>
           </Box>
         </Toolbar>
