@@ -20,6 +20,17 @@ export function InvoiceDetailsInfo() {
   const curId = useParams().id.slice(3);
   const [originalInvoice, setOriginalInvoice] = useState({});
 
+  useEffect(() => {
+    //如果是管理员，调用invoiceAdminManage，否则调用invoiceBasicInfo
+    const fetchData = is_admin ? invoiceAdminManage : invoiceBasicInfo;
+
+    fetchData().then((res) => {
+      const data = res.data;
+      const currentInvoice = findCurrentInvoice(data, curId);
+      setOriginalInvoice(currentInvoice);
+    });
+  }, []);
+
   // useEffect(() => {
   //   if (window.pdfjsLib) {
   //     window.pdfjsLib.GlobalWorkerOptions.workerSrc = window.pdfjsWorkerSrc;
