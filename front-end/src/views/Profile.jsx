@@ -176,7 +176,6 @@ export default function Profile() {
                                   display: "flex",
                                   justifyContent: "flex-end",
                                   alignItems: "center",
-                                  marginRight: "auto",
                                    width: '100%',
                                    marginRight: '10px'
                                 }}>
