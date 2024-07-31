@@ -2073,6 +2073,13 @@ class TimeOfInvoice(APIView):
                 description="文件的UUID",
                 type=openapi.TYPE_STRING,
                 required=True
+            ),
+            openapi.Parameter(
+                'id',
+                openapi.IN_QUERY,
+                description="用户ID（可选），如果不填默认是该用户",
+                type=openapi.TYPE_STRING,
+                required=False
             )
         ],
         responses={
@@ -2120,8 +2127,18 @@ class TimeOfInvoice(APIView):
     )
     def get(self, request):
         uuid = request.GET.get('uuid')
+        userid = request.GET.get('id')
+        name = request.user.name
         
-        file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
+        if userid:
+            file = UpFile.objects.filter(userid=userid, uuid=uuid).first()
+            user = User.objects.filter(id=userid).first()
+            if user is None:
+                return JsonResponse({"code": 404, "msg": "user not found"}, status=status.HTTP_404_NOT_FOUND)
+            name = user.name
+            
+        else:
+            file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
         if file is None:
             return JsonResponse({"code": 404, "msg": "file not found"}, status=status.HTTP_404_NOT_FOUND)
         create_date = file.create_date
@@ -2131,6 +2148,7 @@ class TimeOfInvoice(APIView):
         return JsonResponse({
             "code": 200,
             "msg": "success",
+            "user_name":name,
             "create_date": create_date,
             "validation_date": validation_date,
             "send_date":sending_date,

@@ -213,7 +213,7 @@ class DraftGUISerializer(serializers.ModelSerializer):
     #invoice_name = serializers.CharField(required=True)
     invoice_num = serializers.CharField(required=True)
     userid = serializers.PrimaryKeyRelatedField(read_only=True)  # 设置为只读
-    orders = OrderSerializer(many=True)
+    orders = OrderSerializer(many=True,required=False)
     class Meta:
         # 使用draft而不是model
         model = Draft
@@ -251,7 +251,7 @@ class DraftGUISerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        orders_data = validated_data.pop('orders')
+        orders_data = validated_data.pop('orders', [])  # 如果 orders 不存在，设置为空列表
         guifile = Draft.objects.create(**validated_data)
         for order_data in orders_data:
             order = Order.objects.create(**order_data)
