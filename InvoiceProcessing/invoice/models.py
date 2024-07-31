@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.utils import timezone
+
 
 def user_directory_path(instance, filename):
     # 文件将上传到 MEDIA_ROOT/user_<id>/<filename>
@@ -71,7 +73,7 @@ class UpFile(models.Model):
     is_validated = models.BooleanField(default=False)
     is_correct = models.BooleanField(default=False)
     is_sent = models.BooleanField(default=False)
-    create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
+    create_date = models.DateTimeField(default=timezone.now, verbose_name='Create Date')
     validation_date = models.DateTimeField(verbose_name='Validation Date',null=True, blank=True)
     sending_date = models.DateTimeField(verbose_name='Validation Date',null=True, blank=True)
     email_receiver=models.CharField(max_length=30, default="", verbose_name='Email Receiver')

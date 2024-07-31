@@ -824,6 +824,13 @@ class GUIFileAPIView(APIView):
                 openapi.IN_QUERY,
                 description="发票id,不是uuid, 用于删除draft记录,",
                 type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                'date',
+                openapi.IN_QUERY,
+                description="文件的创建日期 (2024-07-31 20:56:26.798927),不填则默认为当前时间",
+                type=openapi.TYPE_STRING,
+                required=False
             )
         ],
         request_body=openapi.Schema(
@@ -891,6 +898,7 @@ class GUIFileAPIView(APIView):
             )
         )
     def post(self, request):
+        create_date = request.query_params.get('date', None)
         file_serializer = FileGUISerializer(data=request.data)
         if file_serializer.is_valid():
             file_serializer.validated_data['userid'] = request.user
@@ -919,11 +927,20 @@ class GUIFileAPIView(APIView):
             file_path_pdf = f"staticfiles/{request.user.id}/{filename}.pdf"
             
             # 将数据保存到 Invoice_upfile 表中
-            UpFile.objects.create(
-                file=file_path_pdf,
-                uuid=file_instance.uuid,
-                userid=file_instance.userid,
-            )
+            if create_date:
+                UpFile.objects.create(
+                    file=file_path_pdf,
+                    uuid=file_instance.uuid,
+                    userid=file_instance.userid,
+                    create_date=create_date,
+                )
+            else:
+                    UpFile.objects.create(
+                    file=file_path_pdf,
+                    uuid=file_instance.uuid,
+                    userid=file_instance.userid,
+                    create_date=create_date,
+                )
 
             if file_id != None:
                 draft = Draft.objects.filter(userid=request.user, id=file_id).first()
