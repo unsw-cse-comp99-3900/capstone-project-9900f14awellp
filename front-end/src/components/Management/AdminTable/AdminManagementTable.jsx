@@ -32,6 +32,8 @@ import {
   DeleteOutlined,
   ArrowDownOutlined,
   ArrowUpOutlined,
+  ExportOutlined,
+  AppstoreAddOutlined,
 } from "@ant-design/icons";
 
 import { ShineBorder } from "./ShineBorder";
@@ -658,6 +660,7 @@ export function AdminManagementTable() {
         row.total,
       ]);
     });
+
     // 生成Excel文件并下载
     workbook.xlsx.writeBuffer().then((buffer) => {
       const blob = new Blob([buffer], {
@@ -872,10 +875,15 @@ export function AdminManagementTable() {
           </div>
         </div>
         <div className="admin-search-row-right">
-          <Button size="large" onClick={handleExport}>
+          <Button size="large" onClick={handleExport} icon={<ExportOutlined />}>
             Export
           </Button>
-          <Button type="primary" size="large" onClick={goCreate}>
+          <Button
+            type="primary"
+            size="large"
+            onClick={goCreate}
+            icon={<AppstoreAddOutlined />}
+          >
             New Invoice
           </Button>
         </div>
