@@ -2,11 +2,15 @@ import React from "react";
 import { ResponsiveAppBar } from "@/components/Navbar";
 import UserTable from "@/components/Users/UserTable/UserTable";
 
+import "./global.css";
+
 export default function UserManage() {
   return (
-    <div>
+    <div className="full-page">
       <ResponsiveAppBar />
-      <UserTable />
+      <div className="container">
+        <UserTable />
+      </div>
     </div>
   );
 }
