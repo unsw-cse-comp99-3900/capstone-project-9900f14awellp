@@ -25,6 +25,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import authenticate
 from django.urls import reverse
 from django.utils.timezone import now
+from django.db import IntegrityError
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -1132,15 +1133,19 @@ class GUIFileDraft(APIView):
             
             # draft不需要考虑数据完整性，直接创建 或者 更新，通过id作区分
             # 创建和更新的逻辑？
-            # 
-            file_serializer.save(userid=request.user)
-            return Response({
-                                "code": 0,
-                                "msg": "success!",
-                                "data": file_serializer.data
-                            },
-                            status=status.HTTP_200_OK
-                            )
+            try: 
+                file_serializer.save(userid=request.user)
+                return Response({
+                                    "code": 200,
+                                    "msg": "success",
+                                    "data": file_serializer.data
+                                },
+                )
+            except IntegrityError as e:
+                return Response({
+                                    "code": 400,
+                                    "msg": "invoice_num is duplicate", 
+                })
         else:
             return Response({
                     "code": 400,
@@ -1292,13 +1297,19 @@ class GUIFileDraft(APIView):
             )
         file_serializer = DraftGUISerializer(file,data=request.data,partial=True)
         if file_serializer.is_valid():
-            file_serializer.save()
-            return Response({
-                                "code": 200,
-                                "msg": "success",
-                                "data": file_serializer.data
-                            },
-            )
+            try: 
+                file_serializer.save()
+                return Response({
+                                    "code": 200,
+                                    "msg": "success",
+                                    "data": file_serializer.data
+                                },
+                )
+            except IntegrityError as e:
+                return Response({
+                                    "code": 400,
+                                    "msg": "invoice_num is duplicate", 
+                })
         else:
             return Response({
                                 "code": 400,

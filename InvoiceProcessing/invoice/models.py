@@ -110,7 +110,6 @@ class Draft(models.Model):
     my_abn = models.CharField(max_length=20,default="")
     my_email = models.EmailField(default="")
     
-    
     client_company_name = models.CharField(max_length=100,default="")
     client_address = models.CharField(max_length=100,default="")
     client_abn = models.CharField(max_length=100,default="")
@@ -122,8 +121,8 @@ class Draft(models.Model):
     bsb_num = models.CharField(max_length=20,default="")
     account_name = models.CharField(max_length=255,default="")
     
-    issue_date = models.DateField()
-    due_date = models.DateField()
+    issue_date = models.DateField(blank=True, null=True)
+    due_date = models.DateField(blank=True, null=True)
     
 
     subtotal = models.CharField(max_length=20,default="")
