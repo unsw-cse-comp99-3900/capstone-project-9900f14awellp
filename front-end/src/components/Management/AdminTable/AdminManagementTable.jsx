@@ -30,6 +30,8 @@ import {
   DeliveredProcedureOutlined,
   SendOutlined,
   DeleteOutlined,
+  ArrowDownOutlined,
+  ArrowUpOutlined,
 } from "@ant-design/icons";
 
 import { ShineBorder } from "./ShineBorder";
@@ -280,6 +282,7 @@ export function AdminManagementTable() {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [currentUuid, setCurrentUuid] = useState(null);
 
+  //* 获取数据
   useEffect(() => {
     invoiceAdminManage()
       .then((response) => {
@@ -692,12 +695,6 @@ export function AdminManagementTable() {
   const start = pageIndex * pageSize + 1;
   const end = Math.min((pageIndex + 1) * pageSize, total);
 
-  const [selectedState, setSelectedState] = useState([]);
-  const handleStateChange = (value) => {
-    setSelectedState(value);
-    table.getColumn("state").setFilterValue(value);
-  };
-
   return (
     <div className="admin-table-container">
       <Modal
@@ -892,7 +889,12 @@ export function AdminManagementTable() {
                 <th key={header.id}>
                   <div
                     onClick={header.column.getToggleSortingHandler()}
-                    style={{ display: "flex", flexDirection: "column" }}
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 4,
+                      cursor: "pointer",
+                    }}
                   >
                     {header.isPlaceholder
                       ? null
@@ -901,7 +903,11 @@ export function AdminManagementTable() {
                           header.getContext()
                         )}
                     {header.column.getIsSorted() &&
-                      (header.column.getIsSorted() === "asc" ? "🔽" : "🔼")}
+                      (header.column.getIsSorted() === "asc" ? (
+                        <ArrowDownOutlined />
+                      ) : (
+                        <ArrowUpOutlined />
+                      ))}
                   </div>
                 </th>
               ))}
@@ -922,7 +928,7 @@ export function AdminManagementTable() {
       </table>
       <div className="pagination-group">
         <div className="total-info">
-          {`showing ${start}-${end} of ${total} items`}
+          {`Showing ${start}-${end} of ${total} items`}
         </div>
         <Pagination
           current={table.getState().pagination.pageIndex + 1}

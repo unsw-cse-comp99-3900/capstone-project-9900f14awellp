@@ -39,7 +39,7 @@
 /*ID.No*/
 .admin-table-container table th:nth-child(2),
 .admin-table-container table td:nth-child(2) {
-  width: 18%;
+  width: 16%;
 }
 /*Client*/
 .admin-table-container table th:nth-child(3),
@@ -59,7 +59,7 @@
 /*Uploader*/
 .admin-table-container table th:nth-child(6),
 .admin-table-container table td:nth-child(6) {
-  width: 20%;
+  width: 24%;
 }
 /*Price*/
 .admin-table-container table th:nth-child(7),
@@ -69,7 +69,7 @@
 /*Actions*/
 .admin-table-container table th:nth-child(8),
 .admin-table-container table td:nth-child(8) {
-  width: 14%;
+  width: 12%;
 }
 
 .admin-invoice-title {

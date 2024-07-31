@@ -31,7 +31,11 @@ import {
   InputNumber,
 } from "antd";
 
-import { SearchOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+} from "@ant-design/icons";
 
 import "./global.css";
 
@@ -448,7 +452,7 @@ export const ManageTable = forwardRef((props, ref) => {
       </div>
       <div className="pagination-group">
         <div className="total-info">
-          {`showing ${start}-${end} of ${total} items`}
+          {`Showing ${start}-${end} of ${total} items`}
         </div>
         <Pagination
           current={table.getState().pagination.pageIndex + 1}
@@ -469,7 +473,12 @@ export const ManageTable = forwardRef((props, ref) => {
                 <th key={header.id}>
                   <div
                     onClick={header.column.getToggleSortingHandler()}
-                    style={{ display: "flex", flexDirection: "column" }}
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 4,
+                      cursor: "pointer",
+                    }}
                   >
                     {header.isPlaceholder
                       ? null
@@ -478,7 +487,11 @@ export const ManageTable = forwardRef((props, ref) => {
                           header.getContext()
                         )}
                     {header.column.getIsSorted() &&
-                      (header.column.getIsSorted() === "asc" ? "🔽" : "🔼")}
+                      (header.column.getIsSorted() === "asc" ? (
+                        <ArrowDownOutlined />
+                      ) : (
+                        <ArrowUpOutlined />
+                      ))}
                   </div>
                 </th>
               ))}
@@ -499,7 +512,7 @@ export const ManageTable = forwardRef((props, ref) => {
       </table>
       <div className="pagination-group">
         <div className="total-info">
-          {`showing ${start}-${end} of ${total} items`}
+          {`Showing ${start}-${end} of ${total} items`}
         </div>
         <Pagination
           current={table.getState().pagination.pageIndex + 1}
