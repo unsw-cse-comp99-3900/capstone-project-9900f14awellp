@@ -127,7 +127,7 @@ class DraftRecording(serializers.ModelSerializer):
         non_empty_count = len(non_empty_fields)
         # 计算百分比
         empty_percentage = (non_empty_count / total_fields) * 100
-        return f"{empty_percentage:.2f}%"
+        return f"{empty_percentage:.2f}"
     
 class UserInfoSerializer(serializers.ModelSerializer):
     # 你需要将company字段重定义为SerializerMethodField，而不是直接使用模型字段。这将确保在序列化时调用你定义的get_company方法。以下是修改后的代码：
