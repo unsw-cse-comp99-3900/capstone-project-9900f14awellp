@@ -10,11 +10,13 @@ from types import SimpleNamespace
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from datetime import datetime
+import fitz  # PyMuPDF
 
 from django.http import JsonResponse
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.db.models.signals import post_save # 用户已经建好了，才触发generate_token函数生成token
+from django.core.validators import validate_email, ValidationError
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -39,7 +41,7 @@ from rest_framework.parsers import MultiPartParser
 
 from .serializers import CompanySerializer,RegisterSerializer,\
                         FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, InvoiceUpfileSerializer,\
-                        UserInfoSerializer,UserUpdateSerializer,DraftGUISerializer
+                        UserInfoSerializer,UserUpdateSerializer,DraftGUISerializer, DraftRecording
 from .models import Company, User, UpFile, GUIFile,Draft
 from .converter import converter_xml
 from .permission import IsAdminUser,CompanyWorker
@@ -116,6 +118,16 @@ class RegisterView(APIView):
     )
     def post(self, request):
         ser = RegisterSerializer(data=request.data)
+
+        if User.objects.filter(username=request.data.get('username')).exists():
+            return Response({"error": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        if request.data.get('password') != request.data.get('confirm_password'):
+            return Response({"error": "Passwords do not match"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_email(request.data.get('email'))
+        except ValidationError:
+            return Response({"error": "Please enter a valid email address."}, status=status.HTTP_400_BAD_REQUEST)
+        
         if ser.is_valid():
             ser.validated_data.pop('confirm_password')
             ser.validated_data['password'] = make_password(ser.validated_data['password'])
@@ -401,6 +413,68 @@ class CompanyWorkersInfo(APIView):
         
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    
+    @swagger_auto_schema(
+        operation_summary='更新用户信息（提升或解雇）',
+        manual_parameters=[
+            openapi.Parameter(
+                'id', openapi.IN_QUERY, description="用户 ID", type=openapi.TYPE_INTEGER, required=True
+            ),
+            openapi.Parameter(
+                'promotion', openapi.IN_QUERY, description="提升用户为管理员（任何值表示提升）", type=openapi.TYPE_STRING, required=False
+            ),
+            openapi.Parameter(
+                'fire', openapi.IN_QUERY, description="解雇用户（任何值表示解雇）", type=openapi.TYPE_STRING, required=False
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="用户信息更新成功",
+                examples={
+                    "application/json": {
+                        "message": "User updated successfully"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="请求无效",
+                examples={
+                    "application/json": {
+                        "error": "id field is required"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="用户不存在",
+                examples={
+                    "application/json": {
+                        "error": "User does not exist"
+                    }
+                }
+            )
+        }
+    )
+    def post(self,request):
+        userid = request.GET.get('id')
+        promotion = request.GET.get('promotion')
+        fire = request.GET.get('fire')
+        if not userid:
+            return Response({'error': 'id field is required'}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.filter(id=userid, company_id=request.user.company_id).first()
+        if not user:
+            return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if promotion:
+            user.is_staff = True
+        elif fire:
+            user.is_staff = False
+            user.company_id = None
+            Draft.objects.filter(userid=user.id).delete()
+            
+            
+        user.save()
+        return Response({'success': 'User updated successfully'}, status=status.HTTP_200_OK)
+
+        
 class JoinCompanyView(APIView):
     permission_classes = [IsAuthenticated,]
     # permission_classes = [IsAdminUser] # 判断 is_staff 是不是1
@@ -588,10 +662,10 @@ class UpFileAPIView(APIView):
                     converter_xml(f"staticfiles/{request.user.id}/{file_stem}.xml")
             elif str(file.file).endswith('.pdf'):
                 url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
-                api_key = {'APIKey': 'f97106de-6723-4665-a890-d247f58ea44d'}
-                payload = {'user': 'Lianqiangzhao',
-                        'pwd': 'Zlq641737796',
-                        'APIKey': 'f97106de-6723-4665-a890-d247f58ea44d'}
+                api_key = {'APIKey': 'aeff7b2f-3554-45ee-8d36-cc6fd5984c28'}
+                payload = {'user': 'xxxx',
+                        'pwd': 'Xxxx1234',
+                        'APIKey': 'aeff7b2f-3554-45ee-8d36-cc6fd5984c28'}
                 # 保留cookie
                 r = requests.get(url + '/Login', params=payload)
                 
@@ -613,7 +687,7 @@ class UpFileAPIView(APIView):
                     invoiceID = str(r2.json().get("invoice_id"))
                 # 1.3 获得传回的json数据
                 payload2 = {'invoiceid':invoiceID,
-                            'APIKey': 'f97106de-6723-4665-a890-d247f58ea44d'}
+                            'APIKey': 'aeff7b2f-3554-45ee-8d36-cc6fd5984c28'}
             
                 sleep(60)
                 r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
@@ -717,6 +791,24 @@ class UpFileAPIView(APIView):
             "msg":"success",
         })"""
         
+        
+        
+
+
+def pdf_to_png(pdf_path, output_dir):
+    # 打开PDF文件
+    pdf_document = fitz.open(pdf_path)
+    for page_number in range(len(pdf_document)):
+        # 获取页面
+        page = pdf_document.load_page(page_number)
+        # 将页面转换为图像
+        pix = page.get_pixmap()
+        # 保存图像为PNG文件
+        image_path = os.path.join(output_dir)
+        pix.save(image_path)
+    pdf_document.close()
+
+
 class GUIFileAPIView(APIView):
     # authentication_classes = [MyAhenAuthentication]
     authentication_classes = [JWTAuthentication]
@@ -858,6 +950,7 @@ class GUIFileAPIView(APIView):
                 json.dump(file_data, f, ensure_ascii=False, indent=4)
             xml_elem = json_to_xml(file_data)
             xml_str = prettify(xml_elem)
+            
             with open(f"staticfiles/{request.user.id}/{filename}.xml", "w", encoding="utf-8") as f:
                 f.write(xml_str)
             """output_dir = f"staticfiles/{request.user.id}"
@@ -871,6 +964,11 @@ class GUIFileAPIView(APIView):
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE
                 )
+            
+            
+            pdf_path = f"staticfiles/{request.user.id}/{filename}.pdf"
+
+            pdf_to_png(pdf_path, f"staticfiles/{request.user.id}/{filename}.png")
             
             
             return Response({
@@ -1052,29 +1150,49 @@ class GUIFileDraft(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
             
     @swagger_auto_schema(
-        operation_summary="获取发票数据",
-        operation_description="根据发票名称获取发票数据。",
+        operation_summary='获取草稿报告',
         manual_parameters=[
             openapi.Parameter(
-                'id',
-                openapi.IN_QUERY,
-                description="发票id",
-                type=openapi.TYPE_STRING,
-                required=True
+                'id', openapi.IN_QUERY, description="draft id, 填写的话就返回目标draft的详细信息, 不填写的话则返回该user的全部draft记录", type=openapi.TYPE_INTEGER, required=False
             )
         ],
         responses={
             200: openapi.Response(
-                description="成功",
+                description="成功获取草稿报告",
                 examples={
                     "application/json": {
                         "code": 200,
                         "msg": "success",
-                        "data": {
-                            "invoice_name": "example_invoice",
-                            "uuid": "123",
-                            "my_company_name":"string"
+                        "data": [
+                            {
+                                "id": 1,
+                                "name": "Draft 1",
+                                "content": "Some content"
+                            },
+                            {
+                                "id": 2,
+                                "name": "Draft 2",
+                                "content": "Some content"
                             }
+                        ]
+                    },
+                    "application/json": {
+                        "code": 200,
+                        "msg": "success",
+                        "data": {
+                            "id": 1,
+                            "name": "Draft 1",
+                            "content": "Some content"
+                        }
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="请求无效",
+                examples={
+                    "application/json": {
+                        "code": 400,
+                        "msg": "Invalid request"
                     }
                 }
             )
@@ -1083,12 +1201,17 @@ class GUIFileDraft(APIView):
     def get(self,request):
         fileid = request.GET.get('id')
         if not fileid:
+            draft = Draft.objects.filter(userid=request.user)
+            serializer = DraftRecording(draft,many=True)
+            
             return Response({
-                                "code": 400,
-                                "msg": "File name is required",
+                                "code": 200,
+                                "msg": "success",
+                                "data": serializer.data
                             },
-                            status=status.HTTP_400_BAD_REQUEST)
-        
+                            status=status.HTTP_200_OK
+                            )
+            
         file = Draft.objects.filter(userid=request.user, id=fileid).first()
         file_data = DraftGUISerializer(file).data
         return Response({
@@ -1184,11 +1307,104 @@ class GUIFileDraft(APIView):
                             },
             )
 
+class FileReport(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [CompanyWorker]
+    
+    @swagger_auto_schema(
+        operation_summary='获取文件报告',
+        manual_parameters=[
+            openapi.Parameter(
+                'uuid', openapi.IN_QUERY, description="文件 UUID", type=openapi.TYPE_STRING, required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="成功获取文件报告",
+                examples={
+                    "application/json": {
+                        "code": 200,
+                        "msg": "success",
+                        "data": "staticfiles/1/file_report.json"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="请求无效",
+                examples={
+                    "application/json": {
+                        "code": 400,
+                        "msg": "File id is required"
+                    },
+                    "application/json": {
+                        "code": 400,
+                        "msg": "File is not validated"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="文件未找到",
+                examples={
+                    "application/json": {
+                        "code": 404,
+                        "msg": "File not found"
+                    },
+                    "application/json": {
+                        "code": 404,
+                        "msg": "Report file not found"
+                    }
+                }
+            )
+        }
+    )
+    def get(self,request):
+        fileid = request.GET.get('uuid')
+        if not fileid:
+            return Response({
+                                "code": 400,
+                                "msg": "File id is required",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        file = UpFile.objects.filter(userid=request.user.id, uuid=fileid).first()
+        if not file:
+            return Response({
+                                "code": 404,
+                                "msg": "File not found",
+                            },
+                            status=status.HTTP_404_NOT_FOUND
+                            )
+        if file.is_validated == 0:
+            return Response({
+                                "code": 400,
+                                "msg": "File is not validated",
+                            },
+                            status=status.HTTP_400_BAD_REQUEST
+                            )
+            
+        file_name = os.path.basename(str(file.file))
+        file_stem = os.path.splitext(file_name)[0]
+        
+        file_path = f"staticfiles/{request.user.id}/{file_stem}_report.json"
+        if not os.path.isfile(file_path):
+            return Response({
+                                "code": 404,
+                                "msg": "Report file not found",
+                            },
+                            status=status.HTTP_404_NOT_FOUND
+                            )
+        return Response({
+                            "code": 200,
+                            "msg": "success",
+                            "data": file_path
+                        },
+                        status=status.HTTP_200_OK
+                        )
 class DeleteFileAPIView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
     @swagger_auto_schema(
-        operation_summary='删除发票文件',
+        operation_summary='管理员删除公司发票文件',
         manual_parameters=[
             openapi.Parameter('uuid', openapi.IN_QUERY, description="File UUID", type=openapi.TYPE_STRING)
         ],
@@ -1232,7 +1448,7 @@ class DeleteFileAPIView(APIView):
                             },
                             status=status.HTTP_400_BAD_REQUEST)
         
-        file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
+        file = UpFile.objects.filter(uuid=uuid).first()
         if file is None:
             return Response({
                                 "code": 404,
@@ -1240,7 +1456,7 @@ class DeleteFileAPIView(APIView):
                             },
                             status=status.HTTP_404_NOT_FOUND
                             )
-        file_gui = GUIFile.objects.filter(userid=request.user, uuid=file.uuid).first()
+        file_gui = GUIFile.objects.filter(uuid=file.uuid).first()
 
         if file_gui is not None:
             file_gui.delete()
@@ -1257,6 +1473,8 @@ class DeleteFileAPIView(APIView):
             os.remove(f"staticfiles/{request.user.id}/{file_stem}.xml")
         if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}_report.json"):
             os.remove(f"staticfiles/{request.user.id}/{file_stem}_report.json")
+        if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}_report.png"):
+            os.remove(f"staticfiles/{request.user.id}/{file_stem}_report.png")
             
         file.delete()
         return Response({

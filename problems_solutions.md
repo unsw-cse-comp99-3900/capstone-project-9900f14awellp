@@ -1,15 +1,15 @@
-# 1. 在前后端分离项目中，前端如何打开后端服务器运行，从而调取api接口拿数据
+# 1. 在前后端分离项目中，如何使用docker配置前后端环境并一键运行
 
-后端封装 **docker-compose.yml** ,  **Dockerfile** 文件 和 **requirements.txt** ，前端不再需要自己配置虚拟环境，只需要运行
+后端封装 **docker-compose.yml** , 后端 **Dockerfile** 文件 和 前端**Dockerfile**,只需要运行
 
 ```shell
-docker-compose up --build # 创建docker image
+docker-compose up --build # 创建docker image 和docker container
 docker-compose up # 运行docker image
 ```
 
 后端服务器就会开始运行。
 
-【使用docker运行django前后端分离项目的后端服务器】 https://www.bilibili.com/video/BV1u83TedE44/?share_source=copy_web&vd_source=40534de17f3e1d5fe4a64c5ee3d07d6d
+【使用docker一键运行前后端环境】 https://www.bilibili.com/video/BV1AgvNeNECD/?share_source=copy_web&vd_source=40534de17f3e1d5fe4a64c5ee3d07d6d
 
 # 2. 前后端开发时，当前端从后端拿数据，会发送跨域预检请求  `OPTIONS` 请求到服务器，询问服务器是否允许实际请求。
 
@@ -583,3 +583,25 @@ git rm --cached *.pyc *.pyo *.pyd
   ```
 
 * push到github
+
+# 14. 图片保存到数据库里，如何使用url进行访问
+
+首先要配置```STATIC_URL``` 和```MEDIA_URL``` 一个是管理静态文件一个是管理动态文件
+
+```python
+STATIC_URL = "/staticfiles/"
+```
+
+说明用户只需要在网页上输入```localhost:3000/staticfiles/``` 就可以访问数据库中的图片
+
+```python
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "staticfiles/"),
+]
+```
+
+这里是两个备选的路径，通过```localhost:3000/staticfiles/```可以直接指代这两个路径
+
+比如```os.path.join(BASE_DIR, "staticfiles/"),``` 是 ```User/homy/9900/project/staticfiles/```,那么```localhost:3000/staticfiles/``` = ```User/homy/9900/project/staticfiles/``` 接下来只需要填写文件所在的相对路径就可以。比如```1.png```的路径为 ```User/homy/9900/project/staticfiles/avatar/1.png``` 在浏览器只需要输入 ```localhost:3000/staticfiles/avatar/1.png```即可访问

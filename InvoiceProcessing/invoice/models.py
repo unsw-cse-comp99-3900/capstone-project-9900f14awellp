@@ -62,7 +62,6 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 
-
 # use userid to bind user and file
 class UpFile(models.Model):
     file = models.FileField(upload_to=user_directory_path)
@@ -72,14 +71,12 @@ class UpFile(models.Model):
     is_validated = models.BooleanField(default=False)
     is_correct = models.BooleanField(default=False)
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
-    validation_date = models.DateTimeField(verbose_name='Validation Date',default="2000-01-01")
-    sending_date = models.DateTimeField(verbose_name='Validation Date',default="2000-01-01")
+    validation_date = models.DateTimeField(verbose_name='Validation Date',null=True, blank=True)
+    sending_date = models.DateTimeField(verbose_name='Validation Date',null=True, blank=True)
     email_receiver=models.CharField(max_length=30, default="", verbose_name='Email Receiver')
     
     class Meta:
         unique_together = ('userid', 'file')
-
-
 
 class Order(models.Model):
     description = models.CharField(max_length=255,default="")
@@ -107,7 +104,7 @@ class Order(models.Model):
 class Draft(models.Model):
     invoice_name = models.CharField(max_length=30,default="")
     uuid = models.CharField(max_length=30,default="")
-    invoice_num = models.CharField(max_length=20,default="")
+    invoice_num = models.CharField(max_length=20,unique=True)
     my_company_name = models.CharField(max_length=255,default="")
     my_address = models.CharField(max_length=255,default="")
     my_abn = models.CharField(max_length=20,default="")
@@ -136,6 +133,8 @@ class Draft(models.Model):
 
     orders = models.ManyToManyField(Order)
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFileDraf",null=True, blank=True)
+    create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
+    update_date = models.DateTimeField(auto_now=True, verbose_name='Update Date')
 
 
 
@@ -147,11 +146,7 @@ class Draft(models.Model):
         if not self.total_amount.startswith('$'):
             self.total_amount = f"\u0024{self.total_amount}"         
  
-        super().save(*args, **kwargs)
-    
-    
-    
-    
+        super().save(*args, **kwargs)  
     
 class GUIFile(models.Model):
     invoice_name = models.CharField(max_length=30)
