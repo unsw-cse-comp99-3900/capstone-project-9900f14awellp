@@ -353,6 +353,7 @@ export function AdminManagementTable() {
         // console.log(uuid);
         goValidate(uuid);
       },
+      disabled: (state) => state !== "unvalidated",
     },
     {
       key: "2",
@@ -372,14 +373,14 @@ export function AdminManagementTable() {
   ];
 
   //* 点击下拉按钮后使用的方法
-  const onMenuClick = (info, uuid) => {
+  const onMenuClick = (info, uuid, state) => {
     //const { key } = info; 这行代码使用了 JavaScript 的解构赋值（Destructuring assignment）语法。这是 ES6 （ECMAScript 2015）引入的一个特性，允许我们从对象或数组中提取值，赋给变量
     //这行代码等同于：const key = info.key;
     //如果 info 对象还有 label 属性，可以这样写：const { key, label } = info; 这会同时创建 key 和 label 两个变量。
     const { key } = info;
     const selectedAction = items.find((i) => i.key === key);
     if (selectedAction && selectedAction.onClick) {
-      selectedAction.onClick(uuid);
+      selectedAction.onClick(uuid, state);
     }
   };
 
@@ -503,7 +504,12 @@ export function AdminManagementTable() {
           <Button onClick={() => goDetails(row.original.uuid)}>View</Button>
           <Dropdown.Button
             menu={{
-              items,
+              items: items.map((item) => ({
+                ...item,
+                disabled: item.disabled
+                  ? item.disabled(row.original.state)
+                  : false,
+              })),
               onClick: (info) => onMenuClick(info, row.original.uuid),
             }}
           >
