@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 
+import * as ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+
 import {
   createColumnHelper,
   flexRender,
@@ -18,6 +21,7 @@ import {
   Tooltip,
   Modal,
   Popconfirm,
+  message,
 } from "antd";
 
 import {
@@ -25,10 +29,13 @@ import {
   UserSwitchOutlined,
   ArrowDownOutlined,
   ArrowUpOutlined,
+  SearchOutlined,
+  ExportOutlined,
+  UserAddOutlined,
 } from "@ant-design/icons";
 
 import { UserInfo } from "../UserInfo/UserInfo";
-import { allUsersInfo } from "@/apis/users";
+import { allUsersInfo, promoteUser, deleteUser } from "@/apis/users";
 
 import "./UserTable.css";
 
@@ -67,11 +74,37 @@ function formatDate(dateString) {
   return `${day} ${month} ${year}, ${hours}:${minutes}${ampm}`;
 }
 
+const sendEmail = (username, email) => {
+  console.log(`Send email to ${username} at ${email}`);
+};
+
+const statusMapping = {
+  false: "Staff",
+  true: "Admin",
+};
+
 export default function UserTable() {
+  //*二次封装的alert组件
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    severity: "info",
+  });
+
+  //*显示alert
+  const showAlert = (message, severity = "info") => {
+    setAlert({ show: true, message, severity });
+  };
+
+  //*隐藏alert
+  const hideAlert = () => {
+    setAlert({ ...alert, show: false });
+  };
+
   //* 获取数据
   //* get data from the backend
   const [data, _setData] = useState([]);
-  console.log(data);
+
   useEffect(() => {
     allUsersInfo().then((res) => {
       _setData(res.data);
@@ -87,17 +120,80 @@ export default function UserTable() {
 
   const [searchValue, setSearchValue] = useState("");
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [inviteUsername, setInviteUsername] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+
   //* 处理删除用户的逻辑
-  const confirmDelete = () => {};
+  const confirmDelete = async (userId) => {
+    try {
+      await deleteUser(userId);
+      showAlert("User has been removed successfully.", "success");
+      //* 刷新用户列表或更新本地数据
+      allUsersInfo().then((res) => {
+        _setData(res.data);
+      });
+    } catch (error) {
+      showAlert("Failed to remove user.", "error");
+      console.log("删除用户时出错:", error);
+    }
+  };
 
   //* 处理取消删除用户的逻辑
-  const cancelDelete = () => {};
+  const cancelDelete = () => {
+    console.log("cancel delete");
+  };
 
   //* 处理提升用户权限的逻辑
-  const confirmPromote = () => {};
+  const confirmPromote = async (userId) => {
+    try {
+      await promoteUser(userId);
+      showAlert("User permission has been promoted", "success");
+      //* 刷新用户列表或更新本地数据
+      allUsersInfo().then((res) => {
+        _setData(res.data);
+      });
+    } catch (error) {
+      showAlert("Failed to promote user permission", "error");
+      console.log("提升用户权限时出错:", error);
+    }
+  };
 
   //* 处理取消提升用户权限的逻辑
-  const cancelPromote = () => {};
+  const cancelPromote = () => {
+    console.log("cancel promote");
+  };
+
+  //* 处理邀请用户的逻辑
+  const handleInvite = () => {
+    setIsModalVisible(true);
+  };
+
+  //* 处理发送邀请邮件的逻辑
+  const handleModalOk = async () => {
+    if (!inviteUsername || !inviteEmail) {
+      message.error("Please fill in your username and email address.");
+      return;
+    }
+
+    // try {
+    //   await sendEmail(inviteUsername, inviteEmail);
+    //   message.success("邀请邮件已发送");
+    //   setIsModalVisible(false);
+    //   setInviteUsername("");
+    //   setInviteEmail("");
+    // } catch (error) {
+    //   message.error("发送邀请邮件失败");
+    // }
+    console.log("send email");
+  };
+
+  //* 处理取消邀请用户的逻辑
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+    setInviteUsername("");
+    setInviteEmail("");
+  };
 
   const columnHelper = createColumnHelper();
   const columns = [
@@ -173,7 +269,7 @@ export default function UserTable() {
         info.getValue() ? formatDate(info.getValue()) : "Unknown",
     }),
 
-    columnHelper.accessor("create_date", {
+    columnHelper.accessor("join_company_date", {
       header: "Date added",
       enableSorting: true,
       enableColumnFilter: false,
@@ -193,16 +289,28 @@ export default function UserTable() {
         <div className="actions-button-group">
           <Popconfirm
             title="Remove"
+            placement="bottom"
             description="Are you sure to remove the user from the team?"
-            onConfirm={confirmDelete}
+            onConfirm={() => confirmDelete(row.original.id)}
             onCancel={cancelDelete}
             okText="Yes"
             cancelText="Cancel"
           >
-            <Tooltip title="Remove user">
+            <Tooltip
+              title={
+                row.original.is_staff
+                  ? "Administrators cannot be deleted"
+                  : "Remove User"
+              }
+            >
               <Button
                 danger
-                icon={<UserDeleteOutlined style={{ color: "red" }} />}
+                icon={
+                  <UserDeleteOutlined
+                    style={{ color: row.original.is_staff ? "#C0C0C0" : "red" }}
+                  />
+                }
+                disabled={row.original.is_staff}
               >
                 Delete
               </Button>
@@ -210,14 +318,26 @@ export default function UserTable() {
           </Popconfirm>
           <Popconfirm
             title="Promote"
+            placement="bottom"
             description="Are you sure to promote the user to admin?"
-            onConfirm={confirmPromote}
+            onConfirm={() => confirmPromote(row.original.id)}
             onCancel={cancelPromote}
             okText="Yes"
             cancelText="Cancel"
           >
-            <Tooltip title="Promote user to admin">
-              <Button icon={<UserSwitchOutlined />}>Promote</Button>
+            <Tooltip
+              title={
+                row.original.is_staff
+                  ? "Administrators cannot be promoted"
+                  : "Promote User to Admin"
+              }
+            >
+              <Button
+                disabled={row.original.is_staff}
+                icon={<UserSwitchOutlined />}
+              >
+                Promote
+              </Button>
             </Tooltip>
           </Popconfirm>
         </div>
@@ -242,12 +362,60 @@ export default function UserTable() {
     globalFilterFn: (row, columnId, filterValue) => {
       const escapedValue = filterValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const searchRegex = new RegExp(escapedValue, "i");
+      const mappedState =
+        statusMapping[row.getValue("is_staff")] || row.getValue("is_staff");
       return (
         searchRegex.test(row.getValue("username")) ||
-        searchRegex.test(row.getValue("email"))
+        searchRegex.test(row.getValue("email")) ||
+        searchRegex.test(mappedState)
       );
     },
   });
+
+  //* 处理导出用户的逻辑
+  const handleExport = async () => {
+    //* selectedData是选中的行的数据
+    const selectedData = table
+      .getSelectedRowModel()
+      .rows.map((row) => row.original);
+
+    if (selectedData.length === 0) {
+      showAlert("Select at least one row to export", "warning");
+      return;
+    }
+
+    // 创建工作簿和工作表
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("admin_invoices");
+
+    // 添加表头
+    worksheet.addRow([
+      "Username",
+      "Email",
+      "Permission",
+      "Last active",
+      "Date added",
+    ]);
+
+    // 添加数据
+    selectedData.forEach((row) => {
+      worksheet.addRow([
+        row.username,
+        row.email,
+        row.is_staff ? "Admin" : "Staff",
+        formatDate(row.update_date),
+        formatDate(row.join_company_date),
+      ]);
+    });
+
+    // 生成Excel文件并下载
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      saveAs(blob, "Users.xlsx");
+    });
+  };
 
   //*设置自定义分页状态
   //* set custom page size
@@ -281,15 +449,74 @@ export default function UserTable() {
 
   return (
     <div className="user-table-container">
+      <Modal
+        title="Invite a New User"
+        open={isModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        className="invite-user-modal"
+      >
+        <div className="user-modal-input-group">
+          <Input
+            size="large"
+            placeholder="Username"
+            value={inviteUsername}
+            onChange={(e) => setInviteUsername(e.target.value)}
+            style={{ marginBottom: 16 }}
+          />
+          <Input
+            size="large"
+            placeholder="Email"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+          />
+        </div>
+      </Modal>
       <div className="user-info-header-row">
         <div className="user-info-title-row">
-          <div className="user-table-title">Users</div>
-          <div className="user-number-tag">{data.length} users</div>
+          <div className="user-table-title">User Management</div>
         </div>
         <div className="user-header-reminder">
           Manage your team members and their account permissions here.
         </div>
       </div>
+      <div className="user-search-header-row">
+        <div className="user-number-row">
+          <div>All users</div>
+          <div className="user-number-tag">{data.length}</div>
+        </div>
+        <div className="user-search-action-row">
+          <div className="user-primary-search">
+            <Input
+              size="large"
+              allowClear
+              placeholder="Search anything..."
+              className="search-input"
+              prefix={
+                <SearchOutlined
+                  style={{
+                    color: "rgba(0,0,0,.25)",
+                  }}
+                />
+              }
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </div>
+          <Button size="large" icon={<ExportOutlined />} onClick={handleExport}>
+            Export
+          </Button>
+          <Button
+            size="large"
+            type="primary"
+            icon={<UserAddOutlined />}
+            onClick={handleInvite}
+          >
+            Invite User
+          </Button>
+        </div>
+      </div>
+
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (

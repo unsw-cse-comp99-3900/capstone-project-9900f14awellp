@@ -21,14 +21,11 @@
 }
 
 .user-number-tag{
-    font-size: calc(0.5vw + 0.6vh);
+    font-size: calc(1vw + 1vh);
     font-weight: 400;
-    color: #333;
+    color: #959595;
     font-family: "Lexend Deca", sans-serif;
-    border: #959595 1px solid;
-    border-radius: 20px;
-    padding: 3px 8px;
-    margin-top: 5px;
+    width: fit-content;
 }
 
 .user-header-reminder{
@@ -126,4 +123,45 @@
 .user-table-container table th:nth-child(6),
 .user-table-container table td:nth-child(6) {
   width: 20%;
+}
+
+.user-primary-search {
+	flex:auto;
+}
+
+.user-number-row{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    font-size: calc(1vw + 1vh);
+}
+
+.user-search-header-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: -5px;
+}
+
+.user-search-action-row{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    width: 50%;
+}
+
+
+.invite-user-modal .ant-modal-title{
+    font-family: 'Lexend Deca', sans-serif !important;
+    font-size: 30px !important;
+}
+
+.user-modal-input-group{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 6px;
 }
