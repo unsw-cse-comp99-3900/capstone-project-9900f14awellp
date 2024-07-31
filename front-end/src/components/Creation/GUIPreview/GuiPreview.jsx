@@ -101,19 +101,19 @@ export function GuiPreview() {
           <div className="preview-pay-details-row">
             <div className="preview-settle-title">PAY INTO ACCOUNT</div>
             <div className="preview-pay-details">
-              <div className="flex flex-row justify-between">
+              <div className="flex flex-row justify-between gap-2.5">
                 <div>Bank:</div>
                 <div>{invoiceData.bank_name}</div>
               </div>
-              <div className="flex flex-row justify-between">
+              <div className="flex flex-row justify-between gap-2.5">
                 <div>BSB:</div>
                 <div>{invoiceData.bsb_num}</div>
               </div>
-              <div className="flex flex-row justify-between">
+              <div className="flex flex-row justify-between gap-2.5">
                 <div>Account Num:</div>
                 <div>{invoiceData.account_num}</div>
               </div>
-              <div className="flex flex-row justify-between">
+              <div className="flex flex-row justify-between gap-2.5">
                 <div>Account Name:</div>
                 <div>{invoiceData.account_name}</div>
               </div>

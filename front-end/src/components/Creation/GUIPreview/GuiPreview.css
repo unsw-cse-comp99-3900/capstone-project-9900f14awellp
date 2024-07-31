@@ -202,7 +202,8 @@
 }
 
 .preview-pay-details-row{
-  width: 35%;
+  width: fit-content;
+  display: inline-block;
   display: flex;
   flex-direction: column;
 }
