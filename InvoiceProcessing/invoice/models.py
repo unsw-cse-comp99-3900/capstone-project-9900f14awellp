@@ -70,6 +70,7 @@ class UpFile(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     is_validated = models.BooleanField(default=False)
     is_correct = models.BooleanField(default=False)
+    is_sent = models.BooleanField(default=False)
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
     validation_date = models.DateTimeField(verbose_name='Validation Date',null=True, blank=True)
     sending_date = models.DateTimeField(verbose_name='Validation Date',null=True, blank=True)

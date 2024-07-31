@@ -16,6 +16,8 @@ from django.http import JsonResponse
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.db.models.signals import post_save # 用户已经建好了，才触发generate_token函数生成token
+from django.db.models import Count
+from django.db.models.functions import TruncDate
 from django.core.validators import validate_email, ValidationError
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.mail import send_mail
@@ -1395,7 +1397,6 @@ class GUIFileDraft(APIView):
                         },
                         status=status.HTTP_200_OK)
 
-
 class FileReport(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [CompanyWorker]
@@ -1489,6 +1490,7 @@ class FileReport(APIView):
                         },
                         status=status.HTTP_200_OK
                         )
+
 class DeleteFileAPIView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
@@ -1630,6 +1632,130 @@ class FileInfoAPIView(APIView):
         invoices = UpFile.objects.filter(userid=request.user.id)
         serializer = InvoiceUpfileSerializer(invoices, many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+
+class FileNumber(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [CompanyWorker]
+    @swagger_auto_schema(
+        operation_summary="获取发票统计信息",
+        operation_description="返回数据库中发票的各种统计信息，包括总数量、未验证数量、成功数量、失败数量以及按日期划分的总数和已发送数量。",
+        responses={
+            200: openapi.Response(
+                description="成功",
+                examples={
+                    "application/json": {
+                        "code": 200,
+                        "msg": "success",
+                        "total_files": 100,
+                        "unvalidated_files": 20,
+                        "successful_files": 60,
+                        "failed_files": 20,
+                        "total_invoice_timebase": [
+                            {"create_date": "2024-07-29", "count": 2},
+                            {"create_date": "2024-07-30", "count": 1},
+                            {"create_date": "2024-07-31", "count": 4}
+                        ],
+                        "sent_invoice_timebase": [
+                            {"create_date": "2024-07-29", "count": 1},
+                            {"create_date": "2024-07-31", "count": 3}
+                        ]
+                    }
+                },
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'code': openapi.Schema(type=openapi.TYPE_INTEGER, description='响应代码'),
+                        'msg': openapi.Schema(type=openapi.TYPE_STRING, description='响应消息'),
+                        'total_files': openapi.Schema(type=openapi.TYPE_INTEGER, description='发票总数量'),
+                        'unvalidated_files': openapi.Schema(type=openapi.TYPE_INTEGER, description='未验证发票数量'),
+                        'successful_files': openapi.Schema(type=openapi.TYPE_INTEGER, description='成功发票数量'),
+                        'failed_files': openapi.Schema(type=openapi.TYPE_INTEGER, description='失败发票数量'),
+                        'total_invoice_timebase': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Items(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'create_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='创建日期'),
+                                    'count': openapi.Schema(type=openapi.TYPE_INTEGER, description='数量')
+                                }
+                            )
+                        ),
+                        'sent_invoice_timebase': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Items(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'create_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='创建日期'),
+                                    'count': openapi.Schema(type=openapi.TYPE_INTEGER, description='数量')
+                                }
+                            )
+                        )
+                    }
+                )
+            ),
+            400: openapi.Response(
+                description="请求错误",
+                examples={
+                    "application/json": {
+                        "code": 400,
+                        "msg": "请求参数错误"
+                    }
+                },
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'code': openapi.Schema(type=openapi.TYPE_INTEGER, description='响应代码'),
+                        'msg': openapi.Schema(type=openapi.TYPE_STRING, description='响应消息')
+                    }
+                )
+            ),
+            500: openapi.Response(
+                description="服务器错误",
+                examples={
+                    "application/json": {
+                        "code": 500,
+                        "msg": "服务器内部错误"
+                    }
+                },
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'code': openapi.Schema(type=openapi.TYPE_INTEGER, description='响应代码'),
+                        'msg': openapi.Schema(type=openapi.TYPE_STRING, description='响应消息')
+                    }
+                )
+            )
+        }
+    )
+    def get(self,request):
+        total_files = UpFile.objects.all().count()
+        unvalidated_files = UpFile.objects.filter(is_validated=0).count()
+        successful_files = UpFile.objects.filter(is_validated=1,is_correct=1).count()
+        failed_files = UpFile.objects.filter(is_validated=1,is_correct=0).count()
+        
+        sent_invoice_counts = UpFile.objects.filter(is_sent=1).annotate(date=TruncDate('create_date')).values('date').annotate(count=Count('id')).order_by('date')
+        sent_invoice_timebase = [
+            {"create_date": item['date'], "count": item['count']}
+            for item in sent_invoice_counts
+        ]
+        
+        invoice_counts = UpFile.objects.annotate(date=TruncDate('create_date')).values('date').annotate(count=Count('id')).order_by('date')
+        total_invoice_timebase = [
+            {"create_date": item['date'], "count": item['count']}
+            for item in invoice_counts
+        ]
+        
+        return Response({
+            "code": 200,
+            "msg": "success",
+            "total_files": total_files,
+            "unvalidated_files": unvalidated_files,
+            "successful_files": successful_files,
+            "failed_files": failed_files,
+            "total_invoice_timebase": total_invoice_timebase,
+            "send_invoice_timebase": sent_invoice_timebase
+        }, status=status.HTTP_200_OK)
+    
 
 class CompanyFileInfoAPIView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -2047,6 +2173,8 @@ class SendInvoiceEmailAPIView(APIView):
                                 status=status.HTTP_404_NOT_FOUND)
         try:
             email.send()
+            file.is_sent = True
+            file.save()
             return Response({
                                 "code": 200,
                                 "msg": "Email sent successfully",
@@ -2231,6 +2359,7 @@ class PasswordResetRequestView(APIView):
         )
         
         return Response({"message": "Password reset link sent"}, status=status.HTTP_200_OK)
+
 class PasswordResetConfirmView(APIView):
     authentication_classes = []  # 禁用认证
     permission_classes = []
