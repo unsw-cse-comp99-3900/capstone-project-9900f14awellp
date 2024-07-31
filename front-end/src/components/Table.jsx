@@ -23,7 +23,8 @@ import { visuallyHidden } from '@mui/utils';
 import { Progress } from 'antd';
 import OutlinedAlerts from '../components/Alert';
 import axios from 'axios';
-
+import { useInvoice } from '@/Content/GuiContent';
+import { useNavigate } from "react-router-dom";
 
 function createData(id, invoiceNumber, progress, createTime, updateTime) {
   return {
@@ -230,6 +231,11 @@ export default function EnhancedTable() {
   const [alert, setAlert] = useState(null); // 初始状态设置为null
   const token = localStorage.getItem('token');
   const [rows, setRows] = React.useState([]);
+  const { updateInvoiceData } = useInvoice(); // Use the context
+  const navigate = useNavigate();
+  const goGUI = () => {
+      navigate("/create/form");
+  }
 
   const Colors = {
     '0%': '#ffccc7',
@@ -282,15 +288,49 @@ export default function EnhancedTable() {
   };
 
   const handleEdit = (selectedIds) => {
-    // Add your edit logic here
-    console.log('Editing IDs:', selectedIds);
+    const id = selectedIds[0]; // Assuming you only edit one item at a time
+    axios.get(`http://localhost:8000/invoice/invoice-draft?id=${id}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(response => {
+      console.log('Fetched for edit:', response.data.data);
+      updateInvoiceData(response.data.data); // Update the context with the fetched invoice data
+      goGUI();
+    })
+    .catch(error => {
+      console.log('Edit fetch error:', error.message);
+      setAlert({ severity: 'error', message: error.message });
+    });
   };
 
+
   const handleDelete = (selectedIds) => {
-    // Add your delete logic here
-    
-    console.log('Deleting IDs:', selectedIds);
+    axios.delete('http://localhost:8000/invoice/invoice-draft', {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        ids: selectedIds,
+      },
+    })
+    .then(response => {
+      console.log('Deleted:', response.data);
+      setAlert({ severity: 'success', message: 'Delete successful' });
+      // Remove the deleted rows from the table
+      setRows(rows.filter(row => !selectedIds.includes(row.id)));
+      setSelected([]); // Clear the selection
+    })
+    .catch(error => {
+      console.log('Delete error:', error.message);
+      setAlert({ severity: 'error', message: error.message });
+    });
   };
+
 
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
