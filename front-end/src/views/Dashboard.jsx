@@ -107,36 +107,35 @@ useEffect(() => {
                 fail={fail}
                 unvalidated={unvalidated}
               ></DashboardCard>
- 
-  <div style={{ display: 'flex', gap: '20px', marginTop:'30px' }}>
-    <Card style={{ width: '50%', padding: '20px' }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          NUMBERS
-        </Typography>
-        <Typography variant="body2" color="textSecondary" gutterBottom>
-          Total invoices and sent invoices
-        </Typography>
-        <SimpleLineChart 
-    xLabels={xLabels}
-    aLine={totalInvoiceCounts}
-    bLIne={sendInvoiceCounts}
-    />
-      </CardContent>
-    </Card>
-    <Card style={{ width: '50%', padding: '20px' }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Current Numbers
-        </Typography>
-        <Typography variant="body2" color="textSecondary" gutterBottom>
-          Hover your mouse
-        </Typography>
-        <PieActiveArc data={data} />
-      </CardContent>
-    </Card>
-  </div>
-</div>  
+              <div style={{ display: 'flex', gap: '20px', marginTop:'30px' }}>
+                <Card style={{ width: '50%', padding: '20px' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      NUMBERS
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      Total invoices and sent invoices
+                    </Typography>
+                    <SimpleLineChart 
+                xLabels={xLabels}
+                aLine={totalInvoiceCounts}
+                bLIne={sendInvoiceCounts}
+                />
+                  </CardContent>
+                </Card>
+                <Card style={{ width: '50%', padding: '20px' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Current Numbers
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      Hover your mouse
+                    </Typography>
+                    <PieActiveArc data={data} />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>  
         </div>
     );
 }
