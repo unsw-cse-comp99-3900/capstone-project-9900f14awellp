@@ -23,7 +23,14 @@
     font-weight: 700;
     color: #333;
     font-family:'Lexend Deca', sans-serif;
-    }
+}
+
+.create-invoice-title{
+    font-size: calc(2.2vw + 2.2vh);
+    font-weight: 600;
+    color: #333;
+    font-family:'Lexend Deca', sans-serif;
+}
 
 .type{
     color: #A7A7A7;

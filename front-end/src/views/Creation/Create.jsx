@@ -276,7 +276,7 @@ export default function Create() {
       {showCardSelector && (
         <>
           <div className="head-title-div">
-            <div className="title">Create your E-invoice</div>
+            <div className="create-invoice-title">Create your E-invoice</div>
             <div className="type">select your invoice type</div>
           </div>
           <CardSelector

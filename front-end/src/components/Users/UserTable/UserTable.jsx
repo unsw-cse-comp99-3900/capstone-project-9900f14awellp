@@ -32,12 +32,21 @@ import {
   SearchOutlined,
   ExportOutlined,
   UserAddOutlined,
+  UserOutlined,
+  MailOutlined,
 } from "@ant-design/icons";
 
 import { UserInfo } from "../UserInfo/UserInfo";
-import { allUsersInfo, promoteUser, deleteUser } from "@/apis/users";
+import { CustomAlert } from "@/components/Alert/MUIAlert";
+import {
+  allUsersInfo,
+  promoteUser,
+  deleteUser,
+  sendInvitationEmail,
+} from "@/apis/users";
 
 import "./UserTable.css";
+import { color } from "framer-motion";
 
 function formatDate(dateString) {
   // 创建一个 Date 对象
@@ -73,10 +82,6 @@ function formatDate(dateString) {
   // 组合成最终的格式
   return `${day} ${month} ${year}, ${hours}:${minutes}${ampm}`;
 }
-
-const sendEmail = (username, email) => {
-  console.log(`Send email to ${username} at ${email}`);
-};
 
 const statusMapping = {
   false: "Staff",
@@ -120,7 +125,11 @@ export default function UserTable() {
 
   const [searchValue, setSearchValue] = useState("");
 
+  //* Modal状态
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  //* 邀请用户的表单数据
   const [inviteUsername, setInviteUsername] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
 
@@ -134,7 +143,7 @@ export default function UserTable() {
         _setData(res.data);
       });
     } catch (error) {
-      showAlert("Failed to remove user.", "error");
+      showAlert("Failed to remove user:" + error.message, "error");
       console.log("删除用户时出错:", error);
     }
   };
@@ -172,20 +181,22 @@ export default function UserTable() {
   //* 处理发送邀请邮件的逻辑
   const handleModalOk = async () => {
     if (!inviteUsername || !inviteEmail) {
-      message.error("Please fill in your username and email address.");
+      showAlert("Please enter both username and email", "warning");
       return;
     }
 
-    // try {
-    //   await sendEmail(inviteUsername, inviteEmail);
-    //   message.success("邀请邮件已发送");
-    //   setIsModalVisible(false);
-    //   setInviteUsername("");
-    //   setInviteEmail("");
-    // } catch (error) {
-    //   message.error("发送邀请邮件失败");
-    // }
-    console.log("send email");
+    try {
+      setConfirmLoading(true);
+      await sendInvitationEmail(inviteUsername, inviteEmail);
+      setIsModalVisible(false);
+      setConfirmLoading(false);
+      showAlert("Email sent successfully", "success");
+
+      setInviteUsername("");
+      setInviteEmail("");
+    } catch (error) {
+      showAlert("Failed to send email:" + error.message, "error");
+    }
   };
 
   //* 处理取消邀请用户的逻辑
@@ -449,16 +460,25 @@ export default function UserTable() {
 
   return (
     <div className="user-table-container">
+      {alert.show && (
+        <CustomAlert
+          message={alert.message}
+          severity={alert.severity}
+          onClose={hideAlert}
+        />
+      )}
       <Modal
-        title="Invite a New User"
+        title="Invite New User"
         open={isModalVisible}
         onOk={handleModalOk}
+        confirmLoading={confirmLoading}
         onCancel={handleModalCancel}
         className="invite-user-modal"
       >
         <div className="user-modal-input-group">
           <Input
             size="large"
+            prefix={<UserOutlined style={{ color: "#C1C1C1" }} />}
             placeholder="Username"
             value={inviteUsername}
             onChange={(e) => setInviteUsername(e.target.value)}
@@ -466,6 +486,7 @@ export default function UserTable() {
           />
           <Input
             size="large"
+            prefix={<MailOutlined style={{ color: "#C1C1C1" }} />}
             placeholder="Email"
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
