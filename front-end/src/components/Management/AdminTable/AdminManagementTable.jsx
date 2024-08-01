@@ -43,10 +43,7 @@ import Dollor from "@/assets/dollar-sign.svg";
 import Loader from "@/assets/loader.svg";
 import User from "@/assets/user.svg";
 
-import {
-  StatusTag,
-  StatusClosableTag,
-} from "@/components/Management/StatusTag/StatusTag";
+import { StatusTag } from "@/components/Management/StatusTag/StatusTag";
 
 import { UserInfo } from "@/components/Users/UserInfo/UserInfo";
 import { InvoiceMainInfo } from "../InvoiceMainInfo/InvoiceMainInfo";
@@ -86,17 +83,6 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
-const tagRender = (props) => {
-  const { label, value, closable, onClose } = props;
-  return (
-    <StatusClosableTag
-      value={value}
-      label={label}
-      closable={closable}
-      onClose={onClose}
-    />
-  );
-};
 //计算即将到期的30天的发票金额
 // Calculate the amount of invoices that will expire in 30 days
 const calculateUpcoming30DueDateInfo = (invoices) => {
@@ -258,6 +244,7 @@ export function AdminManagementTable() {
 
   //*获取数据
   const [data, _setData] = useState([]);
+  console.log(data);
   const [upcoming30DaysInfo, setUpcoming30DaysInfo] = useState({
     totalAmount: "0.00",
     count: 0,
@@ -875,7 +862,12 @@ export function AdminManagementTable() {
           </div>
         </div>
         <div className="admin-search-row-right">
-          <Button size="large" onClick={handleExport} icon={<ExportOutlined />}>
+          <Button
+            size="large"
+            onClick={handleExport}
+            icon={<ExportOutlined style={{ color: "#787B88" }} />}
+            style={{ color: "#787B88" }}
+          >
             Export
           </Button>
           <Button

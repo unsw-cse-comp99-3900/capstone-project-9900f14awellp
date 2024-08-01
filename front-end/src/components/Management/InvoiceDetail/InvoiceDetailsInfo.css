@@ -1,5 +1,68 @@
-.info-details-header-row{
+.info-details-header-row {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: #e6e9eb solid 1px;
+  align-items: end;
+}
+
+.invoice-detail-page {
+  width: 100%;
+  min-height: 100vh;
+  font-family: "Lexend Deca", sans-serif;
+
+}
+
+.invoice-details-title {
+  font-size: calc(1.8vw + 1.8vh);
+  font-weight: 450;
+  color: #333;
+  padding-top: 10px;
+  padding-bottom: 8px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.invoice-details-header-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.invoice-details-header-details{
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
+    flex-direction: row;
+    gap: 8px;
+    color: #B4B4B4;
+    font-weight: 350;
+}
+
+.invoice-details-header-details-total{
+    color: #333;
+}
+
+.info-details-header-row-right{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.invoice-pdf-img-container{
+    width: 63%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 10px -5px rgba(0, 0, 0, 0.25);
+}
+
+.info-details-body{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    padding-top: 30px;
+    padding-bottom: 30px;
 }
