@@ -765,10 +765,10 @@ class UpFileAPIView(APIView):
                     converter_xml(f"staticfiles/{request.user.id}/{file_stem}.xml")
             elif str(file.file).endswith('.pdf'):
                 url = 'https://app.ezzydoc.com/EzzyService.svc/Rest'
-                api_key = {'APIKey': 'aeff7b2f-3554-45ee-8d36-cc6fd5984c28'}
-                payload = {'user': 'xxxx',
-                        'pwd': 'Xxxx1234',
-                        'APIKey': 'aeff7b2f-3554-45ee-8d36-cc6fd5984c28'}
+                api_key = {'APIKey': '626843fc-1b6d-4b8f-8441-a786bab52708'}
+                payload = {'user': 'LianqiangZhao',
+                        'pwd': 'Zlq641737796',
+                        'APIKey': '626843fc-1b6d-4b8f-8441-a786bab52708'}
                 # 保留cookie
                 r = requests.get(url + '/Login', params=payload)
                 
@@ -790,7 +790,7 @@ class UpFileAPIView(APIView):
                     invoiceID = str(r2.json().get("invoice_id"))
                 # 1.3 获得传回的json数据
                 payload2 = {'invoiceid':invoiceID,
-                            'APIKey': 'aeff7b2f-3554-45ee-8d36-cc6fd5984c28'}
+                            'APIKey': '626843fc-1b6d-4b8f-8441-a786bab52708'}
             
                 sleep(60)
                 r3 = requests.get(url + '/getFormData', cookies=r.cookies,params=payload2)
@@ -815,6 +815,10 @@ class UpFileAPIView(APIView):
                     with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
                         f.write(xml_str)
                     converter_xml(f"staticfiles/{request.user.id}/{file_stem}.xml")
+                    
+                    pdf_path = f"staticfiles/{request.user.id}/{filename}"
+
+                    pdf_to_png(pdf_path, f"staticfiles/{request.user.id}/{file_stem}.png")
                     
             return Response({
                                 "code": 0,
