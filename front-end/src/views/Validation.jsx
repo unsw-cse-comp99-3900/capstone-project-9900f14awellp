@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { ResponsiveAppBar } from "../components/Navbar";
 import { SelectSmall } from "../components/Select";
 import { ButtonSizes } from "../components/Buttons";
 import { MultipleSelect } from "../components/Select";
@@ -22,6 +21,9 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import OutlinedAlerts from "../components/Alert";
 import success from "../assets/success.png";
+import SparklesText from "@/components/SparklesText";
+
+import "./global.css";
 
 export default function Validation() {
   const token = localStorage.getItem("token");
@@ -35,19 +37,19 @@ export default function Validation() {
   const [alert, setAlert] = useState(null);
   const [validatedStatus, setValidatedStatus] = useState(null);
 
-    const handleClick = () => {
-        setOpen(!open);
-    };
-  
-    const rules = [
-        'AUNZ_PEPPOL_1_0_10',
-        'AUNZ_PEPPOL_SB_1_0_10',
-        'AUNZ_UBL_1_0_10',
-        'FR_EN16931_CII_1_3_11',
-        'RO_RO16931_UBL_1_0_8_EN16931',
-        'FR_EN16931_UBL_1_3_11',
-        'RO_RO16931_UBL_1_0_8_CIUS_RO',
-    ];
+  const handleClick = () => {
+    setOpen(!open);
+  };
+
+  const rules = [
+    "AUNZ_PEPPOL_1_0_10",
+    "AUNZ_PEPPOL_SB_1_0_10",
+    "AUNZ_UBL_1_0_10",
+    "FR_EN16931_CII_1_3_11",
+    "RO_RO16931_UBL_1_0_8_EN16931",
+    "FR_EN16931_UBL_1_3_11",
+    "RO_RO16931_UBL_1_0_8_CIUS_RO",
+  ];
 
   const handleClear = () => {
     setSelectedRules([]);
@@ -105,7 +107,8 @@ export default function Validation() {
         },
       })
       .then((response) => {
-        const validatedStatus = response.data.validation_report.report.successful;
+        const validatedStatus =
+          response.data.validation_report.report.successful;
         setValidatedStatus(validatedStatus);
         setValidationReport(response.data.validation_report);
         console.log(response.data);
@@ -121,8 +124,10 @@ export default function Validation() {
           });
           setValidationReport(error.response.data.validation_report);
         } else {
-            setAlert({ severity: 'error', message: error.message });
-            console.log(error.message);
+          setAlert({ severity: "error", message: error.message });
+          console.log(error.message);
+          setAlert({ severity: "error", message: error.message });
+          console.log(error.message);
         }
         setShowIcon(false);
       });
@@ -130,7 +135,6 @@ export default function Validation() {
 
   return (
     <div>
-      <ResponsiveAppBar />
       {alert && (
         <div
           style={{
@@ -157,26 +161,30 @@ export default function Validation() {
           justifyContent: "center",
           alignItems: "center",
           height: "80vh",
+          gap: "20px",
         }}
       >
-        <h1
-          style={{ fontSize: "45px", marginBottom: "16px", fontWeight: "bold" }}
-        >
-          Validate your E-invoice
-        </h1>
-        <h6 style={{ fontSize: "15px", marginBottom: "16px", color: "gray" }}>
-          please choose your invoice and rules
-        </h6>
-        <MultipleSelect
-          lists={rules}
-          onChange={setSelectedRules}
-          selected={selectedRules}
+        <SparklesText
+          text="Validate your E-invoice"
+          className="validate-title"
         />
-        <SelectSmall
-          invoices={invoices}
-          onChange={(e) => setSelectedInvoice(e.target.value)}
-        />
-        <ButtonSizes onClick={handleValidate}>Validate</ButtonSizes>
+        <h6 className="type">please choose your invoice and rules</h6>
+        <div className="validate-form-group">
+          <MultipleSelect
+            lists={rules}
+            onChange={setSelectedRules}
+            selected={selectedRules}
+            style={{ width: "100%" }}
+            className="multiple-select"
+          />
+          <SelectSmall
+            invoices={invoices}
+            onChange={(e) => setSelectedInvoice(e.target.value)}
+            className="select-small"
+          />
+          <ButtonSizes onClick={handleValidate}>Validate</ButtonSizes>
+        </div>
+
         {showIcon && (
           <div
             style={{
@@ -197,27 +205,25 @@ export default function Validation() {
           </div>
         )}
 
-        {validatedStatus !== null && (
-          validatedStatus ? (
-            <div style={{width:'20px'}}>
+        {validatedStatus !== null &&
+          (validatedStatus ? (
+            <div style={{ width: "20px" }}>
               <BasicModal
-              title="Validation"
-              open={validatedStatus}
-              onClose={() => setValidatedStatus(null)}
-              actions={[
-                {
-                  label: "OK",
-                  onClick: () => setValidatedStatus(null)
-                }
-              ]}
-             
-            >
-              <div style={{ padding: "10px", textAlign: "center" }}>
-                <img src={success} alt="icon" />
-              </div>
-            </BasicModal>
+                title="Validation"
+                open={validatedStatus}
+                onClose={() => setValidatedStatus(null)}
+                actions={[
+                  {
+                    label: "OK",
+                    onClick: () => setValidatedStatus(null),
+                  },
+                ]}
+              >
+                <div style={{ padding: "10px", textAlign: "center" }}>
+                  <img src={success} alt="icon" />
+                </div>
+              </BasicModal>
             </div>
-            
           ) : (
             <BasicModal
               title="Validation Result"
@@ -256,7 +262,10 @@ export default function Validation() {
                         <TableRow>
                           <TableCell>Total Errors</TableCell>
                           <TableCell>
-                            {validationReport?.report?.firedAssertionErrorsCount}
+                            {
+                              validationReport?.report
+                                ?.firedAssertionErrorsCount
+                            }
                           </TableCell>
                         </TableRow>
                         <TableRow>
@@ -293,8 +302,7 @@ export default function Validation() {
                 </div>
               </div>
             </BasicModal>
-          )
-        )}
+          ))}
       </div>
     </div>
   );

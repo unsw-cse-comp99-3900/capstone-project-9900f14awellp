@@ -1,8 +1,9 @@
 from rest_framework import serializers,exceptions
-from .models import Company, User, UpFile, GUIFile,Order
+from .models import Company, User, UpFile, GUIFile,Order,Draft
 import json
 from datetime import datetime
 import os
+import re
 
 class InvoiceUpfileSerializer(serializers.ModelSerializer):
     supplier = serializers.SerializerMethodField()
@@ -13,9 +14,12 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     invoice_number = serializers.SerializerMethodField()
     invoice_date = serializers.SerializerMethodField()
     due_date = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
     class Meta:
         model = UpFile
-        fields = ['id', 'timestamp', 'userid', 'uuid', 'file','files_name','supplier','invoice_date','due_date',"invoice_number","total","state","creation_method"]
+        fields = ['id', 'timestamp', 'userid', 'uuid', "avatar","email","name",'file','files_name','supplier','invoice_date','due_date',"invoice_number","total","state","creation_method"]
     
     
     def get_files_name(self, obj):
@@ -25,16 +29,30 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         file_stem = os.path.splitext(file_name)[0]
         return file_stem
     
+    def get_avatar(self, obj):
+        return obj.userid.avatar.url if obj.userid and obj.userid.avatar else None
+    def get_email(self, obj):
+        return obj.userid.email if obj.userid else None
+    def get_name(self, obj):
+        return obj.userid.name if obj.userid else None
+
     def parse_date(self, date_str):
-        # 提取时间戳
         if not date_str:
             raise ValueError("The date string is empty or None")
 
-        timestamp = int(date_str.strip('/Date()').split('+')[0])
+        # 使用正则表达式匹配 /Date(XXX)/ 格式
+        match = re.match(r'/Date\((\d+)\+\d+\)/', date_str)
+        if match:
+            # 提取时间戳并转换为datetime对象
+            timestamp = int(match.group(1))
+            return datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d')
+        else:
+            try:
+                # 处理 YYYY-MM-DD 格式的日期字符串
+                return datetime.strptime(date_str, '%Y-%m-%d').strftime('%Y-%m-%d')
+            except ValueError:
+                raise ValueError("The date string format is not recognized")
         
-        # 转换为datetime对象
-        return datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d')
-    
     def get_file_data(self, obj):
         file_name = os.path.basename(str(obj.file))
         file_stem = os.path.splitext(file_name)[0]
@@ -47,28 +65,38 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     def get_invoice_date(self, obj): 
         print(obj.file) 
         data = self.get_file_data(obj)
-        nested_form_data = data.get('invoiceForm', {})
-        return self.parse_date(nested_form_data.get('invoiceDate', 'N/A'))
+        nested_form_data = data.get('invoiceForm', {}).get('invoiceDate', {})
+        if not nested_form_data:
+            nested_form_data = data.get('issue_date', {})
+        return self.parse_date(nested_form_data)
         
     def get_due_date(self,obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('invoiceForm', {})
-        return self.parse_date(nested_form_data.get('paymentDate', 'N/A'))
+        nested_form_data = data.get('invoiceForm', {}).get('paymentDate', {})
+        if not nested_form_data:
+            nested_form_data = data.get('due_date', {})
+        return self.parse_date(nested_form_data)
 
     def get_invoice_number(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {})
-        return nested_form_data.get('invoiceNumber', 'N/A') 
+        nested_form_data = data.get('form_data', {}).get('invoiceNumber', {})
+        if not nested_form_data:
+            nested_form_data = data.get('invoice_num', {})
+        return nested_form_data
     
     def get_supplier(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {})
-        return nested_form_data.get('company_invoiced', 'N/A')
+        nested_form_data = data.get('form_data', {}).get('company_invoiced', {})
+        if not nested_form_data:
+            nested_form_data = data.get('client_company_name', {})
+        return nested_form_data
     
     def get_total(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {})
-        return nested_form_data.get('total', 'N/A')
+        nested_form_data = data.get('form_data', {}).get('total', {})
+        if not nested_form_data:
+            nested_form_data = data.get('total_amount', {})
+        return nested_form_data
     
     def get_state(self, obj):
         if not obj.is_validated:
@@ -83,13 +111,61 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         if GUIFile.objects.filter(userid=obj.userid, uuid=obj.uuid).exists():
             return "gui"
         return "upload"
+
+class DraftRecording(serializers.ModelSerializer):
+    prograss = serializers.SerializerMethodField()
+    class Meta:
+        model = Draft
+        fields = ['id','invoice_num','create_date','update_date','prograss']
+    
+    def get_prograss(self, obj):
+        # 全部字段数量
+        all_fields = [field.name for field in Draft._meta.get_fields()]
+        total_fields = len(all_fields)
+        
+        # 为空的字段数量
+        non_empty_fields = [field for field in all_fields if getattr(obj, field)]
+        non_empty_count = len(non_empty_fields)
+        # 计算百分比
+        empty_percentage = (non_empty_count / total_fields) * 100
+        return f"{empty_percentage:.2f}"
+    
+class UserInfoSerializer(serializers.ModelSerializer):
+    # 你需要将company字段重定义为SerializerMethodField，而不是直接使用模型字段。这将确保在序列化时调用你定义的get_company方法。以下是修改后的代码：
+    company = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'name', 'company', 'avatar', 'bio', 'is_staff', 'create_date', 'update_date',"login_date","join_company_date"]
+        
+    def get_company(self, obj):
+            return obj.company.name if obj.company else None
+        
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'name', 'avatar', 'bio']
+        # extra_kwargs 设置各字段为可选。
+        extra_kwargs = {
+            'username': {'required': False},
+            'email': {'required': False},
+            'name': {'required': False},
+            'avatar': {'required': False},
+            'bio': {'required': False}
+        }
+        
+    # update 方法循环更新实例的每个字段并保存。
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
     
 class CompanySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Company
         fields = '__all__'
-
 
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
@@ -98,43 +174,26 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['username','password','name','email',"confirm_password"]
+        fields = ['username','password','name','avatar','email',"confirm_password",'bio']
         extra_kwargs = {
             "id": {"read_only": True,},
             'password': {'write_only': True},
         }
-        
-        
-        """
-        自定义验证方法 validate_<field_name> 会在调用 is_valid() 方法时自动被调用。
-        """
-    def validate_password(self, value):
-        return value
-    
-    """
-    value：在 validate_confirm_password 方法中value 是用户输入的 confirm_password 字段的值。
-    因为这个方法的命名规则是 validate_<field_name>，DRF 会自动将 confirm_password 字段的值传递给 validate_confirm_password 方法。
-    """
+
     def validate_confirm_password(self, value):
         password = self.initial_data.get('password')
         if value != password:
             raise exceptions.ValidationError("Passwords do not match")
         return value
     
-
-    
 class PasswordResetSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
-    
-    
+      
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = '__all__'
-
-
-
 
 # only data of uploading files need to be serialized
 class FileUploadSerializer(serializers.ModelSerializer):
@@ -146,21 +205,140 @@ class FileUploadSerializer(serializers.ModelSerializer):
         validated_data['is_validated'] = True
         return super().create(validated_data)"""
  
- 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['description', 'price', 'quantity', 'net', 'qst', 'gross']
+        fields = ['description', 'unit_price', 'quantity', 'net', 'gst', 'amount']
                
+class DraftGUISerializer(serializers.ModelSerializer):
+    #invoice_name = serializers.CharField(required=True)
+    invoice_num = serializers.CharField(required=True)
+    userid = serializers.PrimaryKeyRelatedField(read_only=True)  # 设置为只读
+    orders = OrderSerializer(many=True,required=False)
+    class Meta:
+        # 使用draft而不是model
+        model = Draft
+        # fields = ["filename","uuid","userid",'invoice_num', 'company_name', 'address', 'country_name',"bank","bank_branch","account_num","bsb_num","account_name",'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+        fields = [
+            "id",
+            "invoice_name",  # 对应filename
+            "uuid", 
+            "userid", 
+            "invoice_num", 
+            "my_company_name",  # 对应company_name
+            "my_address",  # 对应address
+            "my_abn",
+            "my_email",
+            # "country_name",  # 模型中无对应字段
+            "client_company_name",
+            "client_address",
+            "client_abn",
+            "client_email",
+            
+            "bank_name",  # 对应bank
+            "currency", 
+            "account_num", 
+            "bsb_num", 
+            "account_name", 
+            "issue_date", 
+            "due_date", 
 
+            "subtotal", 
+            "gst_total",  # 对应qst_total
+            "total_amount",  # 对应total_price
+            "note",  # 对应important_text
+            # "items",  # 模型中无对应字段
+            "orders"
+        ]
+
+    def create(self, validated_data):
+        orders_data = validated_data.pop('orders', [])  # 如果 orders 不存在，设置为空列表
+        guifile = Draft.objects.create(**validated_data)
+        for order_data in orders_data:
+            order = Order.objects.create(**order_data)
+            guifile.orders.add(order)
+        return guifile
+
+    def update(self, instance, validated_data):
+        orders_data = validated_data.pop('orders')
+        instance.invoice_name = validated_data.get('invoice_name', instance.invoice_name)
+        instance.uuid = validated_data.get('uuid', instance.uuid)
+        instance.invoice_num = validated_data.get('invoice_num', instance.invoice_num)
+        instance.my_company_name = validated_data.get('my_company_name', instance.my_company_name)
+        instance.my_address = validated_data.get('my_address', instance.my_address)
+        instance.my_email = validated_data.get('my_email', instance.my_email)
+        instance.my_abn = validated_data.get('my_abn', instance.my_abn)
+        
+        instance.client_company_name = validated_data.get('client_company_name', instance.client_company_name)
+        instance.client_abn = validated_data.get('client_abn', instance.client_abn)
+        instance.client_address = validated_data.get('client_address', instance.client_address)
+        instance.client_email = validated_data.get('client_email', instance.client_email)
+
+        instance.bank_name = validated_data.get('bank_name', instance.bank_name) 
+        instance.currency = validated_data.get('currency', instance.currency)
+        instance.account_num = validated_data.get('account_num', instance.account_num)
+        instance.bsb_num = validated_data.get('bsb_num', instance.bsb_num)
+        instance.account_name = validated_data.get('account_name', instance.account_name)
+            
+        instance.issue_date = validated_data.get('issue_date', instance.issue_date)
+        instance.due_date = validated_data.get('due_date', instance.due_date)
+
+
+
+        instance.subtotal = validated_data.get('subtotal', instance.subtotal)
+        instance.gst_total = validated_data.get('gst_total', instance.gst_total)
+        instance.total_amount = validated_data.get('total_amount', instance.total_amount)
+        instance.note = validated_data.get('note', instance.note)
+
+        instance.save()
+
+            
+        instance.orders.clear()
+        for order_data in orders_data:
+            order = Order.objects.create(**order_data)
+            instance.orders.add(order)
+        
+        return instance
+    
 class FileGUISerializer(serializers.ModelSerializer):
-    filename = serializers.CharField(required=True)
+    invoice_name = serializers.CharField(required=True)
     uuid = serializers.CharField(required=True)
     userid = serializers.PrimaryKeyRelatedField(read_only=True)  # 设置为只读
     orders = OrderSerializer(many=True)
     class Meta:
         model = GUIFile
-        fields = ["filename","uuid","userid",'id', 'company_name', 'address', 'country_name',"bank","bank_branch","account_num","bsb_num","account_name",'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+        # fields = ["filename","uuid","userid",'invoice_num', 'company_name', 'address', 'country_name',"bank","bank_branch","account_num","bsb_num","account_name",'issue_date', "due_date",'terms', 'ABN', 'purchase_id', 'subtotal', 'qst_total', 'total_price', 'important_text', 'items', 'orders']
+        fields = [
+            "invoice_name",  # 对应filename
+            "uuid", 
+            "userid", 
+            "invoice_num", 
+            "my_company_name",  # 对应company_name
+            "my_address",  # 对应address
+            "my_abn",
+            "my_email",
+            # "country_name",  # 模型中无对应字段
+            "client_company_name",
+            "client_address",
+            "client_abn",
+            "client_email",
+            
+            "bank_name",  # 对应bank
+            "currency", 
+            "account_num", 
+            "bsb_num", 
+            "account_name", 
+            "issue_date", 
+            "due_date", 
+
+            "subtotal", 
+            "gst_total",  # 对应qst_total
+            "total_amount",  # 对应total_price
+            "note",  # 对应important_text
+            # "items",  # 模型中无对应字段
+            "orders"
+        ]
+
 
 
     def create(self, validated_data):
@@ -173,26 +351,32 @@ class FileGUISerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         orders_data = validated_data.pop('orders')
-        instance.company_name = validated_data.get('company_name', instance.company_name)
-        instance.address = validated_data.get('address', instance.address)
-        instance.country_name = validated_data.get('country_name', instance.country_name)
+        instance.my_company_name = validated_data.get('my_company_name', instance.my_company_name)
+        instance.my_address = validated_data.get('my_address', instance.my_address)
+        instance.my_email = validated_data.get('my_email', instance.my_email)
+        instance.my_abn = validated_data.get('my_abn', instance.my_abn)
         
-        instance.bank = validated_data.get('bank', instance.bank) 
-        instance.bank_branch = validated_data.get('bank_branch', instance.bank_branch)
+        instance.client_company_name = validated_data.get('client_company_name', instance.client_company_name)
+        instance.client_abn = validated_data.get('client_abn', instance.client_abn)
+        instance.client_address = validated_data.get('client_address', instance.client_address)
+        instance.client_email = validated_data.get('client_email', instance.client_email)
+
+        instance.banbank_namek = validated_data.get('bank_name', instance.bank_name) 
+        instance.currency = validated_data.get('currency', instance.currency)
         instance.account_num = validated_data.get('account_num', instance.account_num)
         instance.bsb_num = validated_data.get('bsb_num', instance.bsb_num)
         instance.account_name = validated_data.get('account_name', instance.account_name)
             
         instance.issue_date = validated_data.get('issue_date', instance.issue_date)
         instance.due_date = validated_data.get('due_date', instance.due_date)
-        instance.terms = validated_data.get('terms', instance.terms)
-        instance.ABN = validated_data.get('ABN', instance.ABN)
-        instance.purchase_id = validated_data.get('purchase_id', instance.purchase_id)
+
+
+
         instance.subtotal = validated_data.get('subtotal', instance.subtotal)
-        instance.qst_total = validated_data.get('qst_total', instance.qst_total)
-        instance.total_price = validated_data.get('total_price', instance.total_price)
-        instance.important_text = validated_data.get('important_text', instance.important_text)
-        instance.items = validated_data.get('items', instance.items)
+        instance.gst_total = validated_data.get('gst_total', instance.gst_total)
+        instance.total_amount = validated_data.get('total_amount', instance.total_amount)
+        instance.note = validated_data.get('note', instance.note)
+
         instance.save()
 
             

@@ -22,7 +22,7 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 150,
+  width: 400,
   bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
@@ -50,12 +50,11 @@ export const BasicModal = ({ title, description, children, open, onClose }) => {
   );
 };
 
-
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
   });
   
-  export const AlertDialogSlide =({ fontsize}) =>{
+export const AlertDialogSlide = ({ fontsize }) => {
     const [open, setOpen] = React.useState(false);
   
     const handleClickOpen = () => {
@@ -70,12 +69,12 @@ const Transition = React.forwardRef(function Transition(props, ref) {
       <React.Fragment>
          <Box
       sx={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        marginTop: '10px',
-        justifyContent: 'center',
-        typography: 'body1',
-        '& > :not(style) ~ :not(style)': {
+          display: "flex",
+          flexWrap: "wrap",
+          marginTop: "10px",
+          justifyContent: "center",
+          typography: "body1",
+          "& > :not(style) ~ :not(style)": {
           ml: 2,
         },
       }}
@@ -87,7 +86,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
         color="inherit"
         style={{ fontSize: fontsize }} // 调整字体大小
         >
-        By clicking Login, you agree to our Terms of Service and Privacy Policy
+          By clicking Login, you agree to our Terms of Service and Privacy
+          Policy
       </Link>
       </Box>
       <Dialog
@@ -108,15 +108,11 @@ const Transition = React.forwardRef(function Transition(props, ref) {
             <Button onClick={handleClose}>Agree</Button>
           </DialogActions>
         </Dialog>
-    
-        
       </React.Fragment>
     );
-  }
+};
 
-
-
-export default function FormDialog({onFormSubmit}) {
+export default function FormDialog({ onFormSubmit }) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -132,14 +128,15 @@ export default function FormDialog({onFormSubmit}) {
       {/* <Button variant="outlined" onClick={handleClickOpen}>
         Forget your password?
       </Button> */}
-        <UnderlineLink onClick={handleClickOpen} fontsize='9px'>
+      <UnderlineLink onClick={handleClickOpen} fontsize="9px">
                         Forget your password?
         </UnderlineLink>
       <Dialog
         open={open}
         onClose={handleClose}
         PaperProps={{
-          component: 'form',
+          component: "form",
+          component: "form",
           onSubmit: (event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
@@ -155,8 +152,8 @@ export default function FormDialog({onFormSubmit}) {
         <DialogTitle>Reset Password</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            To reset your password, please enter your user name and  email address here. We
-            will send a email with a link.
+            To reset your password, please enter your user name and email
+            address here. We will send a email with a link.
           </DialogContentText>
           <TextField
             autoFocus
@@ -182,8 +179,18 @@ export default function FormDialog({onFormSubmit}) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="inherit">Cancel</Button>
-          <Button type="submit" color="inherit" >Submit</Button>
+          <Button onClick={handleClose} color="inherit">
+            Cancel
+          </Button>
+          <Button type="submit" color="inherit">
+            Submit
+          </Button>
+          <Button onClick={handleClose} color="inherit">
+            Cancel
+          </Button>
+          <Button type="submit" color="inherit">
+            Submit
+          </Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
@@ -201,7 +208,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-export const CustomizedDialogs =() =>{
+export const CustomizedDialogs =() => {
   const [open, setOpen] = React.useState(true);
 
   // const handleClickOpen = () => {

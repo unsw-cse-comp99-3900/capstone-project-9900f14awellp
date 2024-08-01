@@ -2,87 +2,88 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import OutlinedAlerts from "../components/Alert";
 import {
-    Box,
-    Button,
-    Container,
-    TextField,
-    Typography,
-    Avatar,
-    FormControl,
-    Grid,
-    Chip
-} from '@mui/material';
-import FaceIcon from '@mui/icons-material/Face';
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Avatar,
+  FormControl,
+  Grid,
+  Chip,
+} from "@mui/material";
+import FaceIcon from "@mui/icons-material/Face";
 
 export default function Profile() {
-    const token = localStorage.getItem('token');
-    const [alert, setAlert] = useState(null); // 初始状态设置为null
-    const [isEditing, setIsEditing] = useState(false);
-    const [profileData, setProfileData] = useState({
-        username: '',
-        email: '',
-        company: '',
-        bio: '',
-        role: '',
-        avatar: '',
-        is_staff: false
-    });
-    const [initialProfileData, setInitialProfileData] = useState({
-        username: '',
-        email: '',
-        company: '',
-        bio: '',
-        role: '',
-        avatar: '',
-        is_staff: false
-    });
+  const token = localStorage.getItem("token");
+  const [alert, setAlert] = useState(null); // 初始状态设置为null
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState({
+    username: "",
+    email: "",
+    company: "",
+    bio: "",
+    role: "",
+    avatar: "",
+    is_staff: false,
+  });
+  const [initialProfileData, setInitialProfileData] = useState({
+    username: "",
+    email: "",
+    company: "",
+    bio: "",
+    role: "",
+    avatar: "",
+    is_staff: false,
+  });
 
-    const handleEditClick = () => {
-        setIsEditing(true);
-    };
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
 
-    const handleCancelClick = () => {
-        setProfileData(initialProfileData);
-        setIsEditing(false);
-    };
+  const handleCancelClick = () => {
+    setProfileData(initialProfileData);
+    setIsEditing(false);
+  };
 
-    const handleSaveClick = () => {
-        handleSaveData();
-        setIsEditing(false);
-    };
+  const handleSaveClick = () => {
+    handleSaveData();
+    setIsEditing(false);
+  };
 
-    const handleFormSubmit = (event) => {
-        // 阻止自动刷新
-        event.preventDefault();
-        // 处理表单提交逻辑
-        // setIsEditing(false);
-    };
+  const handleFormSubmit = (event) => {
+    // 阻止自动刷新
+    event.preventDefault();
+    // 处理表单提交逻辑
+    // setIsEditing(false);
+  };
 
-    const fetchProfileData = useCallback(() => {
-        axios.get('http://127.0.0.1:8000/invoice/user-info/', {
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(response => {
-            console.log(response.data);
-            setProfileData(response.data);
-            setInitialProfileData(response.data);
-        })
-        .catch(error => {
-            console.log(error.message);
-            setAlert({ severity: 'error', message: error.message });
-        });
-    }, [token]);
+  const fetchProfileData = useCallback(() => {
+    axios
+      .get("http://127.0.0.1:8000/invoice/user-info/", {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        console.log(response.data);
+        setProfileData(response.data);
+        setInitialProfileData(response.data);
+      })
+      .catch((error) => {
+        console.log(error.message);
+        setAlert({ severity: "error", message: error.message });
+      });
+  }, [token]);
 
-    useEffect(() => {
-        fetchProfileData();
-    }, [fetchProfileData]);
+  useEffect(() => {
+    fetchProfileData();
+  }, [fetchProfileData]);
 
-    useEffect(() => {
-        console.log('Updated profileData:', profileData);
-    }, [profileData]);
+  useEffect(() => {
+    console.log("Updated profileData:", profileData);
+  }, [profileData]);
 
   const handleSaveData = () => {
     const formData = new FormData();
@@ -121,7 +122,6 @@ export default function Profile() {
         }
       });
   };
-
   const handleAvatarChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -147,17 +147,22 @@ export default function Profile() {
       <div>
       <ResponsiveAppBar />
       {alert && (
-      <div style={{
-          position: 'fixed',
-          top: '11vh',
-          right: 10,
-          width: '30%',
-          zIndex: 9999
-      }}>
-          <OutlinedAlerts severity={alert.severity} onClose={() => setAlert(null)}>
-              {alert.message}
+        <div
+          style={{
+            position: "fixed",
+            top: "11vh",
+            right: 10,
+            width: "30%",
+            zIndex: 9999,
+          }}
+        >
+          <OutlinedAlerts
+            severity={alert.severity}
+            onClose={() => setAlert(null)}
+          >
+            {alert.message}
           </OutlinedAlerts>
-      </div>
+        </div>
       )}
       <Container maxWidth="sm">
         <Box
@@ -217,7 +222,9 @@ export default function Profile() {
                     onChange={handleAvatarChange}
                   />
                   <label htmlFor="avatar-upload">
+
                     {/* <Avatar
+
                       src={
                         profileData.avatar || "https://via.placeholder.com/150"
                       }
@@ -227,6 +234,7 @@ export default function Profile() {
                         cursor: isEditing ? "pointer" : "default",
                       }}
                       component={isEditing ? "span" : "div"}
+
                     /> */}
                     <Avatar
                       src={getAvatarUrl(profileData.avatar)}
@@ -452,6 +460,6 @@ export default function Profile() {
           </Box>
         </Box>
       </Container>
-  </div>
-    );
+    </div>
+  );
 }
