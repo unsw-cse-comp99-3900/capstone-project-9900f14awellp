@@ -6,7 +6,6 @@ import { useInvoice } from "@/Content/GuiContent";
 import { Input, DatePicker, Select, InputNumber } from "antd";
 import dayjs from "dayjs";
 import { FlagIcon } from "react-flag-kit";
-import { CompanyInfo } from "@/apis/gui";
 
 const { TextArea } = Input;
 

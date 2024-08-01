@@ -1,8 +1,10 @@
 // src/context/InvoiceContext.js
 import React, { createContext, useState, useContext, useEffect } from "react";
-
 import { CompanyInfo } from "@/apis/gui";
+
 const InvoiceContext = createContext();
+
+const token = localStorage.getItem("token");
 
 export function InvoiceProvider({ children }) {
   const [invoiceData, setInvoiceData] = useState({
@@ -38,30 +40,32 @@ export function InvoiceProvider({ children }) {
     orders: [],
   });
 
-  useEffect(() => {
-    const fetchCompanyInfo = async () => {
-      try {
-        const res = await CompanyInfo();
-        setInvoiceData((prevData) => ({
-          ...prevData,
-          my_company_name: res.data.name,
-          my_address: res.data.address,
-          my_ABN: res.data.ABN,
-          my_email: res.data.email,
-        }));
-      } catch (error) {
-        console.warning("Failed to fetch company info:", error);
-      }
-    };
-    fetchCompanyInfo();
-  }, []);
+  if (token) {
+    useEffect(() => {
+      const fetchCompanyInfo = async () => {
+        try {
+          const res = await CompanyInfo();
+          setInvoiceData((prevData) => ({
+            ...prevData,
+            my_company_name: res.data.name,
+            my_address: res.data.address,
+            my_ABN: res.data.ABN,
+            my_email: res.data.email,
+          }));
+        } catch (error) {
+          console.log("Failed to fetch company info:", error);
+        }
+      };
+      fetchCompanyInfo();
+    }, []);
+  }
 
   const updateInvoiceData = (newData) => {
     setInvoiceData((prevData) => ({ ...prevData, ...newData }));
   };
 
   const clearInvoiceData = () => {
-    setInvoiceData({
+    setInvoiceData((prevData) => ({
       editBefore: false,
       dreaftId: "",
       uuid: "",
@@ -70,6 +74,10 @@ export function InvoiceProvider({ children }) {
       issue_date: "",
       due_date: "",
       currency: "",
+      my_company_name: prevData.my_company_name,
+      my_address: prevData.my_address,
+      my_ABN: prevData.my_ABN,
+      my_email: prevData.my_email,
       client_company_name: "",
       client_address: "",
       client_ABN: "",
@@ -83,7 +91,7 @@ export function InvoiceProvider({ children }) {
       total_amount: "",
       note: "",
       orders: [],
-    });
+    }));
   };
 
   return (

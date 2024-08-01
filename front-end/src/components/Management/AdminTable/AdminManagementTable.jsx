@@ -1,9 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -27,8 +22,19 @@ import {
   Dropdown,
   InputNumber,
   Tooltip,
+  Modal,
 } from "antd";
-import { InfoCircleOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  InfoCircleOutlined,
+  SearchOutlined,
+  DeliveredProcedureOutlined,
+  SendOutlined,
+  DeleteOutlined,
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  ExportOutlined,
+  AppstoreAddOutlined,
+} from "@ant-design/icons";
 
 import { ShineBorder } from "./ShineBorder";
 
@@ -46,7 +52,7 @@ import { UserInfo } from "@/components/Users/UserInfo/UserInfo";
 import { InvoiceMainInfo } from "../InvoiceMainInfo/InvoiceMainInfo";
 import { CustomAlert } from "@/components/Alert/MUIAlert";
 
-import { invoiceAdminManage } from "@/apis/management";
+import { invoiceAdminManage, invoiceDeletion } from "@/apis/management";
 
 import "./AdminManagementTable.css";
 
@@ -275,6 +281,10 @@ export function AdminManagementTable() {
 
   const [searchValue, setSearchValue] = useState("");
 
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [currentUuid, setCurrentUuid] = useState(null);
+
+  //* 获取数据
   useEffect(() => {
     invoiceAdminManage()
       .then((response) => {
@@ -290,6 +300,51 @@ export function AdminManagementTable() {
         console.log(error);
       });
   }, []);
+
+  //* 删除发票
+  const handleDelete = (uuid) => {
+    setCurrentUuid(uuid);
+    setIsDeleteModalVisible(true);
+  };
+
+  //* 确认删除发票
+  const confirmDelete = () => {
+    if (currentUuid) {
+      invoiceDeletion(currentUuid)
+        .then(() => {
+          showAlert("Delete Successfully", "success");
+          refreshData();
+        })
+        .catch((error) => {
+          console.error("删除发票时出错:", error);
+          showAlert("Deletion of invoice failed, please try again", "error");
+        });
+    }
+    setIsDeleteModalVisible(false);
+  };
+
+  //* 取消删除发票
+  const cancelDelete = () => {
+    setIsDeleteModalVisible(false);
+  };
+
+  //* 当删除发票后，调用该函数来刷新表格数据
+  const refreshData = () => {
+    invoiceAdminManage()
+      .then((response) => {
+        _setData(response.data);
+        setFilteredData(response.data);
+        setUpcoming30DaysInfo(calculateUpcoming30DueDateInfo(response.data));
+        setUniqueSuppliersCount(countUniqueSuppliers(response.data));
+        setOverdueInfo(calculateOverdueInfo(response.data));
+        setTopSupplier(findSupplierWithHighestTotal(response.data));
+        setNonFailedInvoicesInfo(calculateNonFailedInvoicesInfo(response.data));
+      })
+      .catch((error) => {
+        console.error("刷新数据时出错:", error);
+        showAlert("Refresh data failed, please try again", "error");
+      });
+  };
 
   //* 根据选择的支付状态过滤数据
   const filterData = (status) => {
@@ -349,14 +404,20 @@ export function AdminManagementTable() {
     {
       key: "1",
       label: "Validate",
-      onClick: (uuid) => {
-        // console.log(uuid);
-        goValidate(uuid);
+      onClick: (uuid, state) => {
+        if (state === "unvalidated") {
+          goValidate(uuid);
+        } else {
+          showAlert("Only unvalidated invoices can be validated", "warning");
+        }
       },
+      disabled: (state) => state !== "unvalidated",
+      icon: <DeliveredProcedureOutlined />,
     },
     {
       key: "2",
       label: "Send",
+      icon: <SendOutlined />,
       onClick: (uuid) => {
         // console.log(uuid);
         goSend(uuid);
@@ -365,21 +426,26 @@ export function AdminManagementTable() {
     {
       key: "3",
       label: "Delete",
+      icon: <DeleteOutlined />,
       onClick: (uuid) => {
-        //TODO: 删除发票
+        if (typeof uuid === "string" && uuid) {
+          handleDelete(uuid);
+        } else {
+          console.log("Invalid UUID:", uuid);
+        }
       },
     },
   ];
 
   //* 点击下拉按钮后使用的方法
-  const onMenuClick = (info, uuid) => {
+  const onMenuClick = (menuInfo, row) => {
     //const { key } = info; 这行代码使用了 JavaScript 的解构赋值（Destructuring assignment）语法。这是 ES6 （ECMAScript 2015）引入的一个特性，允许我们从对象或数组中提取值，赋给变量
     //这行代码等同于：const key = info.key;
     //如果 info 对象还有 label 属性，可以这样写：const { key, label } = info; 这会同时创建 key 和 label 两个变量。
-    const { key } = info;
-    const selectedAction = items.find((i) => i.key === key);
+    const { key } = menuInfo;
+    const selectedAction = items.find((item) => item.key === key);
     if (selectedAction && selectedAction.onClick) {
-      selectedAction.onClick(uuid);
+      selectedAction.onClick(row.uuid, row.state);
     }
   };
 
@@ -503,8 +569,13 @@ export function AdminManagementTable() {
           <Button onClick={() => goDetails(row.original.uuid)}>View</Button>
           <Dropdown.Button
             menu={{
-              items,
-              onClick: (info) => onMenuClick(info, row.original.uuid),
+              items: items.map((item) => ({
+                ...item,
+                disabled: item.disabled
+                  ? item.disabled(row.original.state)
+                  : false,
+              })),
+              onClick: (info) => onMenuClick(info, row.original),
             }}
           >
             Actions
@@ -589,6 +660,7 @@ export function AdminManagementTable() {
         row.total,
       ]);
     });
+
     // 生成Excel文件并下载
     workbook.xlsx.writeBuffer().then((buffer) => {
       const blob = new Blob([buffer], {
@@ -626,14 +698,20 @@ export function AdminManagementTable() {
   const start = pageIndex * pageSize + 1;
   const end = Math.min((pageIndex + 1) * pageSize, total);
 
-  const [selectedState, setSelectedState] = useState([]);
-  const handleStateChange = (value) => {
-    setSelectedState(value);
-    table.getColumn("state").setFilterValue(value);
-  };
-
   return (
     <div className="admin-table-container">
+      <Modal
+        title="Comfirm to Delete"
+        open={isDeleteModalVisible}
+        onOk={confirmDelete}
+        onCancel={cancelDelete}
+        okText="Confirm"
+        cancelText="Cancel"
+      >
+        <p>
+          Sure you want to delete this invoice? This action cannot be undone.
+        </p>
+      </Modal>
       {alert.show && (
         <CustomAlert
           message={alert.message}
@@ -797,10 +875,15 @@ export function AdminManagementTable() {
           </div>
         </div>
         <div className="admin-search-row-right">
-          <Button size="large" onClick={handleExport}>
+          <Button size="large" onClick={handleExport} icon={<ExportOutlined />}>
             Export
           </Button>
-          <Button type="primary" size="large" onClick={goCreate}>
+          <Button
+            type="primary"
+            size="large"
+            onClick={goCreate}
+            icon={<AppstoreAddOutlined />}
+          >
             New Invoice
           </Button>
         </div>
@@ -814,7 +897,12 @@ export function AdminManagementTable() {
                 <th key={header.id}>
                   <div
                     onClick={header.column.getToggleSortingHandler()}
-                    style={{ display: "flex", flexDirection: "column" }}
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 4,
+                      cursor: "pointer",
+                    }}
                   >
                     {header.isPlaceholder
                       ? null
@@ -823,7 +911,11 @@ export function AdminManagementTable() {
                           header.getContext()
                         )}
                     {header.column.getIsSorted() &&
-                      (header.column.getIsSorted() === "asc" ? "🔽" : "🔼")}
+                      (header.column.getIsSorted() === "asc" ? (
+                        <ArrowDownOutlined />
+                      ) : (
+                        <ArrowUpOutlined />
+                      ))}
                   </div>
                 </th>
               ))}
@@ -844,7 +936,7 @@ export function AdminManagementTable() {
       </table>
       <div className="pagination-group">
         <div className="total-info">
-          {`showing ${start}-${end} of ${total} items`}
+          {`Showing ${start}-${end} of ${total} items`}
         </div>
         <Pagination
           current={table.getState().pagination.pageIndex + 1}
