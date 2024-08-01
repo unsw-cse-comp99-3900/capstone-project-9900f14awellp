@@ -65,15 +65,9 @@ export default function Validation() {
         },
       })
       .then((response) => {
-        console.log(response.data);
-        // 筛选出state为"Unvalidated"的数据
         const passedData = response.data.filter(
           (entry) => entry.state === "unvalidated"
         );
-        // 获得filename 的list
-        // 跟select对应上，可以对应选择file
-        // 找到file对应的uuid，post到后端
-        // get its uuid and filename
         const invoiceList = passedData.map((entry) =>
           entry.file.split("/").pop()
         );
@@ -89,6 +83,7 @@ export default function Validation() {
         setAlert({ severity: "error", message: error.message });
       });
   }, [token]);
+
   useEffect(() => {
     fetchInvoiceData();
   }, [token, fetchInvoiceData]);
@@ -104,7 +99,7 @@ export default function Validation() {
       .post("http://127.0.0.1:8000/invoice/invoice-validation/", null, {
         params: {
           uuid: selectedUuid,
-          rules: selectedRules.join(","), // 将选中的规则传递给后端
+          rules: selectedRules.join(","),
         },
         headers: {
           Accept: "application/json",
@@ -130,6 +125,8 @@ export default function Validation() {
         } else {
           setAlert({ severity: "error", message: error.message });
             console.log(error.message);
+          setAlert({ severity: "error", message: error.message });
+          console.log(error.message);
         }
         setShowIcon(false);
       });
@@ -306,3 +303,4 @@ export default function Validation() {
     </div>
   );
 }
+
