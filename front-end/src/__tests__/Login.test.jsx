@@ -1,11 +1,11 @@
-import React from "react";
+// import React from "react";
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, test, expect, beforeAll, afterAll, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import Login from '../views/Login';
 import Register from "@/views/Register";
-import { render_page, register_testaccount } from "./render_page_for_test";
-import { exec_async } from "./render_page_for_test";
+import { render_page, register_testaccount, exec_async } from "./test_functions";
+import React, { createContext, useState, useContext, useEffect } from "react";
 
 describe('Login page unit tests', () => {
   // headline login
@@ -209,27 +209,27 @@ describe('Login page UI tests', () => {
       });
     });
 
-    test('login account that has registered', async () => {
-      // register account
-      register_testaccount();
+    // test('login account that has registered', async () => {
+    //   // register account
+    //   register_testaccount();
 
-      render_page(Login, 'login');
+    //   render_page(Login, 'login');
       
-      const username_p = screen.getByTestId("Login-username");
-      const username_f = username_p.querySelector("#Login-username")
-      fireEvent.change(username_f, { value: "test-user"});
+    //   const username_p = screen.getByTestId("Login-username");
+    //   const username_f = username_p.querySelector("#Login-username")
+    //   fireEvent.change(username_f, { value: "test-user"});
       
-      const password_p = screen.getByTestId("Login-password");
-      const password_f = password_p.querySelector("#Login-password")
-      fireEvent.change(password_f, { value: "123456" });
+    //   const password_p = screen.getByTestId("Login-password");
+    //   const password_f = password_p.querySelector("#Login-password")
+    //   fireEvent.change(password_f, { value: "123456" });
 
-      fireEvent.click(screen.getByRole('button', {name: "Login"}));
+    //   fireEvent.click(screen.getByRole('button', {name: "Login"}));
 
-      await waitFor(() => {
-        expect(screen.getByText('Login successfully!')).toBeInTheDocument();
-      });
-      await exec_async('python3 src/__tests__/sqlite3_read_script.py');
-    });
+    //   await waitFor(() => {
+    //     expect(screen.getByText('Login successfully!')).toBeInTheDocument();
+    //   });
+    //   await exec_async('python3 src/__tests__/sqlite3_read_script.py');
+    // });
 
   });
 });

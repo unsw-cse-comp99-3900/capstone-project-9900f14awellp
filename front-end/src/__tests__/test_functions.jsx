@@ -3,6 +3,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Register from "@/views/Register";
 import { exec } from 'child_process';
+import { createMemoryRouter } from "react-router-dom";
+import { routes } from "../AppRouter";
+
+export const render_this_router = (initialEntries, Page) => {
+  const router = createMemoryRouter(routes, { initialEntries });
+  return render(<Page router={router} />);
+};
 
 export const render_page = (Page, url) => {
   return render(
