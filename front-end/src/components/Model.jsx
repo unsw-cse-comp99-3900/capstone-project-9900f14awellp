@@ -75,41 +75,41 @@ export const AlertDialogSlide = ({ fontsize }) => {
           justifyContent: "center",
           typography: "body1",
           "& > :not(style) ~ :not(style)": {
-            ml: 2,
-          },
-        }}
-        onClick={handleClickOpen}
-      >
-        <Link
-          href="#"
-          underline="hover"
-          color="inherit"
-          style={{ fontSize: fontsize }} // 调整字体大小
+          ml: 2,
+        },
+      }}
+      onClick={handleClickOpen}
+    >
+      <Link 
+        href="#" 
+        underline="hover" 
+        color="inherit"
+        style={{ fontSize: fontsize }} // 调整字体大小
         >
           By clicking Login, you agree to our Terms of Service and Privacy
           Policy
-        </Link>
+      </Link>
       </Box>
       <Dialog
-        open={open}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleClose}
-        aria-describedby="alert-dialog-slide-description"
-      >
-        <DialogTitle>{"Use our e-invoice service?"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-slide-description">
-            Let us help invoice
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Disagree</Button>
-          <Button onClick={handleClose}>Agree</Button>
-        </DialogActions>
-      </Dialog>
-    </React.Fragment>
-  );
+          open={open}
+          TransitionComponent={Transition}
+          keepMounted
+          onClose={handleClose}
+          aria-describedby="alert-dialog-slide-description"
+        >
+          <DialogTitle>{"Use our e-invoice service?"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-slide-description">
+              Let us help invoice 
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Disagree</Button>
+            <Button onClick={handleClose}>Agree</Button>
+          </DialogActions>
+        </Dialog>
+      </React.Fragment>
+    );
 };
 
 export default function FormDialog({ onFormSubmit }) {
@@ -129,12 +129,13 @@ export default function FormDialog({ onFormSubmit }) {
         Forget your password?
       </Button> */}
       <UnderlineLink onClick={handleClickOpen} fontsize="9px">
-        Forget your password?
-      </UnderlineLink>
+                        Forget your password?
+        </UnderlineLink>
       <Dialog
         open={open}
         onClose={handleClose}
         PaperProps={{
+          component: "form",
           component: "form",
           onSubmit: (event) => {
             event.preventDefault();
@@ -184,6 +185,12 @@ export default function FormDialog({ onFormSubmit }) {
           <Button type="submit" color="inherit">
             Submit
           </Button>
+          <Button onClick={handleClose} color="inherit">
+            Cancel
+          </Button>
+          <Button type="submit" color="inherit">
+            Submit
+          </Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
@@ -201,7 +208,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-export const CustomizedDialogs =() =>{
+export const CustomizedDialogs =() => {
   const [open, setOpen] = React.useState(true);
 
   // const handleClickOpen = () => {

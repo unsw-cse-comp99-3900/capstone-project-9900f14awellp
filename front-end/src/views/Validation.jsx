@@ -126,6 +126,8 @@ export default function Validation() {
         } else {
           setAlert({ severity: "error", message: error.message });
             console.log(error.message);
+          setAlert({ severity: "error", message: error.message });
+          console.log(error.message);
         }
         setShowIcon(false);
       });
@@ -302,3 +304,4 @@ export default function Validation() {
     </div>
   );
 }
+
