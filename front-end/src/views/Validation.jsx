@@ -22,7 +22,6 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import OutlinedAlerts from "../components/Alert";
 import success from "../assets/success.png";
-import success from "../assets/success.png";
 
 export default function Validation() {
 
