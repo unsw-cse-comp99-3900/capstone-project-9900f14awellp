@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+          context: InvoiceProcessing
+          dockerfile: Dockerfile
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./InvoiceProcessing:/INVOICE_PROCESSING
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: front-end
+      dockerfile: Dockerfile
+    volumes:
+      - ./front-end:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"

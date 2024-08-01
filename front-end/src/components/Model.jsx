@@ -35,7 +35,6 @@ export const BasicModal = ({ title, description, children, open, onClose }) => {
       onClose={onClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
-      
     >
       <Box sx={style} style={{ borderRadius: '15px' }}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
@@ -75,41 +74,41 @@ export const AlertDialogSlide = ({ fontsize }) => {
           justifyContent: "center",
           typography: "body1",
           "& > :not(style) ~ :not(style)": {
-          ml: 2,
-        },
-      }}
-      onClick={handleClickOpen}
-    >
-      <Link 
-        href="#" 
-        underline="hover" 
-        color="inherit"
-        style={{ fontSize: fontsize }} // 调整字体大小
+            ml: 2,
+          },
+        }}
+        onClick={handleClickOpen}
+      >
+        <Link
+          href="#"
+          underline="hover"
+          color="inherit"
+          style={{ fontSize: fontsize }} // 调整字体大小
         >
           By clicking Login, you agree to our Terms of Service and Privacy
           Policy
-      </Link>
+        </Link>
       </Box>
       <Dialog
-          open={open}
-          TransitionComponent={Transition}
-          keepMounted
-          onClose={handleClose}
-          aria-describedby="alert-dialog-slide-description"
-        >
-          <DialogTitle>{"Use our e-invoice service?"}</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-slide-description">
-              Let us help invoice 
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Disagree</Button>
-            <Button onClick={handleClose}>Agree</Button>
-          </DialogActions>
-        </Dialog>
-      </React.Fragment>
-    );
+        open={open}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleClose}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle>{"Use our e-invoice service?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            Let us help invoice
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Disagree</Button>
+          <Button onClick={handleClose}>Agree</Button>
+        </DialogActions>
+      </Dialog>
+    </React.Fragment>
+  );
 };
 
 export default function FormDialog({ onFormSubmit }) {
@@ -129,8 +128,8 @@ export default function FormDialog({ onFormSubmit }) {
         Forget your password?
       </Button> */}
       <UnderlineLink onClick={handleClickOpen} fontsize="9px">
-                        Forget your password?
-        </UnderlineLink>
+        Forget your password?
+      </UnderlineLink>
       <Dialog
         open={open}
         onClose={handleClose}
@@ -151,8 +150,8 @@ export default function FormDialog({ onFormSubmit }) {
         <DialogTitle>Reset Password</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            To reset your password, please enter your user name and  email address here. We
-            will send a email with a link.
+            To reset your password, please enter your user name and email
+            address here. We will send a email with a link.
           </DialogContentText>
           <TextField
             autoFocus

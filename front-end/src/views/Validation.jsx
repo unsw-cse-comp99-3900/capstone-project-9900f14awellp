@@ -24,6 +24,7 @@ import OutlinedAlerts from "../components/Alert";
 import success from "../assets/success.png";
 
 export default function Validation() {
+
   const token = localStorage.getItem("token");
   const [showIcon, setShowIcon] = useState(false);
   const [validationReport, setValidationReport] = useState(null);
@@ -49,6 +50,7 @@ export default function Validation() {
     "RO_RO16931_UBL_1_0_8_CIUS_RO",
     ];
 
+
   const handleClear = () => {
     setSelectedRules([]);
     setSelectedInvoice("");
@@ -63,9 +65,15 @@ export default function Validation() {
         },
       })
       .then((response) => {
+        console.log(response.data);
+        // 筛选出state为"Unvalidated"的数据
         const passedData = response.data.filter(
           (entry) => entry.state === "unvalidated"
         );
+        // 获得filename 的list
+        // 跟select对应上，可以对应选择file
+        // 找到file对应的uuid，post到后端
+        // get its uuid and filename
         const invoiceList = passedData.map((entry) =>
           entry.file.split("/").pop()
         );
@@ -81,7 +89,6 @@ export default function Validation() {
         setAlert({ severity: "error", message: error.message });
       });
   }, [token]);
-
   useEffect(() => {
     fetchInvoiceData();
   }, [token, fetchInvoiceData]);
@@ -97,7 +104,7 @@ export default function Validation() {
       .post("http://127.0.0.1:8000/invoice/invoice-validation/", null, {
         params: {
           uuid: selectedUuid,
-          rules: selectedRules.join(","),
+          rules: selectedRules.join(","), // 将选中的规则传递给后端
         },
         headers: {
           Accept: "application/json",
