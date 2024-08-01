@@ -205,7 +205,7 @@ export default function Create() {
         }, 2000);
       } catch (error) {
         console.error("提交发票时出错:", error);
-        showAlert("发票提交失败。请重试。", "error");
+        showAlert(error.message, "error");
       }
     }
   };
