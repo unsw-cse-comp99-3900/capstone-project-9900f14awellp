@@ -107,7 +107,7 @@ export const CreateCompanyForm = ({ open, handleClose, handleSubmit, formData, h
         <DialogContent>
           <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
-              fullWidth
+              fullwidth
               label="Company Name"
               name="name"
               value={formData.name || ''} 
@@ -117,7 +117,7 @@ export const CreateCompanyForm = ({ open, handleClose, handleSubmit, formData, h
             />
             <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField
-                fullWidth
+                fullwidth
                 label="Phone Number"
                 name="phone_number"
                 value={formData.phone_number || ''} 
@@ -127,7 +127,7 @@ export const CreateCompanyForm = ({ open, handleClose, handleSubmit, formData, h
               />
             </Box>
             <TextField
-              fullWidth
+              fullwidth
               label="Company Email address"
               name="email"
               value={formData.email || ''} 
@@ -136,7 +136,7 @@ export const CreateCompanyForm = ({ open, handleClose, handleSubmit, formData, h
               margin="normal"
             />
             <TextField
-              fullWidth
+              fullwidth
               label="Australian Business Number(ABN)"
               name="ABN"
               value={formData.ABN || ''} 
@@ -145,7 +145,7 @@ export const CreateCompanyForm = ({ open, handleClose, handleSubmit, formData, h
               margin="normal"
             />
             <TextField
-              fullWidth
+              fullwidth
               label="Company address"
               name="address"
               value={formData.address || ''} 

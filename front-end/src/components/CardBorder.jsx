@@ -1,19 +1,18 @@
 import React from 'react';
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 import { Card, Col, Row, Statistic } from 'antd';
 import ShineBorder from './ShineBorder'; // 假设ShineBorder文件在同一个目录下
 
-export const DashboardCard = () => (
-    <Row gutter={16}>
-    <Col span={12}>
+export const DashboardCard = ({total, success,fail,unvalidated}) => (
+  <Row gutter={16}>
+    <Col span={6}>
       <ShineBorder 
-      color={["black"]} 
+       color={["#FFF5E7", "#D5F9EF", "#FED5D4"]}
       className="text-center text-2xl font-bold capitalize"
       >
-        <Card bordered={false} style={{ width: '99%', height: '99%'}}>
+        <Card bordered={false} style={{ width: '100%', height: '100%'}}>
           <Statistic
             title="Total Invoices"
-            value={11.28}
+            value={total}
             valueStyle={{
               color: '#3f8600',
             }}
@@ -21,22 +20,46 @@ export const DashboardCard = () => (
         </Card>
       </ShineBorder>
     </Col>
-    <Col span={12}>
-      <ShineBorder color={["black"]} className="text-center text-2xl font-bold capitalize">
-        <Card bordered={false} style={{ width: '99%', height: '99%'}}>
+    <Col span={6}>
+      <ShineBorder  color={["#FFF5E7", "#D5F9EF", "#FED5D4"]} className="text-center text-2xl font-bold capitalize">
+        <Card bordered={false} style={{ width: '100%', height: '100%'}}>
           <Statistic
-            title="Idle"
-            value={9.3}
-            precision={2}
+            title="Validation Successful Invoices"
+            value={success}
             valueStyle={{
               color: '#cf1322',
             }}
-            prefix={<ArrowDownOutlined />}
-            suffix="%"
+          />
+        </Card>
+      </ShineBorder>
+    </Col>
+    <Col span={6}>
+      <ShineBorder  color={["#FFF5E7", "#D5F9EF", "#FED5D4"]} className="text-center text-2xl font-bold capitalize">
+        <Card bordered={false} style={{ width: '100%', height: '100%'}}>
+          <Statistic
+            title="Validation failed Invoices"
+            value={fail}
+            valueStyle={{
+              color: '#cf1322',
+            }}
+          />
+        </Card>
+      </ShineBorder>
+    </Col>
+    <Col span={6}>
+      <ShineBorder  color={["#FFF5E7", "#D5F9EF", "#FED5D4"]} className="text-center text-2xl font-bold capitalize">
+        <Card bordered={false} style={{ width: '100%', height: '100%'}}>
+          <Statistic
+            title="Unvalidated Invoices"
+            value={unvalidated}
+            valueStyle={{
+              color: '#cf1322',
+            }}
           />
         </Card>
       </ShineBorder>
     </Col>
   </Row>
-  );
-  
+);
+
+export default DashboardCard;
