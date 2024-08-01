@@ -35,6 +35,7 @@ export const BasicModal = ({ title, description, children, open, onClose }) => {
       onClose={onClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
+      
     >
       <Box sx={style} style={{ borderRadius: '15px' }}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
