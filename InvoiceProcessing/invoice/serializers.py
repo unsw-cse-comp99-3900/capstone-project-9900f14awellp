@@ -72,7 +72,8 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
         
-    def get_invoice_date(self, obj):
+    def get_invoice_date(self, obj): 
+        print(obj.file) 
         data = self.get_file_data(obj)
         nested_form_data = data.get('invoiceForm', {}).get('invoiceDate', {})
         if not nested_form_data:
@@ -398,4 +399,4 @@ class FileGUISerializer(serializers.ModelSerializer):
 
 class FileDeletionSerializer(serializers.Serializer):
     file_name = serializers.CharField(required=True)
-    uuid = serializers.CharField(required=True)
+    uuid = serializers.CharField(required=True)  

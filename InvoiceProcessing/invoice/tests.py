@@ -4,7 +4,7 @@ from django.utils import timezone
 from .serializers import RegisterSerializer, UserInfoSerializer
 from .models import User, Company
 from .views import RegisterView, CreateCompanyView
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError 
 from django.urls import reverse, resolve
 from rest_framework import status
 from rest_framework.test import APIClient
