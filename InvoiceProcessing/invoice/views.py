@@ -2298,32 +2298,43 @@ class SendInvoiceEmailAPIView(APIView):
         email_body = f"""
         <html>
         <body>
-            <p>Please find attached your invoice.</p>
-            <p>Kind Regards,<br/>
-               <span style="color: black; font-weight: bold;">Natalia Pires</span><br/>
-               <span style="color: black; font-weight: bold;">Strata Assistant</span></p>
+        <p style="font-size: 16px; font-weight: bold;">Please find attached your invoice.</p>
+        <br/>
+        
+        <p> <span style="color: black; font-weight: bold;">UNSW Invoice Management Team</span></p>
             <p><img src="cid:logo"></p>
-            <p>Alldis & Cox<br/>
-               <span style="color: grey;">Estate Agents Since 1888</span><br/>
+            <p>UNSW Invoice<br/>
                <span style="color: grey;">Liability limited by a scheme approved under Professional Standards Legislation</span><br/>
-               Ph: (02) 9326 4488<br/>
-               61A-65 Frenchmans Road, Randwick  NSW 2031<br/>
-               <a href="http://www.alldiscox.com.au">www.alldiscox.com.au</a></p>
+               Ph: +61 0415059822<br/>
+               UNSW Sydney High St Kensington NSW 2052<br/>
+               
             <p>Note: Our office is closed from 12:30 PM – 1:30 PM weekdays.</p>
             <p style="color: red;">IMPORTANT: The contents of this email are confidential. They are intended for the named recipient(s) only.<br/>
                If you have received this email in error, please notify the sender immediately and do not disclose the contents to anyone or make copies thereof.</p>
         </body>
         </html>
         """
-        email = EmailMessage(
+        email = EmailMultiAlternatives(
             'Your Invoice',
             email_body,
-            to=[client_email]
+            'ikezhao123@gmail.com',
+            [client_email]
         )
+        email.attach_alternative(email_body, "text/html")
+
+        # 添加内嵌图片
+        image_path = 'staticfiles/logo.png'
+        if os.path.exists(image_path):
+            with open(image_path, 'rb') as img:
+                img_data = img.read()
+                img = MIMEImage(img_data)
+                img.add_header('Content-ID', '<logo>')
+                img.add_header('Content-Disposition', 'inline', filename='logo.png')
+                email.attach(img)
+
         for file in files:
             file_name = os.path.basename(str(file.file))
             file_stem = os.path.splitext(file_name)[0]
-            
             file_path = str(file.file)
 
             if os.path.exists(file_path):
@@ -2343,10 +2354,10 @@ class SendInvoiceEmailAPIView(APIView):
                                     "msg": "file not found on server",
                                 },
                                 status=status.HTTP_404_NOT_FOUND)
+        
         try:
             email.send()
-            file.is_sent = True
-            file.save()
+            files.update(is_sent=True)
             return Response({
                                 "code": 200,
                                 "msg": "Email sent successfully",
