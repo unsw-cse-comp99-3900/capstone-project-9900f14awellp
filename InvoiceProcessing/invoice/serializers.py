@@ -97,7 +97,7 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         data = self.get_file_data(obj)
         nested_form_data = data.get('form_data', {}).get('company_invoiced', "")
         if not nested_form_data:
-            nested_form_data = data.get('client_company_name', {})
+            nested_form_data = data.get('client_company_name', "")
         return nested_form_data
     
     def get_total(self, obj):
