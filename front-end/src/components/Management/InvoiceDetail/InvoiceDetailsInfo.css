@@ -57,12 +57,91 @@
     background-color: white;
     border-radius: 20px;
     box-shadow: 0 10px 10px -5px rgba(0, 0, 0, 0.25);
+    padding-bottom: 20px;
 }
 
 .info-details-body{
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    justify-content: space-between;
     padding-top: 30px;
     padding-bottom: 30px;
 }
+
+.invoice-time-log-row{
+    display: flex;
+    flex-direction: row;
+    gap: 18px;
+    justify-content: start;
+    align-items: flex-start;
+  position: relative;
+  padding-bottom: 20px; /* 增加行间距 */
+}
+
+.invoice-log-container{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 32%;
+}
+
+.invoice-time-log {
+    position: relative;
+  }
+
+  .invoice-time-log::before {
+    content: '';
+    position: absolute;
+    left: 20px; /* 调整到图标中心 */
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e0e0e0; /* 灰色线条 */
+    z-index: 0;
+  }
+
+.log-icon-container{
+    border: #f6f8fab7 solid 1px;
+    border-radius: 50%;
+    padding: 7px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    position: relative;
+  z-index: 1; /* 确保图标在线条上方 */
+}
+
+.log-info-title{
+    font-weight: 350;
+    font-size: 17px;
+}
+
+.log-info-details{
+    color: #B4B4B4;
+    font-weight: 300;
+    font-size: 16px;
+}
+
+.log-info-container{
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-top: 5px; /* 微调文本位置 */
+}
+
+/* 隐藏最后一个元素下方的线条 */
+.invoice-time-log-row:last-child {
+    padding-bottom: 0;
+  }
+
+  .invoice-time-log-row:last-child::after {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 40px; /* 调整以覆盖多余的线条 */
+    bottom: 0;
+    width: 2px;
+    background-color:#F6F8FA; /* 与背景色相同 */
+    z-index: 1;
+  }
