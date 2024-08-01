@@ -76,6 +76,7 @@ export const ResponsiveAppBar = () => {
       localStorage.removeItem("userid");
       localStorage.removeItem("is_admin");
       navigate("/login");
+      window.location.reload();
     } else {
       navigate(`/${path}`);
     }

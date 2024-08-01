@@ -5,8 +5,17 @@
     width: 100%;
     align-items: center;
     justify-content: start;
-
 }
+.invoice-detail-full-page{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: start;
+    background-color: #F6F8FA;
+}
+
 .container{
     display: flex;
     flex-direction: column;

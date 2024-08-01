@@ -1,11 +1,45 @@
-import React from "react";
+import React, { useState } from "react";
 import { useInvoice } from "@/Content/GuiContent";
 import "./GuiPreview.css";
 import { Button } from "antd";
 import { FilePdfOutlined, CopyOutlined } from "@ant-design/icons";
+import { createDraft } from "@/apis/gui";
+import { CustomAlert } from "@/components/Alert/MUIAlert";
+import { v4 as uuidv4 } from "uuid";
+import { useNavigate } from "react-router-dom";
 
 export function GuiPreview() {
+  //二次封装的alert组件
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    severity: "info",
+  });
+  //显示alert
+  const showAlert = (message, severity = "info") => {
+    setAlert({ show: true, message, severity });
+  };
+  //隐藏alert
+  const hideAlert = () => {
+    setAlert({ ...alert, show: false });
+  };
   const { invoiceData } = useInvoice();
+  const navigate = useNavigate();
+
+  const handleCreateDraft = async () => {
+    try {
+      if (invoiceData.uuid === "") {
+        const uuid = uuidv4().substring(0, 30);
+        invoiceData.uuid = uuid;
+      }
+      await createDraft(invoiceData);
+      showAlert("Draft created successfully!", "success");
+      navigate("/draft");
+    } catch (error) {
+      console.error("Error creating draft:", error);
+      showAlert("Error creating draft: " + error.message, "error");
+    }
+  };
 
   const renderProductRows = () => {
     return invoiceData.orders.map((order, index) => (
@@ -23,21 +57,21 @@ export function GuiPreview() {
 
   return (
     <div className="gui-preview">
+      {alert.show && (
+        <CustomAlert
+          message={alert.message}
+          severity={alert.severity}
+          onClose={hideAlert}
+        />
+      )}
       <div className="preview-button-row">
         <div className="preview-header">Preview</div>
         <div>
           <Button
             size="large"
-            icon={<FilePdfOutlined />}
-            className="preview-gui-button"
-          >
-            Download
-          </Button>
-          <Button
-            size="large"
-            type="text"
             icon={<CopyOutlined />}
             className="preview-gui-button"
+            onClick={handleCreateDraft}
           >
             Save as Draft
           </Button>
