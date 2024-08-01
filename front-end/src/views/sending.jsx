@@ -137,7 +137,6 @@ export default function Sending() {
 
   return (
     <div>
-      <ResponsiveAppBar />
       {alert && (
         <div
           style={{

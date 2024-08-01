@@ -7,7 +7,6 @@ import "./global.css";
 export default function UserManage() {
   return (
     <div className="full-page">
-      <ResponsiveAppBar />
       <div className="container">
         <UserTable />
       </div>

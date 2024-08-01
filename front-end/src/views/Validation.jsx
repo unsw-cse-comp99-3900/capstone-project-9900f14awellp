@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { ResponsiveAppBar } from "../components/Navbar";
 import { SelectSmall } from "../components/Select";
 import { ButtonSizes } from "../components/Buttons";
 import { MultipleSelect } from "../components/Select";
@@ -136,7 +135,6 @@ export default function Validation() {
 
   return (
     <div>
-      <ResponsiveAppBar />
       {alert && (
         <div
           style={{

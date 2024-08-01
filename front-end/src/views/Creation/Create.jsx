@@ -254,7 +254,6 @@ export default function Create() {
 
   return (
     <div className="center">
-      <ResponsiveAppBar />
       <Modal
         title="Confirm to Leave?"
         open={showModal}

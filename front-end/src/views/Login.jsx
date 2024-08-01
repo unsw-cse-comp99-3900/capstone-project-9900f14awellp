@@ -10,6 +10,7 @@ import FormDialog from "../components/Model";
 import loading from "../assets/loading.gif";
 import { CompanyInfo } from "@/apis/gui";
 import { useInvoice } from "@/Content/GuiContent";
+import { loginEvent } from "@/Content/RerenderNavbar";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -54,6 +55,7 @@ export default function Login() {
         localStorage.setItem("is_admin", response.data.is_admin);
         // alert(response.data.state);
         setAlert({ severity: "success", message: "Login successfully!" });
+        window.dispatchEvent(loginEvent);
         return CompanyInfo();
       })
       .then((companyInfoResponse) => {

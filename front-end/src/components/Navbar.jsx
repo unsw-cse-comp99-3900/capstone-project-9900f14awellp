@@ -248,10 +248,7 @@ export const ResponsiveAppBar = () => {
                   borderRadius: "20px",
                 },
                 "& .MuiMenuItem-root": {
-                  marginBottom: "8px",
-                  "&:last-child": {
-                    marginBottom: 0,
-                  },
+                  padding: "12px 16px",
                 },
               }}
               id="menu-appbar"
