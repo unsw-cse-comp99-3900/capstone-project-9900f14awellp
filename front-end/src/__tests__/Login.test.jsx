@@ -3,46 +3,183 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { describe, test, expect, beforeAll, afterAll, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import Login from '../views/Login';
+import Register from "@/views/Register";
+import { render_page, register_testaccount } from "./render_page_for_test";
 
-// headline login
-// username input field
-// password input field
-// password visibility btn
-// forget password
-// Login btn
-// Dont ...
-// By clicking login...
-const render_register = () => {
-  return render(
-    <MemoryRouter initialEntries={['/login']}>
-        <Login />
-    </MemoryRouter>
-  );
-};
-
-describe('Login page unit test', () => {
+describe('Login page unit tests', () => {
+  // headline login
   test('Login headline', () => {
-    render_register();
+    render_page(Login, 'login');
 
     expect(screen.getByRole('heading', {name: "Login"})).toBeInTheDocument();
   });
   
+  // username input field
   test('Username input field', () => {
-    render_register();
+    render_page(Login, 'login');
 
     const username_parent = screen.getByTestId("Login-username");
     const username_field = username_parent.querySelector("#Login-username")
     expect(username_field).toBeInTheDocument();
   });
 
+  // password input field
   test('Password input field', () => {
-    render_register();
+    render_page(Login, 'login');
 
     const password_parent = screen.getByTestId("Login-password");
     const password_field = password_parent.querySelector("#Login-password")
     expect(password_field).toBeInTheDocument();
   });
   
+  // password visibility btn
+  test('Password visibility btn', () => {
+    render_page(Login, ' login');
+    
+    expect(screen.getByRole('button', {name: "toggle password visibility"})).toBeInTheDocument();
+  })
   
+  // forget password
+  test('link of forget password', () => {
+    render_page(Login, 'login');
+    
+    expect(screen.getByRole('link', {name: "Forget your password?"})).toBeInTheDocument();
+  });
+
+  // Login btn
+  test('LOGIN btn', () => {
+    render_page(Login, 'login');
+  
+    expect(screen.getByRole('button', {name: "Login"})).toBeInTheDocument();
+  });
+
+  // Don't have an account? Go register
+  test('link to Register page', () => {
+    render_page(Login, 'login');
+
+    expect(screen.getByRole('link', {name: "Don't have an account? Go register"}));
+  });
+
+  // By clicking login...
+  test('link of information', () => {
+    render_page(Login, 'login');
+
+    expect(screen.getByRole('link',
+      {name: "By clicking Login, you agree to our Terms of Service and Privacy Policy"}
+    ));
+  });
 
 });
+
+// entering in username field will change value
+describe('page element functional tests', () => {
+  test('entering in username field', () => {
+    render_page(Login, 'login');
+
+    const username_parent = screen.getByTestId("Login-username");
+    const username_field = username_parent.querySelector("#Login-username")
+
+    fireEvent.change(username_field, { target: { value: "test-user" } });
+
+    expect(username_field).toHaveAttribute('value', "test-user");
+  });
+
+  // entering in password field will change value
+  test('entering in password field', () => {
+    render_page(Login, 'login');
+
+    const password_parent = screen.getByTestId("Login-password");
+    const password_field = password_parent.querySelector("#Login-password")
+    
+    fireEvent.change(password_field, { target: { value: "123456" } });
+    
+    expect(password_field).toHaveAttribute('value', "123456");
+  });
+  
+  // password visibility btn work
+  test('visibility button working', () => {
+    render_page(Login, 'login');
+    
+    // default type of input field should be password
+    const password_parent = screen.getByTestId("Login-password");
+    const password_field = password_parent.querySelector("#Login-password")
+    expect(password_field).toHaveAttribute('type', 'password');
+
+    const btn = screen.getByRole('button', {name: "toggle password visibility"});
+    expect(btn).toBeInTheDocument();
+    fireEvent.click(btn);
+    
+    // after clicking the visibility button, the type of password field should be text
+    expect(password_field).toHaveAttribute('type', 'text');
+    
+    fireEvent.click(btn);
+    // click the button twice will change type back to password
+    expect(password_field).toHaveAttribute('type', 'password');
+  });
+
+  // forget password show reset password modal
+  test('forget password link working', () => {
+    render_page(Login, 'login');
+
+    const forget_link = screen.getByRole('link', {name: "Forget your password?"});
+    fireEvent.click(forget_link);
+
+    expect(screen.getByRole('heading', {name: "Reset Password"})).toBeInTheDocument();
+  });
+
+  // click link should navigate to Register page
+  test('navigate to register page link working', () => {
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </MemoryRouter>
+    );
+
+    const navi_register = screen.getByText("Don't have an account? Go register");
+
+    fireEvent.click(navi_register);
+
+    expect(screen.getByRole('heading', {name: "Create an account"})).toBeInTheDocument();
+  });
+
+  // by clicking show another modal
+  test('information link working', () => {
+    render_page(Login, 'login');
+
+    const By_link = screen.getByRole('link',
+      {name: "By clicking Login, you agree to our Terms of Service and Privacy Policy"}
+    );
+    fireEvent.click(By_link);
+
+    expect(screen.getByRole('heading', {name: "Use our e-invoice service?"})).toBeInTheDocument();
+  });
+});
+
+describe('Login page UI tests', () => {
+
+  describe('incomplete form test', () => {
+    test('only type username', () => {
+      
+    })
+  })
+});
+
+
+    // register_testaccount();  
+  // test('only type in username', async () => {
+  //   // register a test user first using
+  //   render_page(Login, 'login');
+
+  //   const username_parent = screen.getByTestId("Login-username");
+  //   const username_field = username_parent.querySelector("#Login-username")
+
+  //   fireEvent.change(username_field, { value: "test-user"});
+  //   fireEvent.click(screen.getByRole('button', {name: "Login"}));
+
+  //   await waitFor(() => {
+  //     expect(screen.getByText(/Login failed/i)).toBeInTheDocument();
+  //   });
+  // });

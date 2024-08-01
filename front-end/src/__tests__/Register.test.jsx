@@ -5,7 +5,7 @@ import { useNavigate, MemoryRouter, Route, Routes } from 'react-router-dom';
 import Register from '../views/Register';
 import Login from '../views/Login';
 import { exec } from 'child_process';
-import { render_page } from './render_page_for_test';
+import { render_page, exec_async } from './render_page_for_test';
 
 describe('Register unit test', () => {
     test('Register page element test', () => {
@@ -123,7 +123,9 @@ describe('Register unit test', () => {
         fireEvent.click(TSPP);
 
         // modal headline
-        expect(screen.getByRole('heading', { name: "Use our e-invoice service?" })).toBeInTheDocument();
+        expect(screen.getByRole('heading',
+            { name: "Use our e-invoice service?" }
+        )).toBeInTheDocument();
 
         // disagree btn
         expect(screen.getByRole('button', { name: "Disagree" })).toBeInTheDocument();
@@ -201,20 +203,6 @@ describe('incomplete form test', () => {
   });
 });
 
-const exec_async = (command) => {
-  return new Promise((res, rej) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        rej(error);
-      } else if (stderr) {
-        rej(stderr);
-      } else {
-        res(stdout);
-        console.log('finish script')
-      }
-    });
-  });
-};
 
 describe('complete form test', () => {
   test('successful register', async () => {

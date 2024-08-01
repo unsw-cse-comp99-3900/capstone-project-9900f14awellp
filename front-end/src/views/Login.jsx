@@ -181,7 +181,7 @@ export default function Login() {
 
         <ButtonSizes onClick={handleLogin}>Login</ButtonSizes>
         <UnderlineLink onClick={goRegister} fontsize="10px">
-          Don't have an accnt? Go register
+          Don't have an account? Go register
         </UnderlineLink>
         <AlertDialogSlide fontsize="8px" />
         {showIcon && (
