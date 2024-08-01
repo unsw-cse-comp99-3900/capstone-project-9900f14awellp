@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -13,6 +14,9 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
+import { getCurrentUserInfo } from "@/apis/users";
+import { DownOutlined } from "@ant-design/icons";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const pages = ["Create", "Validate", "Send", "Manage"];
 const settings = ["Profile", "Draft", "Company Details", "Logout"];
@@ -25,6 +29,20 @@ const admin_settings = [
 ];
 
 const is_admin = localStorage.getItem("is_admin") === "true";
+
+const getGreeting = () => {
+  const currentHour = new Date().getHours();
+
+  if (currentHour >= 5 && currentHour < 12) {
+    return "Good Morning👋";
+  } else if (currentHour >= 12 && currentHour < 17) {
+    return "Good Afternoon👋";
+  } else if (currentHour >= 17 && currentHour < 20) {
+    return "Good Evening👋";
+  } else {
+    return "Good Night👋";
+  }
+};
 
 export const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -67,6 +85,19 @@ export const ResponsiveAppBar = () => {
   const handleHomeNavigate = () => {
     navigate("/home");
   };
+
+  const [avatarPath, setAvatarPath] = useState("");
+  const [userName, setUserName] = useState("");
+  const [greeting, setGreeting] = useState("");
+  const getUserAvatarPath = async () => {
+    const response = await getCurrentUserInfo();
+    setAvatarPath(`${import.meta.env.VITE_API_URL}${response.data.avatar}`);
+    setUserName(response.data.username);
+    setGreeting(getGreeting());
+  };
+  useEffect(() => {
+    getUserAvatarPath();
+  }, []);
 
   return (
     <AppBar position="static" sx={{ backgroundColor: "white" }}>
@@ -159,12 +190,70 @@ export const ResponsiveAppBar = () => {
 
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+              <IconButton
+                onClick={handleOpenUserMenu}
+                sx={{
+                  p: "5px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  border: "1px solid #333",
+                  borderRadius: "30px",
+                }}
+              >
+                <Avatar alt="User Avatat" src={avatarPath} />
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "start",
+                    alignItems: "start",
+                    paddingTop: "2px",
+                  }}
+                >
+                  <div
+                    style={{
+                      color: "#C7C7C7",
+                      fontSize: "12px",
+                      marginBottom: "-4px",
+                      fontWeight: 300,
+                    }}
+                  >
+                    {greeting}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "Lexend Deca",
+                      color: "#333",
+                      fontSize: "16px",
+                    }}
+                  >
+                    {userName}
+                  </div>
+                </div>
+                <KeyboardArrowDownIcon
+                  style={{
+                    size: "small",
+                    paddingRight: "8px",
+                    color: "#333",
+                  }}
+                />
               </IconButton>
             </Tooltip>
             <Menu
-              sx={{ mt: "45px" }}
+              sx={{
+                mt: "45px",
+                borderRadius: "20px !important",
+                "& .MuiPaper-root": {
+                  borderRadius: "20px",
+                },
+                "& .MuiMenuItem-root": {
+                  marginBottom: "8px",
+                  "&:last-child": {
+                    marginBottom: 0,
+                  },
+                },
+              }}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
