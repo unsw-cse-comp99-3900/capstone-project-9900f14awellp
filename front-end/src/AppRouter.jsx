@@ -1,5 +1,5 @@
 import React from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 
 // 导入所有需要的组件
 import Welcome from "@/views/Welcome";
@@ -20,100 +20,69 @@ import Choice from "@/views/ChoiceCompany";
 import CompanyDetails from "@/views/CompanyDetails";
 import UserManage from "@/views/Users/UsersManagement";
 import { RouterAuth } from "@/router/RouterAuth";
+
+import { ResponsiveAppBar } from "./components/Navbar";
+
+// 定义布局组件
+const Layout = () => (
+  <>
+    <ResponsiveAppBar />
+    <Outlet />
+  </>
+);
+
 // 定义路由配置
 export const routes = [
   { path: "/", element: <Welcome /> },
   {
-    path: "/home",
     element: (
       <RouterAuth>
-        <Dashboard />
-      </RouterAuth>
-    ),
-  },
-  {
-    path: "/create",
-    element: (
-      <RouterAuth>
-        <Create />
+        <Layout />
       </RouterAuth>
     ),
     children: [
-      { path: "upload", element: <Upload /> },
-      { path: "form", element: <GUI /> },
+      { path: "home", element: <Dashboard /> },
+      {
+        path: "create",
+        element: <Create />,
+        children: [
+          { path: "upload", element: <Upload /> },
+          { path: "form", element: <GUI /> },
+        ],
+      },
+      { path: "draft", element: <Draft /> },
+      {
+        path: "manage",
+        children: [
+          { index: true, element: <InvoiceManagement /> },
+          { path: ":id", element: <InvoiceDetails /> },
+        ],
+      },
+      {
+        path: "send",
+        children: [
+          { index: true, element: <Sending /> },
+          { path: ":id", element: <Sending /> },
+        ],
+      },
+      {
+        path: "validate",
+        children: [
+          { index: true, element: <Validation /> },
+          { path: ":id", element: <Validation /> },
+        ],
+      },
+
+      { path: "profile", element: <Profile /> },
+      { path: "company-details", element: <CompanyDetails /> },
+      { path: "employee-management", element: <UserManage /> },
     ],
   },
-  {
-    path: "/draft",
-    element: (
-      <RouterAuth>
-        <Draft />
-      </RouterAuth>
-    ),
-  },
-  {
-    path: "/manage",
-    element: <RouterAuth />,
-    children: [
-      { index: true, element: <InvoiceManagement /> },
-      { path: ":id", element: <InvoiceDetails /> },
-    ],
-  },
-  {
-    path: "/send",
-    element: (
-      <RouterAuth>
-        <Sending />
-      </RouterAuth>
-    ),
-    children: [{ path: ":id", element: <Sending /> }],
-  },
-  {
-    path: "/validate",
-    element: (
-      <RouterAuth>
-        <Validation />
-      </RouterAuth>
-    ),
-    children: [{ path: ":id", element: <Validation /> }],
-  },
-  { path: "/login", element: <Login /> },
-  { path: "/register", element: <Register /> },
-  {
-    path: "/choice",
-    element: (
-      <RouterAuth>
-        <Choice />
-      </RouterAuth>
-    ),
-  },
-  {
-    path: "/profile",
-    element: (
-      <RouterAuth>
-        <Profile />
-      </RouterAuth>
-    ),
-  },
-  {
-    path: "/company-details",
-    element: (
-      <RouterAuth>
-        <CompanyDetails />
-      </RouterAuth>
-    ),
-  },
-  {
-    path: "/employee-management",
-    element: (
-      <RouterAuth>
-        <UserManage />
-      </RouterAuth>
-    ),
-  },
-  { path: "/404", element: <NotFound /> },
+  { path: "choice", element: <Choice /> },
+  { path: "login", element: <Login /> },
+  { path: "register", element: <Register /> },
+  { path: "404", element: <NotFound /> },
   { path: "*", element: <Navigate to="/404" /> },
 ];
-
 // 创建并导出路由器创建函数
 export const createAppRouter = () => createBrowserRouter(routes);

@@ -111,7 +111,6 @@ export function InvoiceManagement() {
 
   return (
     <div className="full-page">
-      <ResponsiveAppBar />
       {alert.show && (
         <CustomAlert
           message={alert.message}
