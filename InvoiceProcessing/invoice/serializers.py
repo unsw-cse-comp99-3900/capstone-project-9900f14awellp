@@ -11,6 +11,7 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
     creation_method = serializers.SerializerMethodField()
     files_name = serializers.SerializerMethodField()
+    file_png = serializers.SerializerMethodField()
     invoice_number = serializers.SerializerMethodField()
     invoice_date = serializers.SerializerMethodField()
     due_date = serializers.SerializerMethodField()
@@ -19,8 +20,17 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     class Meta:
         model = UpFile
-        fields = ['id', 'timestamp', 'userid', 'uuid', "avatar","email","name",'file','files_name','supplier','invoice_date','due_date',"invoice_number","total","state","creation_method"]
+        fields = ['id', 'timestamp', 'userid', 'uuid', "avatar","email","name",'file', "file_png",'files_name','supplier','invoice_date','due_date',"invoice_number","total","state","creation_method"]
     
+    def get_file_png(self, obj):
+        # 获取 file 字段的值
+        file_path = obj.file.name
+        # 修改文件扩展名为 .png
+        if file_path.endswith('.pdf'):
+            file_png_path = file_path[:-4] + '.png'
+        else:
+            file_png_path = file_path
+        return file_png_path
     
     def get_files_name(self, obj):
         # 返回自定义的 file 字段
@@ -85,7 +95,7 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     
     def get_supplier(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {}).get('company_invoiced', {})
+        nested_form_data = data.get('form_data', {}).get('company_invoiced', "")
         if not nested_form_data:
             nested_form_data = data.get('client_company_name', {})
         return nested_form_data

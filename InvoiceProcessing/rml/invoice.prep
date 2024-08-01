@@ -111,7 +111,7 @@
 
             <td rightPadding="10">
                 <!-- 将内容顶部对齐，并移除间隔 -->
-                <para style="right" leading="15">Invoice Subject:&nbsp;&nbsp;&nbsp;{{data.invoice_num}}</para>
+                <para style="right" leading="15">Invoice Subject:&nbsp;&nbsp;&nbsp;{{data.invoice_name}}</para>
                 <para style="right" leading="15">Invoice Num:&nbsp;&nbsp;&nbsp;{{data.invoice_num}}</para>
                 <para style="right" leading="15">Issue Date:&nbsp;&nbsp;&nbsp;{{data.issue_date}}</para>
                 <para style="right" leading="15">Due Date:&nbsp;&nbsp;&nbsp;{{data.due_date}}</para>
