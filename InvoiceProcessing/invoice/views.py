@@ -262,6 +262,106 @@ class UserInfo(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_summary="发送用户邮件",
+        operation_description="根据用户名和邮箱发送邮件。",
+        manual_parameters=[
+            openapi.Parameter(
+                'username',
+                openapi.IN_QUERY,
+                description="用户名",
+                type=openapi.TYPE_STRING,
+                required=True
+            ),
+            openapi.Parameter(
+                'email',
+                openapi.IN_QUERY,
+                description="用户邮箱",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="成功",
+                examples={
+                    "application/json": {
+                        "success": "Email sent successfully"
+                    }
+                },
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'success': openapi.Schema(type=openapi.TYPE_STRING, description='成功消息')
+                    }
+                )
+            ),
+            400: openapi.Response(
+                description="请求错误",
+                examples={
+                    "application/json": {
+                        "error": "username or email field is required"
+                    }
+                },
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'error': openapi.Schema(type=openapi.TYPE_STRING, description='错误消息')
+                    }
+                )
+            ),
+            404: openapi.Response(
+                description="未找到",
+                examples={
+                    "application/json": {
+                        "error": "User does not exist"
+                    }
+                },
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'error': openapi.Schema(type=openapi.TYPE_STRING, description='错误消息')
+                    }
+                )
+            ),
+            500: openapi.Response(
+                description="服务器错误",
+                examples={
+                    "application/json": {
+                        "error": "详细的错误消息"
+                    }
+                },
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'error': openapi.Schema(type=openapi.TYPE_STRING, description='错误消息')
+                    }
+                )
+            )
+        }
+    )
+    def patch(self,request):
+        username = request.GET.get('username')
+        email = request.GET.get('email')
+        if not username or not email:
+            return Response({'error': 'username or email field is required'}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.filter(username=username, email=email).first()
+        
+        if not user:
+            return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        subject = "Company Invitation"
+        message = f"Dear {user.username},\nYou are invited to the {request.user.company.name} company."
+        from_email = 'ikezhao123@gmail.com'
+        recipient_list = [email]
+        try:
+            
+            send_mail(subject, message, from_email, recipient_list)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return Response({'success': 'Invitation Sent Successfully'}, status=status.HTTP_200_OK)
+        
     
 class DeleterUser(APIView):
     authentication_classes = [JWTAuthentication]
@@ -939,7 +1039,7 @@ class GUIFileAPIView(APIView):
                     file=file_path_pdf,
                     uuid=file_instance.uuid,
                     userid=file_instance.userid,
-                    create_date=create_date,
+                    create_date=datetime.now(),
                 )
 
             if file_id != None:
@@ -1581,8 +1681,8 @@ class DeleteFileAPIView(APIView):
             os.remove(f"staticfiles/{request.user.id}/{file_stem}.xml")
         if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}_report.json"):
             os.remove(f"staticfiles/{request.user.id}/{file_stem}_report.json")
-        if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}_report.png"):
-            os.remove(f"staticfiles/{request.user.id}/{file_stem}_report.png")
+        if os.path.isfile(f"staticfiles/{request.user.id}/{file_stem}.png"):
+            os.remove(f"staticfiles/{request.user.id}/{file_stem}.png")
             
         file.delete()
         return Response({
@@ -2220,9 +2320,9 @@ class TimeOfInvoice(APIView):
                 required=True
             ),
             openapi.Parameter(
-                'id',
+                'username',
                 openapi.IN_QUERY,
-                description="用户ID（可选），如果不填默认是该用户",
+                description="用户Username（可选），如果不填默认是该用户",
                 type=openapi.TYPE_STRING,
                 required=False
             )
@@ -2272,18 +2372,18 @@ class TimeOfInvoice(APIView):
     )
     def get(self, request):
         uuid = request.GET.get('uuid')
-        userid = request.GET.get('id')
+        username = request.GET.get('username')
         name = request.user.name
-        
-        if userid:
-            file = UpFile.objects.filter(userid=userid, uuid=uuid).first()
-            user = User.objects.filter(id=userid).first()
+        if username:
+            user = User.objects.filter(username=username).first()
+            file = UpFile.objects.filter(userid=user.id, uuid=uuid).first()
             if user is None:
                 return JsonResponse({"code": 404, "msg": "user not found"}, status=status.HTTP_404_NOT_FOUND)
             name = user.name
             
         else:
             file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
+            
         if file is None:
             return JsonResponse({"code": 404, "msg": "file not found"}, status=status.HTTP_404_NOT_FOUND)
         create_date = file.create_date
