@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import OutlinedAlerts from "../components/Alert";
-import { ResponsiveAppBar } from "../components/Navbar";
 import {
   Box,
   Button,
@@ -101,7 +100,7 @@ export default function Profile() {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
       })
       .then((response) => {
@@ -129,14 +128,24 @@ export default function Profile() {
       setProfileData({ ...profileData, avatarFile: file });
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileData({ ...profileData, avatar: reader.result });
+        setProfileData((prevState) => ({
+          ...prevState,
+          avatar: reader.result,
+        }));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  return (
-    <div>
+  const getAvatarUrl = (avatarPath) =>{
+    if ( !avatarPath || typeof avatarPath !== "string") 
+      return "https://via.placeholder.com/150";
+    return `${import.meta.env.VITE_API_URL}${avatarPath}`;
+};
+
+    return (
+      <div>
+      <ResponsiveAppBar />
       {alert && (
         <div
           style={{
@@ -213,7 +222,9 @@ export default function Profile() {
                     onChange={handleAvatarChange}
                   />
                   <label htmlFor="avatar-upload">
-                    <Avatar
+
+                    {/* <Avatar
+
                       src={
                         profileData.avatar || "https://via.placeholder.com/150"
                       }
@@ -223,6 +234,16 @@ export default function Profile() {
                         cursor: isEditing ? "pointer" : "default",
                       }}
                       component={isEditing ? "span" : "div"}
+
+                    /> */}
+                    <Avatar
+                      src={getAvatarUrl(profileData.avatar)}
+                      component={isEditing ? "span" : "div"}
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        cursor: isEditing ? "pointer" : "default",
+                      }}
                     />
                   </label>
                 </div>
@@ -330,6 +351,7 @@ export default function Profile() {
                 {isEditing ? (
                   <TextField
                     fullWidth
+                    disabled
                     name="company"
                     label="Company"
                     id="profile-company"

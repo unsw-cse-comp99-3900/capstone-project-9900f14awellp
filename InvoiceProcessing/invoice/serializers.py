@@ -11,6 +11,7 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
     creation_method = serializers.SerializerMethodField()
     files_name = serializers.SerializerMethodField()
+    file_png = serializers.SerializerMethodField()
     invoice_number = serializers.SerializerMethodField()
     invoice_date = serializers.SerializerMethodField()
     due_date = serializers.SerializerMethodField()
@@ -19,8 +20,17 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     class Meta:
         model = UpFile
-        fields = ['id', 'timestamp', 'userid', 'uuid', "avatar","email","name",'file','files_name','supplier','invoice_date','due_date',"invoice_number","total","state","creation_method"]
+        fields = ['id', 'timestamp', 'userid', 'uuid', "avatar","email","name",'file', "file_png",'files_name','supplier','invoice_date','due_date',"invoice_number","total","state","creation_method"]
     
+    def get_file_png(self, obj):
+        # 获取 file 字段的值
+        file_path = obj.file.name
+        # 修改文件扩展名为 .png
+        if file_path.endswith('.pdf'):
+            file_png_path = file_path[:-4] + '.png'
+        else:
+            file_png_path = file_path
+        return file_png_path
     
     def get_files_name(self, obj):
         # 返回自定义的 file 字段
@@ -38,7 +48,7 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
 
     def parse_date(self, date_str):
         if not date_str:
-            raise ValueError("The date string is empty or None")
+            return ""
 
         # 使用正则表达式匹配 /Date(XXX)/ 格式
         match = re.match(r'/Date\((\d+)\+\d+\)/', date_str)
@@ -62,37 +72,37 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
         
-    def get_invoice_date(self, obj):
+    def get_invoice_date(self, obj): 
         data = self.get_file_data(obj)
-        nested_form_data = data.get('invoiceForm', {}).get('invoiceDate', {})
+        nested_form_data = data.get('invoiceForm', {}).get('invoiceDate', "")
         if not nested_form_data:
             nested_form_data = data.get('issue_date', {})
         return self.parse_date(nested_form_data)
         
     def get_due_date(self,obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('invoiceForm', {}).get('paymentDate', {})
+        nested_form_data = data.get('invoiceForm', {}).get('paymentDate', "")
         if not nested_form_data:
             nested_form_data = data.get('due_date', {})
         return self.parse_date(nested_form_data)
 
     def get_invoice_number(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {}).get('invoiceNumber', {})
+        nested_form_data = data.get('form_data', {}).get('invoiceNumber', "")
         if not nested_form_data:
             nested_form_data = data.get('invoice_num', {})
         return nested_form_data
     
     def get_supplier(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {}).get('company_invoiced', {})
+        nested_form_data = data.get('form_data', {}).get('company_invoiced', "")
         if not nested_form_data:
             nested_form_data = data.get('client_company_name', {})
         return nested_form_data
     
     def get_total(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {}).get('total', {})
+        nested_form_data = data.get('form_data', {}).get('total', "")
         if not nested_form_data:
             nested_form_data = data.get('total_amount', {})
         return nested_form_data
@@ -388,4 +398,4 @@ class FileGUISerializer(serializers.ModelSerializer):
 
 class FileDeletionSerializer(serializers.Serializer):
     file_name = serializers.CharField(required=True)
-    uuid = serializers.CharField(required=True)
+    uuid = serializers.CharField(required=True)  

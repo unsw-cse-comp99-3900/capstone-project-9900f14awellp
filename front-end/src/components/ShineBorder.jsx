@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 function ShineBorder({
   borderRadius = 8,
-  borderWidth = 1,
+  borderWidth = 2,
   duration = 14,
   color = "#000000",
   className,

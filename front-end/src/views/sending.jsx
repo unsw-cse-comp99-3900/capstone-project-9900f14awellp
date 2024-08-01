@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { ResponsiveAppBar } from "../components/Navbar";
 import { NestedList } from "../components/List";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -12,6 +11,7 @@ import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
 import shipping from "../assets/shipping.gif";
 import OutlinedAlerts from "../components/Alert";
+import SparklesText from "@/components/SparklesText";
 
 export default function Sending() {
   const token = localStorage.getItem("token");
@@ -234,6 +234,112 @@ export default function Sending() {
             />
           </div>
 
+  return (
+    <div>
+      {alert && (
+        <div
+          style={{
+            position: "fixed",
+            top: "11vh",
+            right: 10,
+            // transform: 'translateX(-50%)',
+            width: "30%",
+            zIndex: 9999,
+          }}
+        >
+          <OutlinedAlerts
+            severity={alert.severity}
+            onClose={() => setAlert(null)}
+          >
+            {alert.message}
+          </OutlinedAlerts>
+        </div>
+      )}
+      <Box
+        sx={{
+          height: "calc(100vh - 80px)",
+          // height: '80vh',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          borderColor: "divider",
+          borderRadius: 2,
+          overflow: "hidden",
+          "& svg": {
+            m: 1,
+          },
+        }}
+      >
+        {/* maxHeight: 'calc(100vh - 300px)', minHeight: 'calc(100vh - 350px)' */}
+        <div
+          style={{ margin: "50px", overflow: "auto", height: "calc(450px)" }}
+        >
+          {/* <h1
+            style={{
+              fontSize: "45px",
+              marginBottom: "50px",
+              fontWeight: "600",
+              fontFamily: "Lexend Deca",
+              color: "#333",
+            }}
+          >
+            Choice Invoice
+          </h1> */}
+          <SparklesText
+          style={{ textAlign: 'left', fontSize: '3.5rem' }} 
+          text=" Choice Invoice"
+          className="Choice-Invoice-title"
+        />
+          <NestedList
+            passedList={passedList}
+            failedList={failedList}
+            unvalidatedList={unvalidatedList}
+            onInvoiceSelect={handleInvoiceSelection}
+            selectedInvoices={selectedInvoices}
+          ></NestedList>
+        </div>
+        <Divider orientation="vertical" variant="middle" flexItem />
+        <div style={{ margin: "50px" }}>
+          {/* <h1
+            style={{
+              fontSize: "45px",
+              marginBottom: "50px",
+              fontWeight: "600",
+              fontFamily: "Lexend Deca",
+              color: "#333",
+            }}
+          >
+            Sending To
+          </h1> */}
+          <SparklesText
+          style={{ textAlign: 'left', fontSize: '3.5rem' }} 
+          text=" Sending To"
+          className="Sending-To-title"
+        />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <InputTextField
+              label="First Name"
+              id="first-name"
+              defaultValue="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <div style={{ margin: "10px" }}></div>
+            <InputTextField
+              label="Last Name"
+              id="last-name"
+              defaultValue="Last Name"
+              value={lastName}
+              onChange={(e) => setlastName(e.target.value)}
+            />
+          </div>
+
           <InputTextField
             label="Email Address"
             id="email-address"
@@ -297,3 +403,4 @@ export default function Sending() {
     </div>
   );
 }
+
