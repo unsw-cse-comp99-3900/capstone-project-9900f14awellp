@@ -12,15 +12,18 @@ import Slide from "@mui/material/Slide";
 import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import { UnderlineLink } from "../components/Link";
+import { styled } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import success from "../assets/success.png";
 
 const style = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: 150,
   bgcolor: "background.paper",
-  border: "2px solid #000",
   boxShadow: 24,
   p: 4,
 };
@@ -33,7 +36,7 @@ export const BasicModal = ({ title, description, children, open, onClose }) => {
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <Box sx={style}>
+      <Box sx={style} style={{ borderRadius: '15px' }}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
           {title}
         </Typography>
@@ -47,24 +50,24 @@ export const BasicModal = ({ title, description, children, open, onClose }) => {
 };
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
-
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
+  
 export const AlertDialogSlide = ({ fontsize }) => {
-  const [open, setOpen] = React.useState(false);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  return (
-    <React.Fragment>
-      <Box
-        sx={{
+    const [open, setOpen] = React.useState(false);
+  
+    const handleClickOpen = () => {
+      setOpen(true);
+    };
+  
+    const handleClose = () => {
+      setOpen(false);
+    };
+  
+    return (
+      <React.Fragment>
+         <Box
+      sx={{
           display: "flex",
           flexWrap: "wrap",
           marginTop: "10px",
@@ -182,6 +185,57 @@ export default function FormDialog({ onFormSubmit }) {
           </Button>
         </DialogActions>
       </Dialog>
+    </React.Fragment>
+  );
+}
+
+
+
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(2),
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(1),
+  },
+}));
+
+export const CustomizedDialogs =() =>{
+  const [open, setOpen] = React.useState(true);
+
+  // const handleClickOpen = () => {
+  //   setOpen(true);
+  // };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  return (
+    <React.Fragment>
+      <BootstrapDialog
+        onClose={handleClose}
+        aria-labelledby="customized-dialog-title"
+        open={open}
+      >
+        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+          Validation Successful
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={handleClose}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent dividers>
+        <img src={success} alt="icon" />
+        </DialogContent>
+      </BootstrapDialog>
     </React.Fragment>
   );
 }

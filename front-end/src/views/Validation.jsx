@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
 import axios from "axios";
 import { ResponsiveAppBar } from "../components/Navbar";
 import { SelectSmall } from "../components/Select";
@@ -22,10 +21,10 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import OutlinedAlerts from "../components/Alert";
+import success from "../assets/success.png";
 
 export default function Validation() {
-  // let fileName = null;
-  // let uuid = null;
+
   const token = localStorage.getItem("token");
   const [showIcon, setShowIcon] = useState(false);
   const [validationReport, setValidationReport] = useState(null);
@@ -34,16 +33,14 @@ export default function Validation() {
   const [selectedRules, setSelectedRules] = useState([]);
   const [invoiceUuidMap, setInvoiceUuidMap] = useState({});
   const [open, setOpen] = React.useState(true);
-  const [alert, setAlert] = useState(null); // 初始状态设置为null
+  const [alert, setAlert] = useState(null);
+  const [validatedStatus, setValidatedStatus] = useState(null);
 
-  const { id } = useParams();
-  console.log(id);
-
-  const handleClick = () => {
-    setOpen(!open);
-  };
-
-  const rules = [
+    const handleClick = () => {
+        setOpen(!open);
+    };
+  
+    const rules = [
     "AUNZ_PEPPOL_1_0_10",
     "AUNZ_PEPPOL_SB_1_0_10",
     "AUNZ_UBL_1_0_10",
@@ -51,17 +48,19 @@ export default function Validation() {
     "RO_RO16931_UBL_1_0_8_EN16931",
     "FR_EN16931_UBL_1_3_11",
     "RO_RO16931_UBL_1_0_8_CIUS_RO",
-  ];
+    ];
+
 
   const handleClear = () => {
     setSelectedRules([]);
     setSelectedInvoice("");
   };
+
   const fetchInvoiceData = useCallback(() => {
     axios
       .get(`http://127.0.0.1:8000/invoice/invoice-info/`, {
         headers: {
-          Accept: "application/json", // Setting the Accept header
+          Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
       })
@@ -88,7 +87,6 @@ export default function Validation() {
       .catch((error) => {
         console.log(error.message);
         setAlert({ severity: "error", message: error.message });
-        //alert(error.message);
       });
   }, [token]);
   useEffect(() => {
@@ -102,7 +100,6 @@ export default function Validation() {
       return;
     }
     setShowIcon(true);
-    console.log(selectedUuid, selectedRules);
     axios
       .post("http://127.0.0.1:8000/invoice/invoice-validation/", null, {
         params: {
@@ -115,11 +112,11 @@ export default function Validation() {
         },
       })
       .then((response) => {
+        const validatedStatus = response.data.validation_report.report.successful;
+        setValidatedStatus(validatedStatus);
+        setValidationReport(response.data.validation_report);
         console.log(response.data);
-        setAlert({ severity: "success", message: response.data.msg });
-        // alert(response.data.msg);
-        setValidationReport(response.data.validation_report); // 设置验证报告内容
-        setShowIcon(false); // 隐藏等待图标
+        setShowIcon(false);
         handleClear();
         fetchInvoiceData();
       })
@@ -129,14 +126,15 @@ export default function Validation() {
             severity: "error",
             message: error.response.data.detail || "validate failed",
           });
-          // alert(error.response.data.detail || 'validate failed');
+          setValidationReport(error.response.data.validation_report);
         } else {
           setAlert({ severity: "error", message: error.message });
-          console.log(error.message);
+            console.log(error.message);
         }
-        setShowIcon(false); // 隐藏等待图标，即使出错也要隐藏
+        setShowIcon(false);
       });
   };
+
   return (
     <div>
       <ResponsiveAppBar />
@@ -146,7 +144,6 @@ export default function Validation() {
             position: "fixed",
             top: "11vh",
             right: 10,
-            // transform: 'translateX(-50%)',
             width: "30%",
             zIndex: 9999,
           }}
@@ -207,99 +204,103 @@ export default function Validation() {
           </div>
         )}
 
-        {validationReport && (
-          <BasicModal
-            title="Validation Result"
-            open={!!validationReport}
-            onClose={() => setValidationReport(null)}
-          >
-            <div style={{ overflowY: "auto", height: "calc(400px)" }}>
-              <div>
-                {/* <Typography variant="h6" gutterBottom>
-                                    Statement: failed
-                                </Typography> */}
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Attribute</TableCell>
-                        <TableCell>Details</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>Statement</TableCell>
-                        <TableCell>
-                          <Typography color="error" gutterBottom>
-                            failed
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Customer</TableCell>
-                        <TableCell>{validationReport?.customer}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>File Name</TableCell>
-                        <TableCell>
-                          {validationReport?.report?.filename}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Total Errors</TableCell>
-                        <TableCell>
-                          {validationReport?.report?.firedAssertionErrorsCount}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Total Successful Reports</TableCell>
-                        <TableCell>
-                          {
-                            validationReport?.report
-                              ?.firedSuccessfulReportsCount
-                          }
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell colSpan={2}>
-                          <ListItemButton onClick={handleClick}>
-                            {/* <Typography></Typography> */}
-                            <ListItemText primary="Error Codes" />
-                            {open ? <ExpandLess /> : <ExpandMore />}
-                          </ListItemButton>
-                          <Collapse in={open} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                              {validationReport?.report?.allAssertionErrorCodes?.map(
-                                (code, index) => (
-                                  <ListItemButton key={index} sx={{ pl: 4 }}>
-                                    <ListItemText primary={code} />
-                                  </ListItemButton>
-                                )
-                              )}
-                            </List>
-                          </Collapse>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+        {validatedStatus !== null && (
+          validatedStatus ? (
+            <div style={{width:'20px'}}>
+              <BasicModal
+              title="Validation"
+              open={validatedStatus}
+              onClose={() => setValidatedStatus(null)}
+              actions={[
+                {
+                  label: "OK",
+                  onClick: () => setValidatedStatus(null)
+                }
+              ]}
+             
+            >
+              <div style={{ padding: "10px", textAlign: "center" }}>
+                <img src={success} alt="icon" />
               </div>
-
-              {/* <ListItemButton onClick={handleClick}>
-                                        <ListItemText primary="Error Codes" />
-                                        {open ? <ExpandLess /> : <ExpandMore />}
-                                    </ListItemButton>
-                                    <Collapse in={!open} timeout="auto" unmountOnExit>
-                                        <List component="div" disablePadding>
-                                        {validationReport.report.allAssertionErrorCodes.map((code, index) => (
-                                            <ListItemButton key={index} sx={{ pl: 4 }}>
-                                                <ListItemText primary={code} />
-                                            </ListItemButton>
-                                        ))}
-                                    </List>
-                                    </Collapse> */}
+            </BasicModal>
             </div>
-          </BasicModal>
+            
+          ) : (
+            <BasicModal
+              title="Validation Result"
+              open={!validatedStatus}
+              onClose={() => setValidationReport(null)}
+            >
+              <div style={{ overflowY: "auto", height: "calc(400px)" }}>
+                <div>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Attribute</TableCell>
+                          <TableCell>Details</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Statement</TableCell>
+                          <TableCell>
+                            <Typography color="error" gutterBottom>
+                              failed
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Customer</TableCell>
+                          <TableCell>{validationReport?.customer}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>File Name</TableCell>
+                          <TableCell>
+                            {validationReport?.report?.filename}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Total Errors</TableCell>
+                          <TableCell>
+                            {validationReport?.report?.firedAssertionErrorsCount}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Total Successful Reports</TableCell>
+                          <TableCell>
+                            {
+                              validationReport?.report
+                                ?.firedSuccessfulReportsCount
+                            }
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell colSpan={2}>
+                            <ListItemButton onClick={handleClick}>
+                              <ListItemText primary="Error Codes" />
+                              {open ? <ExpandLess /> : <ExpandMore />}
+                            </ListItemButton>
+                            <Collapse in={open} timeout="auto" unmountOnExit>
+                              <List component="div" disablePadding>
+                                {validationReport?.report?.allAssertionErrorCodes?.map(
+                                  (code, index) => (
+                                    <ListItemButton key={index} sx={{ pl: 4 }}>
+                                      <ListItemText primary={code} />
+                                    </ListItemButton>
+                                  )
+                                )}
+                              </List>
+                            </Collapse>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </div>
+              </div>
+            </BasicModal>
+          )
         )}
       </div>
     </div>
