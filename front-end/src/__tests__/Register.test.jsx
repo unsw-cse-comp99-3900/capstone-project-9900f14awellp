@@ -4,7 +4,7 @@ import { describe, test, expect, beforeAll, afterAll, vi } from 'vitest';
 import { useNavigate, MemoryRouter, Route, Routes } from 'react-router-dom';
 import Register from '../views/Register';
 import Login from '../views/Login';
-import { exec } from 'child_process';
+// import { exec } from 'child_process';
 import { render_page, exec_async } from './render_page_for_test';
 
 describe('Register unit test', () => {

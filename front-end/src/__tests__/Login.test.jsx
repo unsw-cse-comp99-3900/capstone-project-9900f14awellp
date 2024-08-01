@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import Login from '../views/Login';
 import Register from "@/views/Register";
 import { render_page, register_testaccount } from "./render_page_for_test";
+import { exec_async } from "./render_page_for_test";
 
 describe('Login page unit tests', () => {
   // headline login
@@ -159,12 +160,78 @@ describe('page element functional tests', () => {
 });
 
 describe('Login page UI tests', () => {
-
   describe('incomplete form test', () => {
-    test('only type username', () => {
+    test('only type username', async () => {
+      render_page(Login, 'login');
       
-    })
-  })
+      const username_parent = screen.getByTestId("Login-username");
+      const username_field = username_parent.querySelector("#Login-username")
+    
+      fireEvent.change(username_field, { value: "test-user"});
+      fireEvent.click(screen.getByRole('button', {name: "Login"}));
+    
+      await waitFor(() => {
+        expect(screen.getByText(/Login failed/i)).toBeInTheDocument();
+      });
+    });
+
+    test('only type username', async () => {
+      render_page(Login, 'login');
+
+      const password_parent = screen.getByTestId("Login-password");
+      const password_field = password_parent.querySelector("#Login-password")
+
+      fireEvent.change(password_field, { value: "123456" });
+      fireEvent.click(screen.getByRole('button', {name: "Login"}));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Login failed/i)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('complete form test', () => {
+    test('login account that has not yet register', async () => {
+      render_page(Login, 'login');
+      
+      const username_parent = screen.getByTestId("Login-username");
+      const username_field = username_parent.querySelector("#Login-username")
+      fireEvent.change(username_field, { value: "test-user"});
+
+      const password_parent = screen.getByTestId("Login-password");
+      const password_field = password_parent.querySelector("#Login-password")
+      fireEvent.change(password_field, { value: "123456" });
+
+      fireEvent.click(screen.getByRole('button', {name: "Login"}));
+
+      await waitFor(() => {
+        expect(screen.getByText('Login failed')).toBeInTheDocument();
+      });
+    });
+
+    test('login account that has registered', async () => {
+      // register account
+      register_testaccount();
+
+      render_page(Login, 'login');
+      
+      const username_p = screen.getByTestId("Login-username");
+      const username_f = username_p.querySelector("#Login-username")
+      fireEvent.change(username_f, { value: "test-user"});
+      
+      const password_p = screen.getByTestId("Login-password");
+      const password_f = password_p.querySelector("#Login-password")
+      fireEvent.change(password_f, { value: "123456" });
+
+      fireEvent.click(screen.getByRole('button', {name: "Login"}));
+
+      await waitFor(() => {
+        expect(screen.getByText('Login successfully!')).toBeInTheDocument();
+      });
+      await exec_async('python3 src/__tests__/sqlite3_read_script.py');
+    });
+
+  });
 });
 
 
