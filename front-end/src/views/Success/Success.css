@@ -1,0 +1,30 @@
+.success-full-page{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: start;
+    padding-top: 6%;
+    gap:20px;
+    font-family: 'Lexend Deca', sans-serif;
+}
+
+.success-title{
+    font-size: calc(2.1vw + 2.1vh);
+    font-weight: 600;
+    color: #333;
+}
+
+.success-detail{
+    color:#5A5A5A;
+    font-size: calc(0.5vw + 0.8vh);
+    font-weight: 350;
+}
+
+.success-button-group{
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    gap: 10px;
+}
