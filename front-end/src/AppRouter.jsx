@@ -22,15 +22,23 @@ import UserManage from "@/views/Users/UsersManagement";
 import { RouterAuth } from "@/router/RouterAuth";
 
 import { ResponsiveAppBar } from "./components/Navbar";
+import { Box, useTheme } from "@mui/material";
 
 // 定义布局组件
-const Layout = () => (
-  <>
-    <ResponsiveAppBar />
-    <Outlet />
-  </>
-);
+const Layout = () => {
+  const theme = useTheme();
 
+  return (
+    <>
+      <ResponsiveAppBar />
+      <Box sx={{ ...theme.mixins.toolbar }} />{" "}
+      {/* 这会创建一个与 Navbar 高度相同的空白区域 */}
+      <Box component="main">
+        <Outlet />
+      </Box>
+    </>
+  );
+};
 // 定义路由配置
 export const routes = [
   { path: "/", element: <Welcome /> },
