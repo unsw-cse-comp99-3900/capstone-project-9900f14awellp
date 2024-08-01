@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, test, expect, beforeAll, afterAll } from "vitest";
 import App from "../App";
 import { render_this_router } from "./test_functions";
@@ -87,8 +87,11 @@ describe("App structure test with login", () => {
   });
 
   // company-details
-  test("render company-details", () => {
+  test("render company-details", async () => {
     render_this_router(["/company-details"], App);
-    expect(screen.getByText(/company details Page/i)).toBeInTheDocument();
+    await waitFor(() => {
+        expect(screen.getByText("Company Information")).toBeInTheDocument();
+    });
   });
 });
+
