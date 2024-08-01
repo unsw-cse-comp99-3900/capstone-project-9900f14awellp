@@ -75,7 +75,7 @@ export default function Dashboard() {
   }, [fetchNumData]);
 
   return (
-    <div>
+    <div className="full-page">
       {alert && (
         <div
           style={{
@@ -107,7 +107,12 @@ export default function Dashboard() {
           colors={{ first: "#FFD700", second: "#FF4500" }}
           className="my-custom-class"
           sparklesCount={8}
-          style={{ textAlign: "left", fontSize: "2rem" }} // 直接在style中设置
+          style={{
+            textAlign: "left",
+            fontSize: "3rem",
+            fontWeight: "500",
+            fontFamily: "Lexend Deca",
+          }} // 直接在style中设置
         />
       </div>
       <div

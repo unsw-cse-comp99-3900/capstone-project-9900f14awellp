@@ -59,12 +59,10 @@ export default function FileUploader({ showAlert }) {
       setUploadProgress(1); // 开始上传，设置进度为1%
       const response = await uploadFile(file, uuid);
       console.log("File uploaded successfully:", response.data);
-      showAlert("File uploaded successfully!", "success");
+      // showAlert("File uploaded successfully!", "success");
       setUploadProgress(100); // 上传完成，设置进度为100%
       //TODO: 在这里加上成功上传的动画效果，使用@magicui Confetti组件
-      setTimeout(() => {
-        navigate("/home");
-      }, 1000);
+      navigate("/success");
     } catch (error) {
       console.error("Error uploading file:", error);
       showAlert(error.message, "error");

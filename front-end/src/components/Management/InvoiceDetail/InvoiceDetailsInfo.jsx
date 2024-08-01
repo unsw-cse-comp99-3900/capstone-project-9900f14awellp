@@ -227,7 +227,7 @@ export function InvoiceDetailsInfo() {
           <img src={realpath} alt="Specific Invoice" style={{ width: "86%" }} />
         </div>
         <div className="invoice-log-container">
-          <div style={{ fontSize: "24px", marginBottom: "5px" }}>Log</div>
+          <div style={{ fontSize: "24px", marginBottom: "9px" }}>Log</div>
           <div className="invoice-time-log">
             {sendlog !== "" && (
               <div className="invoice-time-log-row">
@@ -265,9 +265,7 @@ export function InvoiceDetailsInfo() {
               </div>
 
               <div className="log-info-container">
-                <div className="log-info-title">
-                  Invoice {originalInvoice.files_name} was created
-                </div>
+                <div className="log-info-title">Invoice was created</div>
                 <div className="log-info-details">{createlog}</div>
               </div>
             </div>

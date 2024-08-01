@@ -5,6 +5,7 @@ import { ResponsiveAppBar } from "../components/Navbar";
 
 export default function CompanyDetails() {
   const [companyInfo, setCompanyInfo] = useState(null);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchCompanyInfo = async () => {
@@ -14,8 +15,7 @@ export default function CompanyDetails() {
           {
             headers: {
               accept: "application/json",
-              Authorization:
-                "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyNTE2NDA5LCJpYXQiOjE3MjI0MzAwMDksImp0aSI6ImQyZjgyZGQ2NDRiNzQ5NWNiZWIzOWJiNDdmZmY3NDU5IiwidXNlcl9pZCI6MX0.Rtb0u2MNHD66W1e5Ndw6jrDqvKJzj9eJcWeYe6Tpcj0",
+              Authorization: `Bearer ${token}`,
             },
           }
         );
