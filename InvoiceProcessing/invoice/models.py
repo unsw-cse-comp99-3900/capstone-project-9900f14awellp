@@ -94,8 +94,6 @@ class Order(models.Model):
     def save(self, *args, **kwargs): 
         if not self.unit_price.startswith('$'):
             self.unit_price = f"\u0024{self.unit_price}" 
-        if not self.gst.startswith('$'):
-            self.gst = f"\u0024{self.gst}"  
         if not self.net.startswith('$'):
             self.net = f"\u0024{self.net}"   
         if not self.amount.startswith('$'):

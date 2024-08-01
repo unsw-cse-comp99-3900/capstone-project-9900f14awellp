@@ -90,7 +90,7 @@
                 <td leftPadding="0">
                     <para style="normal" leading="20" fontSize="17"><b>Bill to</b><br/></para>
                     <pre style="normal">Company:{{data.client_company_name}}</pre>
-                    <pre style="normal">Email:{{data.client_abn}}</pre>
+                    <pre style="normal">ABN:{{data.client_abn}}</pre>
                     <pre style="normal">Address:{{data.client_address}}</pre>
                     <pre style="normal">Email:{{data.client_email}}</pre>
                 </td>
@@ -104,7 +104,7 @@
             <td leftPadding="0">
                 <para style="normal" leading="20" fontSize="17"><b>Bill from</b><br/></para>
                 <pre style="normal">Company:{{data.my_company_name}}</pre>
-                <pre style="normal">Company:{{data.my_abn}}</pre>
+                <pre style="normal">ABN:{{data.my_abn}}</pre>
                 <pre style="normal">Address:{{data.my_address}}</pre>
                 <pre style="normal">Email:{{data.my_email}}</pre>
             </td>
@@ -128,7 +128,7 @@
     			<td align="DECIMAL">Unit Price</td>
     			<td align="CENTER">Qty</td>
 				<td align="CENTER">Net</td>
-				<td align="CENTER">QST(%)</td>
+				<td align="CENTER">GST(%)</td>
 				<td align="DECIMAL">Gross</td>
     	</tr>
 
@@ -155,13 +155,13 @@
         </tr>
         <tr>
             <td></td> 
-            <td align="RIGHT">QST Total</td>
+            <td align="RIGHT">GST Total</td>
             <td align="DECIMAL" rightPadding="15">{{data.gst_total}}</td>
         </tr>
         <tr>
             <td></td> 
             <td align="RIGHT">Gross</td>
-            <td align="DECIMAL" rightPadding="15">{{data.total_price}}</td>
+            <td align="DECIMAL" rightPadding="15">{{data.total_amount}}</td>
         </tr>    
     </blockTable>
 
