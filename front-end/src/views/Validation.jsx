@@ -40,13 +40,13 @@ export default function Validation() {
     };
   
     const rules = [
-        'AUNZ_PEPPOL_1_0_10',
-        'AUNZ_PEPPOL_SB_1_0_10',
-        'AUNZ_UBL_1_0_10',
-        'FR_EN16931_CII_1_3_11',
-        'RO_RO16931_UBL_1_0_8_EN16931',
-        'FR_EN16931_UBL_1_3_11',
-        'RO_RO16931_UBL_1_0_8_CIUS_RO',
+    "AUNZ_PEPPOL_1_0_10",
+    "AUNZ_PEPPOL_SB_1_0_10",
+    "AUNZ_UBL_1_0_10",
+    "FR_EN16931_CII_1_3_11",
+    "RO_RO16931_UBL_1_0_8_EN16931",
+    "FR_EN16931_UBL_1_3_11",
+    "RO_RO16931_UBL_1_0_8_CIUS_RO",
     ];
 
   const handleClear = () => {
@@ -121,7 +121,7 @@ export default function Validation() {
           });
           setValidationReport(error.response.data.validation_report);
         } else {
-            setAlert({ severity: 'error', message: error.message });
+          setAlert({ severity: "error", message: error.message });
             console.log(error.message);
         }
         setShowIcon(false);
