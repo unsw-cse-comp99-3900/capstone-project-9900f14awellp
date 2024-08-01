@@ -48,7 +48,7 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
 
     def parse_date(self, date_str):
         if not date_str:
-            raise ValueError("The date string is empty or None")
+            return ""
 
         # 使用正则表达式匹配 /Date(XXX)/ 格式
         match = re.match(r'/Date\((\d+)\+\d+\)/', date_str)
@@ -73,23 +73,22 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
             return {}
         
     def get_invoice_date(self, obj): 
-        print(obj.file) 
         data = self.get_file_data(obj)
-        nested_form_data = data.get('invoiceForm', {}).get('invoiceDate', {})
+        nested_form_data = data.get('invoiceForm', {}).get('invoiceDate', "")
         if not nested_form_data:
             nested_form_data = data.get('issue_date', {})
         return self.parse_date(nested_form_data)
         
     def get_due_date(self,obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('invoiceForm', {}).get('paymentDate', {})
+        nested_form_data = data.get('invoiceForm', {}).get('paymentDate', "")
         if not nested_form_data:
             nested_form_data = data.get('due_date', {})
         return self.parse_date(nested_form_data)
 
     def get_invoice_number(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {}).get('invoiceNumber', {})
+        nested_form_data = data.get('form_data', {}).get('invoiceNumber', "")
         if not nested_form_data:
             nested_form_data = data.get('invoice_num', {})
         return nested_form_data
@@ -103,7 +102,7 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     
     def get_total(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {}).get('total', {})
+        nested_form_data = data.get('form_data', {}).get('total', "")
         if not nested_form_data:
             nested_form_data = data.get('total_amount', {})
         return nested_form_data
