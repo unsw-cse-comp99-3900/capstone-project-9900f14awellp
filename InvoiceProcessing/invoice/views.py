@@ -344,18 +344,15 @@ class UserInfo(APIView):
     def patch(self,request):
         username = request.GET.get('username')
         email = request.GET.get('email')
+        
         if not username or not email:
             return Response({'error': 'username or email field is required'}, status=status.HTTP_400_BAD_REQUEST)
-        user = User.objects.filter(username=username, email=email).first()
         
-        if not user:
-            return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
         subject = "Company Invitation"
-        message = f"Dear {user.username},\nYou are invited to the {request.user.company.name} company."
+        message = f"Dear {username},\nYou are invited to the {request.user.company.name} company."
         from_email = 'ikezhao123@gmail.com'
         recipient_list = [email]
         try:
-            
             send_mail(subject, message, from_email, recipient_list)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
