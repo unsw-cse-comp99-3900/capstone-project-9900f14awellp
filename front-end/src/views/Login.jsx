@@ -16,7 +16,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showIcon, setShowIcon] = useState(false);
   const [alert, setAlert] = useState(null); // 初始状态设置为null
-  const { updateInvoiceData } = useInvoice();
+  const updateInvoiceData = useInvoice();
 
   const updateCompanyInfo = (companyData) => {
     updateInvoiceData({
@@ -163,12 +163,14 @@ export default function Login() {
         <InputTextField
           label="username"
           id="Login-username"
+          dataTestId="Login-username"
           defaultValue="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <PasswordTextField
           id="Login-password"
+          dataTestId="Login-password"
           label="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -179,7 +181,7 @@ export default function Login() {
 
         <ButtonSizes onClick={handleLogin}>Login</ButtonSizes>
         <UnderlineLink onClick={goRegister} fontsize="10px">
-          Don't have an accnt? Go register
+          Don't have an account? Go register
         </UnderlineLink>
         <AlertDialogSlide fontsize="8px" />
         {showIcon && (
