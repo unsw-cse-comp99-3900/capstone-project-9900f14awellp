@@ -9,6 +9,7 @@ import CardSelector from "@/components/Creation/File2GUIselect/CardSelector";
 import ProgressIndicator from "@/components/Creation/CreationProgress/Progress";
 import { CustomAlert } from "@/components/Alert/MUIAlert";
 import { Modal } from "antd";
+import SparklesText from "@/components/SparklesText";
 
 import { useInvoice } from "@/Content/GuiContent";
 
@@ -205,7 +206,7 @@ export default function Create() {
         }, 2000);
       } catch (error) {
         console.error("提交发票时出错:", error);
-        showAlert("发票提交失败。请重试。", "error");
+        showAlert(error.message, "error");
       }
     }
   };
@@ -253,7 +254,6 @@ export default function Create() {
 
   return (
     <div className="center">
-      <ResponsiveAppBar />
       <Modal
         title="Confirm to Leave?"
         open={showModal}
@@ -276,7 +276,11 @@ export default function Create() {
       {showCardSelector && (
         <>
           <div className="head-title-div">
-            <div className="title">Create your E-invoice</div>
+            {/* <div className="create-invoice-title">Create your E-invoice</div> */}
+            <SparklesText
+              text="Create your E-invoice"
+              className="create-invoice-title"
+            />
             <div className="type">select your invoice type</div>
           </div>
           <CardSelector

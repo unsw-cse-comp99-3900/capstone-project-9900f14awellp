@@ -18,6 +18,7 @@ export default function Login() {
   const [alert, setAlert] = useState(null); // 初始状态设置为null
   const {updateInvoiceData} = useInvoice();
 
+
   const updateCompanyInfo = (companyData) => {
     updateInvoiceData({
       my_company_name: companyData.name,
@@ -61,6 +62,7 @@ export default function Login() {
         const companyData = companyInfoResponse.data;
         updateCompanyInfo(companyData);
         goDashboard();
+        window.location.reload();
       })
       .catch((error) => {
         if (error.response) {

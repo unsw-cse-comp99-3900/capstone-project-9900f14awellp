@@ -10,6 +10,9 @@ const theme = createTheme({
       main: "#333",
     },
   },
+  typography: {
+    fontFamily: "Lexend Deca", // 字体
+  },
 });
 
 export default function App({ router }) {
