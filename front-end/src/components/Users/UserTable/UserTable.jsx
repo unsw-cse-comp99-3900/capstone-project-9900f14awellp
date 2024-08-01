@@ -495,7 +495,7 @@ export default function UserTable() {
       </Modal>
       <div className="user-info-header-row">
         <div className="user-info-title-row">
-          <div className="user-table-title">User Management</div>
+          <div className="user-table-title">Users Management</div>
         </div>
         <div className="user-header-reminder">
           Manage your team members and their account permissions here.

@@ -9,6 +9,7 @@ import CardSelector from "@/components/Creation/File2GUIselect/CardSelector";
 import ProgressIndicator from "@/components/Creation/CreationProgress/Progress";
 import { CustomAlert } from "@/components/Alert/MUIAlert";
 import { Modal } from "antd";
+import SparklesText from "@/components/SparklesText";
 
 import { useInvoice } from "@/Content/GuiContent";
 
@@ -276,7 +277,11 @@ export default function Create() {
       {showCardSelector && (
         <>
           <div className="head-title-div">
-            <div className="create-invoice-title">Create your E-invoice</div>
+            {/* <div className="create-invoice-title">Create your E-invoice</div> */}
+            <SparklesText
+              text="Create your E-invoice"
+              className="create-invoice-title"
+            />
             <div className="type">select your invoice type</div>
           </div>
           <CardSelector

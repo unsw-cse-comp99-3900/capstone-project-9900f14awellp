@@ -1,0 +1,15 @@
+.validate-title{
+    font-size: calc(2.4vw + 2.2vh);
+    font-weight: 400 !important;
+    color: #333;
+    font-family:'Lexend Deca', sans-serif;
+    margin-bottom: "16px";
+}
+
+.validate-form-group{
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}

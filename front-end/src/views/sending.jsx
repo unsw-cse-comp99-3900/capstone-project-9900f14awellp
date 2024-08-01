@@ -183,7 +183,9 @@ export default function Sending() {
             style={{
               fontSize: "45px",
               marginBottom: "50px",
-              fontWeight: "bold",
+              fontWeight: "600",
+              fontFamily: "Lexend Deca",
+              color: "#333",
             }}
           >
             Choice Invoice
@@ -202,7 +204,9 @@ export default function Sending() {
             style={{
               fontSize: "45px",
               marginBottom: "50px",
-              fontWeight: "bold",
+              fontWeight: "600",
+              fontFamily: "Lexend Deca",
+              color: "#333",
             }}
           >
             Sending To

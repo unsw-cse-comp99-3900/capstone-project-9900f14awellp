@@ -51,3 +51,12 @@ export function sendInvitationEmail(userName, email) {
     }
   );
 }
+
+export function getCurrentUserInfo() {
+  return axios.get(`${API_BASE_URL}/user-info/`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
