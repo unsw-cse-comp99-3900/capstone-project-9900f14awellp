@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { ResponsiveAppBar } from "../components/Navbar";
 import OutlinedAlerts from '../components/Alert';
 import SparklesText from '@/components/SparklesText';
 import { DashboardCard } from '@/components/CardBorder';
@@ -68,8 +67,11 @@ useEffect(() => {
     
 
     return (
-        <div>
-            <ResponsiveAppBar />
+        <div style={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center'
+          }}>
             {alert && (
               <div style={{
                   position: 'fixed',
@@ -83,6 +85,7 @@ useEffect(() => {
                   </OutlinedAlerts>
               </div>
               )}
+              <div>
               <div className="container mx-auto p-7"style={{
                   width: '100%',
                   display: 'flex',
@@ -108,35 +111,37 @@ useEffect(() => {
                 unvalidated={unvalidated}
               ></DashboardCard>
  
-  <div style={{ display: 'flex', gap: '20px', marginTop:'30px' }}>
-    <Card style={{ width: '50%', padding: '20px' }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          NUMBERS
-        </Typography>
-        <Typography variant="body2" color="textSecondary" gutterBottom>
-          Total invoices and sent invoices
-        </Typography>
-        <SimpleLineChart 
-    xLabels={xLabels}
-    aLine={totalInvoiceCounts}
-    bLIne={sendInvoiceCounts}
-    />
-      </CardContent>
-    </Card>
-    <Card style={{ width: '50%', padding: '20px' }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Current Numbers
-        </Typography>
-        <Typography variant="body2" color="textSecondary" gutterBottom>
-          Hover your mouse
-        </Typography>
-        <PieActiveArc data={data} />
-      </CardContent>
-    </Card>
-  </div>
-</div>  
+              <div style={{ display: 'flex', gap: '20px', marginTop:'30px' }}>
+                <Card style={{ width: '50%', padding: '20px' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      NUMBERS
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      Total invoices and sent invoices
+                    </Typography>
+                    <SimpleLineChart 
+                xLabels={xLabels}
+                aLine={totalInvoiceCounts}
+                bLIne={sendInvoiceCounts}
+                />
+                  </CardContent>
+                </Card>
+                <Card style={{ width: '50%', padding: '20px' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Current Numbers
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      Hover your mouse
+                    </Typography>
+                    <PieActiveArc data={data} />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>  
+              </div>
+              
         </div>
     );
 }

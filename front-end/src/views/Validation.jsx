@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { SelectSmall } from "../components/Select";
+import { SelectSmall, MultipleSelect } from "../components/Select";
 import { ButtonSizes } from "../components/Buttons";
-import { MultipleSelect } from "../components/Select";
 import { BasicModal } from "../components/Model";
 import waiting from "../assets/waiting.gif";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -33,12 +32,20 @@ export default function Validation() {
   const [selectedInvoice, setSelectedInvoice] = useState("");
   const [selectedRules, setSelectedRules] = useState([]);
   const [invoiceUuidMap, setInvoiceUuidMap] = useState({});
-  const [open, setOpen] = React.useState(true);
+  const [openList, setOpenList] = useState({});
   const [alert, setAlert] = useState(null);
   const [validatedStatus, setValidatedStatus] = useState(null);
+  const [open, setOpen] = useState(false);
 
-  const handleClick = () => {
-    setOpen(!open);
+  const handleListClick = (listName) => {
+    setOpenList((prev) => ({
+      ...prev,
+      [listName]: !prev[listName],
+    }));
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const rules = [
@@ -88,6 +95,12 @@ export default function Validation() {
     fetchInvoiceData();
   }, [token, fetchInvoiceData]);
 
+  useEffect(() => {
+    if (selectedInvoice && !invoices.includes(selectedInvoice)) {
+      setSelectedInvoice("");
+    }
+  }, [invoices, selectedInvoice]);
+
   const handleValidate = () => {
     const selectedUuid = invoiceUuidMap[selectedInvoice];
     if (!selectedUuid) {
@@ -115,6 +128,7 @@ export default function Validation() {
         setShowIcon(false);
         handleClear();
         fetchInvoiceData();
+        setOpen(true);  // Open the modal when validation is done
       })
       .catch((error) => {
         if (error.response) {
@@ -130,6 +144,7 @@ export default function Validation() {
           console.log(error.message);
         }
         setShowIcon(false);
+        setOpen(true);  // Open the modal even if validation fails
       });
   };
 
@@ -179,7 +194,15 @@ export default function Validation() {
           />
           <SelectSmall
             invoices={invoices}
-            onChange={(e) => setSelectedInvoice(e.target.value)}
+            selectedInvoice={selectedInvoice}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (invoices.includes(value)) {
+                setSelectedInvoice(value);
+              } else {
+                setSelectedInvoice("");
+              }
+            }}
             className="select-small"
           />
           <ButtonSizes onClick={handleValidate}>Validate</ButtonSizes>
@@ -205,104 +228,117 @@ export default function Validation() {
           </div>
         )}
 
-        {validatedStatus !== null &&
-          (validatedStatus ? (
-            <div style={{ width: "20px" }}>
-              <BasicModal
-                title="Validation"
-                open={validatedStatus}
-                onClose={() => setValidatedStatus(null)}
-                actions={[
-                  {
-                    label: "OK",
-                    onClick: () => setValidatedStatus(null),
-                  },
-                ]}
-              >
-                <div style={{ padding: "10px", textAlign: "center" }}>
-                  <img src={success} alt="icon" />
-                </div>
-              </BasicModal>
-            </div>
-          ) : (
-            <BasicModal
-              title="Validation Result"
-              open={!validatedStatus}
-              onClose={() => setValidationReport(null)}
-            >
-              <div style={{ overflowY: "auto", height: "calc(400px)" }}>
-                <div>
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Attribute</TableCell>
-                          <TableCell>Details</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>Statement</TableCell>
-                          <TableCell>
-                            <Typography color="error" gutterBottom>
-                              failed
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Customer</TableCell>
-                          <TableCell>{validationReport?.customer}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>File Name</TableCell>
-                          <TableCell>
-                            {validationReport?.report?.filename}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Total Errors</TableCell>
-                          <TableCell>
-                            {
-                              validationReport?.report
-                                ?.firedAssertionErrorsCount
-                            }
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Total Successful Reports</TableCell>
-                          <TableCell>
-                            {
-                              validationReport?.report
-                                ?.firedSuccessfulReportsCount
-                            }
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell colSpan={2}>
-                            <ListItemButton onClick={handleClick}>
-                              <ListItemText primary="Error Codes" />
-                              {open ? <ExpandLess /> : <ExpandMore />}
-                            </ListItemButton>
-                            <Collapse in={open} timeout="auto" unmountOnExit>
-                              <List component="div" disablePadding>
-                                {validationReport?.report?.allAssertionErrorCodes?.map(
-                                  (code, index) => (
-                                    <ListItemButton key={index} sx={{ pl: 4 }}>
-                                      <ListItemText primary={code} />
-                                    </ListItemButton>
-                                  )
-                                )}
-                              </List>
-                            </Collapse>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </div>
+        <BasicModal
+          title="Validation Result"
+          open={open}
+          onClose={handleClose}
+          actions={[
+            {
+              label: "OK",
+              onClick: handleClose,
+            },
+          ]}
+        >
+          {validatedStatus !== null ? (
+            validatedStatus ? (
+              <div style={{ padding: "10px", justifyContent: "center", display: 'flex' }}>
+                <img src={success} alt="icon" />
               </div>
-            </BasicModal>
-          ))}
+            ) : (
+              <div style={{ overflowY: "auto", height: "calc(400px)" }}>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Attribute</TableCell>
+                        <TableCell>Details</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>Statement</TableCell>
+                        <TableCell>
+                          <Typography color="error" gutterBottom>
+                            failed
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Customer</TableCell>
+                        <TableCell>{validationReport?.customer}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>File Name</TableCell>
+                        <TableCell>
+                          {validationReport?.report?.filename}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Total Errors</TableCell>
+                        <TableCell>
+                          {
+                            validationReport?.report
+                              ?.firedAssertionErrorsCount
+                          }
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Total Successful Reports</TableCell>
+                        <TableCell>
+                          {
+                            validationReport?.report
+                              ?.firedSuccessfulReportsCount
+                          }
+                        </TableCell>
+                      </TableRow>
+                      {validationReport?.report?.reports &&
+                        Object.keys(validationReport.report.reports).map(
+                          (listName, index) => (
+                            <TableRow key={index}>
+                              <TableCell colSpan={2}>
+                                <ListItemButton
+                                  onClick={() => handleListClick(listName)}
+                                >
+                                  <ListItemText primary={listName} />
+                                  {openList[listName] ? (
+                                    <ExpandLess />
+                                  ) : (
+                                    <ExpandMore />
+                                  )}
+                                </ListItemButton>
+                                <Collapse
+                                  in={openList[listName]}
+                                  timeout="auto"
+                                  unmountOnExit
+                                >
+                                  <List component="div" disablePadding>
+                                    {validationReport.report.reports[
+                                      listName
+                                    ].firedAssertionErrors.map(
+                                      (error, ruleIndex) => (
+                                        <ListItemButton
+                                          key={ruleIndex}
+                                          sx={{ pl: 4 }}
+                                        >
+                                          <ListItemText primary={error.text} />
+                                        </ListItemButton>
+                                      )
+                                    )}
+                                  </List>
+                                </Collapse>
+                              </TableCell>
+                            </TableRow>
+                          )
+                        )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </div>
+            )
+          ) : (
+            <div>Loading...</div>
+          )}
+        </BasicModal>
       </div>
     </div>
   );

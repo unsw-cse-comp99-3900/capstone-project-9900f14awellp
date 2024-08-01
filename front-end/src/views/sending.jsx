@@ -12,6 +12,7 @@ import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
 import shipping from "../assets/shipping.gif";
 import OutlinedAlerts from "../components/Alert";
+import SparklesText from "@/components/SparklesText";
 
 export default function Sending() {
   const token = localStorage.getItem("token");
@@ -176,9 +177,9 @@ export default function Sending() {
       >
         {/* maxHeight: 'calc(100vh - 300px)', minHeight: 'calc(100vh - 350px)' */}
         <div
-          style={{ margin: "30px", overflow: "auto", height: "calc(450px)" }}
+          style={{ margin: "50px", overflow: "auto", height: "calc(450px)" }}
         >
-          <h1
+          {/* <h1
             style={{
               fontSize: "45px",
               marginBottom: "50px",
@@ -188,7 +189,12 @@ export default function Sending() {
             }}
           >
             Choice Invoice
-          </h1>
+          </h1> */}
+          <SparklesText
+          style={{ textAlign: 'left', fontSize: '3.5rem' }} 
+          text=" Choice Invoice"
+          className="Choice-Invoice-title"
+        />
           <NestedList
             passedList={passedList}
             failedList={failedList}
@@ -198,8 +204,8 @@ export default function Sending() {
           ></NestedList>
         </div>
         <Divider orientation="vertical" variant="middle" flexItem />
-        <div style={{ margin: "30px" }}>
-          <h1
+        <div style={{ margin: "50px" }}>
+          {/* <h1
             style={{
               fontSize: "45px",
               marginBottom: "50px",
@@ -209,7 +215,12 @@ export default function Sending() {
             }}
           >
             Sending To
-          </h1>
+          </h1> */}
+          <SparklesText
+          style={{ textAlign: 'left', fontSize: '3.5rem' }} 
+          text=" Sending To"
+          className="Sending-To-title"
+        />
           <div
             style={{
               display: "flex",
