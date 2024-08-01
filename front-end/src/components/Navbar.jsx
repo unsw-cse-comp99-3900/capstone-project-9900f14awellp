@@ -34,13 +34,13 @@ const getGreeting = () => {
   const currentHour = new Date().getHours();
 
   if (currentHour >= 5 && currentHour < 12) {
-    return "Good Morning👋";
+    return "Good Morning 👋";
   } else if (currentHour >= 12 && currentHour < 17) {
-    return "Good Afternoon👋";
+    return "Good Afternoon 👋";
   } else if (currentHour >= 17 && currentHour < 20) {
-    return "Good Evening👋";
+    return "Good Evening 👋";
   } else {
-    return "Good Night👋";
+    return "Good Night 👋";
   }
 };
 
@@ -197,7 +197,7 @@ export const ResponsiveAppBar = () => {
                   display: "flex",
                   alignItems: "center",
                   gap: 1,
-                  border: "1px solid #333",
+                  // border: "1px solid #333",
                   borderRadius: "30px",
                 }}
               >
