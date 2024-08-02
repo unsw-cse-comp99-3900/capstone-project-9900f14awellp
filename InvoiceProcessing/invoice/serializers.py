@@ -76,21 +76,21 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
         data = self.get_file_data(obj)
         nested_form_data = data.get('invoiceForm', {}).get('invoiceDate', "")
         if not nested_form_data:
-            nested_form_data = data.get('issue_date', {})
+            nested_form_data = data.get('issue_date', "")
         return self.parse_date(nested_form_data)
         
     def get_due_date(self,obj):
         data = self.get_file_data(obj)
         nested_form_data = data.get('invoiceForm', {}).get('paymentDate', "")
         if not nested_form_data:
-            nested_form_data = data.get('due_date', {})
+            nested_form_data = data.get('due_date', "")
         return self.parse_date(nested_form_data)
 
     def get_invoice_number(self, obj):
         data = self.get_file_data(obj)
         nested_form_data = data.get('form_data', {}).get('invoiceNumber', "")
         if not nested_form_data:
-            nested_form_data = data.get('invoice_num', {})
+            nested_form_data = data.get('invoice_num', "")
         return nested_form_data
     
     def get_supplier(self, obj):
@@ -102,9 +102,9 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     
     def get_total(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {}).get('total', "")
+        nested_form_data = data.get('form_data', "").get('total', "")
         if not nested_form_data:
-            nested_form_data = data.get('total_amount', {})
+            nested_form_data = data.get('total_amount', "")
         return nested_form_data
     
     def get_state(self, obj):
