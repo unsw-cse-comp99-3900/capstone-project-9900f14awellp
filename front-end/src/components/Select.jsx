@@ -7,15 +7,14 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import OutlinedInput from "@mui/material/OutlinedInput";
 
-
-
-export const SelectSmall = ({ invoices, selectedInvoice, onChange }) => {
+export const SelectSmall = ({ invoices, selectedInvoice, onChange, dataTestId }) => {
   return (
     <FormControl sx={{ m: 1, minWidth: 100, width: '100%', maxHeight: 400 }} size="small">
       <InputLabel>Invoice</InputLabel>
       <Select
         value={selectedInvoice || ""}
         onChange={onChange}
+        data-testid={dataTestId}
         label="Invoice"
         MenuProps={{
           PaperProps: {
@@ -39,9 +38,6 @@ export const SelectSmall = ({ invoices, selectedInvoice, onChange }) => {
   );
 };
 
-
-
-
 function getStyles(name, personName, theme) {
   return {
     fontWeight:
@@ -62,7 +58,7 @@ const MenuProps = {
   },
 };
 
-export const MultipleSelect = ({ lists, onChange, selected }) => {
+export const MultipleSelect = ({lists, onChange, selected, dataTestId}) => {
   const theme = useTheme();
   const [personName, setPersonName] = React.useState([]);
 
@@ -88,6 +84,7 @@ export const MultipleSelect = ({ lists, onChange, selected }) => {
         <Select
           labelId="demo-multiple-name-label"
           id="demo-multiple-name"
+          data-testid={dataTestId}
           multiple
           value={personName}
           onChange={handleChange}
