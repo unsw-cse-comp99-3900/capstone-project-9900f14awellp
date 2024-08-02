@@ -190,12 +190,14 @@ export default function Validation() {
           <MultipleSelect
             lists={rules}
             onChange={setSelectedRules}
+            dataTestId="select-Rules"
             selected={selectedRules}
             style={{ width: "100%" }}
             className="multiple-select"
           />
           <SelectSmall
             invoices={invoices}
+            dataTestId="select-Invoice"
             selectedInvoice={selectedInvoice}
             onChange={(e) => {
               const value = e.target.value;

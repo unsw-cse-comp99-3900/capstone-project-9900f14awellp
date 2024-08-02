@@ -14,17 +14,13 @@ export const SelectSmall = ({ invoices, selectedInvoice, onChange }) => {
     <FormControl sx={{ m: 1, minWidth: 100, width: '100%', maxHeight: 400 }} size="small">
       <InputLabel>Invoice</InputLabel>
       <Select
-        value={selectedInvoice || ""}
-        onChange={onChange}
-        label="Invoice"
-        MenuProps={{
-          PaperProps: {
-            style: {
-              maxWidth: 200,
-              overflowX: 'auto',
-            },
-          },
-        }}
+        labelId="demo-select-small-label"
+        id="demo-select-small"
+        data-testid={dataTestId}
+        value={personName}
+        label="invoice"
+        onChange={handleChange}
+        //onClick={onclick}
       >
         <MenuItem value="">
           <em>None</em>
@@ -62,7 +58,11 @@ const MenuProps = {
   },
 };
 
-export const MultipleSelect = ({ lists, onChange, selected }) => {
+
+
+
+
+export const MultipleSelect = ({lists, onChange, selected, dataTestId}) => {
   const theme = useTheme();
   const [personName, setPersonName] = React.useState([]);
 
@@ -88,6 +88,7 @@ export const MultipleSelect = ({ lists, onChange, selected }) => {
         <Select
           labelId="demo-multiple-name-label"
           id="demo-multiple-name"
+          data-testid={dataTestId}
           multiple
           value={personName}
           onChange={handleChange}

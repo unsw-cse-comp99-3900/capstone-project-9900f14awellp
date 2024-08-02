@@ -1,10 +1,10 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Register from "@/views/Register";
 import { exec } from 'child_process';
 import { createMemoryRouter } from "react-router-dom";
 import { routes } from "../AppRouter";
+import { InvoiceProvider } from "@/Content/GuiContent";
 
 export const render_this_router = (initialEntries, Page) => {
   const router = createMemoryRouter(routes, { initialEntries });
@@ -14,7 +14,9 @@ export const render_this_router = (initialEntries, Page) => {
 export const render_page = (Page, url) => {
   return render(
     <MemoryRouter initialEntries={[`/${url}`]}>
+      <InvoiceProvider>
         <Page />
+      </InvoiceProvider>
     </MemoryRouter>
   );
 }
@@ -39,7 +41,7 @@ export const register_testaccount = async () => {
   // delete test account if already exist
   await exec_async('python3 src/__tests__/sqlite3_read_script.py');
 
-  render_page(Register, 'register');
+//   render_page(Register, 'register');
   // get username input field
   const username_parent = screen.getByTestId("Register-Username");
   const username_field = username_parent.querySelector('#Register-Username');
@@ -61,7 +63,6 @@ export const register_testaccount = async () => {
   fireEvent.change(name_field, { target: { value: 'test-name' } });
   fireEvent.change(password_field_P, { target: { value: '123456' } });
   fireEvent.change(password_field_CP, { target: { value: '123456' } });
-  fireEvent.click(screen.getByTestId('Sign-up-btn'));
   
   await waitFor(() => {
     expect(screen.getByText('Register successfully!')).toBeInTheDocument();

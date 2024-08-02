@@ -5,7 +5,10 @@ import { useNavigate, MemoryRouter, Route, Routes } from 'react-router-dom';
 import Register from '../views/Register';
 import Login from '../views/Login';
 import { render_page, exec_async } from './test_functions';
-import { createContext, useState, useContext, useEffect } from "react";
+// import { createContext, useState, useContext, useEffect } from "react";
+import { InvoiceProvider } from "@/Content/GuiContent";
+// import { RouterProvider } from 'react-router-dom';
+// import { RouterAuth } from "@/router/RouterAuth";
 
 describe('Register unit test', () => {
     test('Register page element test', () => {
@@ -102,10 +105,10 @@ describe('Register unit test', () => {
     test('link to login page', async () => {
         render(
           <MemoryRouter initialEntries={['/register']}>
-            <Routes>
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login />} />
-            </Routes>
+            <InvoiceProvider>
+              <Register />
+              <Login />
+            </InvoiceProvider>
           </MemoryRouter>
         );
 
@@ -211,7 +214,7 @@ describe('complete form test', () => {
   test('successful register', async () => {
     render_page(Register, 'register');
     // delete the record in sqlite if username and email have been used
-    await exec_async('python3 src/__tests__/sqlite3_read_script.py');
+    await exec_async('python3 src/__tests__/sqlite3_read_script.py test-user');
     // get username input field
     const username_parent = screen.getByTestId("Register-Username");
     const username_field = username_parent.querySelector('#Register-Username');
@@ -243,13 +246,13 @@ describe('complete form test', () => {
       expect(screen.getByText('Register successfully!')).toBeInTheDocument();
     });
     // delete the record in sqlite if successfully register
-    await exec_async('python3 src/__tests__/sqlite3_read_script.py');
+    await exec_async('python3 src/__tests__/sqlite3_read_script.py test-user');
   });
 
   test('password & confirm password not the same', async () => {
     render_page(Register, 'register');
 
-    await exec_async('python3 src/__tests__/sqlite3_read_script.py');
+    await exec_async('python3 src/__tests__/sqlite3_read_script.py test-user');
     
     const username_parent = screen.getByTestId("Register-Username");
     const username_field = username_parent.querySelector('#Register-Username');
