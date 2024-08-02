@@ -13,4 +13,3 @@ exec_cursor.execute(f'delete from invoice_user where username="{sys.argv[1]}";')
 
 sql_connection.commit()
 sql_connection.close()
-
