@@ -201,8 +201,8 @@ export default function Create() {
         showAlert("submit successful", "success");
         setCurrentStep(2); // 移动到下一步
         setTimeout(() => {
-          navigate("/home");
           clearInvoiceData();
+          navigate("/success");
         }, 2000);
       } catch (error) {
         console.error("提交发票时出错:", error);

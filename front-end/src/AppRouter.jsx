@@ -19,6 +19,7 @@ import NotFound from "@/views/NotFound";
 import Choice from "@/views/ChoiceCompany";
 import CompanyDetails from "@/views/CompanyDetails";
 import UserManage from "@/views/Users/UsersManagement";
+import Success from "@/views/Success/Success";
 import { RouterAuth } from "@/router/RouterAuth";
 
 import { ResponsiveAppBar } from "./components/Navbar";
@@ -50,6 +51,7 @@ export const routes = [
     ),
     children: [
       { path: "home", element: <Dashboard /> },
+      { path: "success", element: <Success /> },
       {
         path: "create",
         element: <Create />,

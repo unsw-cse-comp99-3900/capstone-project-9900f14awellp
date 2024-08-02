@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import OutlinedAlerts from "../components/Alert";
-import { ResponsiveAppBar } from "../components/Navbar";
 import {
   Box,
   Button,

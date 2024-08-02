@@ -28,6 +28,9 @@ from django.contrib.auth import authenticate
 from django.urls import reverse
 from django.utils.timezone import now
 from django.db import IntegrityError
+from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
+from email.mime.image import MIMEImage
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -341,7 +344,7 @@ class UserInfo(APIView):
             )
         }
     )
-    def patch(self,request):
+    def patch(self, request):
         username = request.GET.get('username')
         email = request.GET.get('email')
         
@@ -349,17 +352,51 @@ class UserInfo(APIView):
             return Response({'error': 'username or email field is required'}, status=status.HTTP_400_BAD_REQUEST)
         
         subject = "Company Invitation"
-        message = f"Dear {username},\nYou are invited to the {request.user.company.name} company."
+        
+        # 构建 HTML 邮件正文
+        html_content = f"""
+        <html>
+        <body>
+            <p>Dear {username},</p>
+            <p>You are invited to the {request.user.company.name} company.</p>
+            <p>Kind Regards,<br/>
+                <span style="color: black; font-weight: bold;">UNSW Invoice Management Team</span><br/>
+            <p><img src="cid:logo"></p>
+            <p>UNSW Invoice<br/>
+               <span style="color: grey;">Liability limited by a scheme approved under Professional Standards Legislation</span><br/>
+               Ph: +61 0415059822<br/>
+               UNSW Sydney High St Kensington NSW 2052<br/>
+               
+            <p>Note: Our office is closed from 12:30 PM – 1:30 PM weekdays.</p>
+            <p style="color: red;">IMPORTANT: The contents of this email are confidential. They are intended for the named recipient(s) only.<br/>
+               If you have received this email in error, please notify the sender immediately and do not disclose the contents to anyone or make copies thereof.</p>
+        </body>
+        </html>
+        """
+        
         from_email = 'ikezhao123@gmail.com'
         recipient_list = [email]
+        
+        # 创建邮件对象
+        email_message = EmailMultiAlternatives(subject, '', from_email, recipient_list)
+        email_message.attach_alternative(html_content, "text/html")
+
+        # 添加内嵌图片
+        image_path = 'staticfiles/logo.png'
+        if os.path.exists(image_path):
+            with open(image_path, 'rb') as img:
+                img_data = img.read()
+                img = MIMEImage(img_data)
+                img.add_header('Content-ID', '<logo>')
+                img.add_header('Content-Disposition', 'inline', filename='logo.png')
+                email_message.attach(img)
+        
         try:
-            send_mail(subject, message, from_email, recipient_list)
+            email_message.send()
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         return Response({'success': 'Invitation Sent Successfully'}, status=status.HTTP_200_OK)
-        
-    
 class DeleterUser(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
@@ -896,8 +933,6 @@ class UpFileAPIView(APIView):
         })"""
         
         
-        
-
 
 def pdf_to_png(pdf_path, output_dir):
     # 打开PDF文件
@@ -2260,16 +2295,46 @@ class SendInvoiceEmailAPIView(APIView):
                             status=status.HTTP_404_NOT_FOUND)
 
         files.update(sending_date=datetime.now(), email_receiver=client_email)
-        email_body = f"{custom_message}\n\nPlease find attached your invoice."  # 将自定义消息添加到邮件正文中
-        email = EmailMessage(
+        email_body = f"""
+        <html>
+        <body>
+        <p style="font-size: 16px; font-weight: bold;">Please find attached your invoice.</p>
+        <br/>
+        
+        <p> <span style="color: black; font-weight: bold;">UNSW Invoice Management Team</span></p>
+            <p><img src="cid:logo"></p>
+            <p>UNSW Invoice<br/>
+               <span style="color: grey;">Liability limited by a scheme approved under Professional Standards Legislation</span><br/>
+               Ph: +61 0415059822<br/>
+               UNSW Sydney High St Kensington NSW 2052<br/>
+               
+            <p>Note: Our office is closed from 12:30 PM – 1:30 PM weekdays.</p>
+            <p style="color: red;">IMPORTANT: The contents of this email are confidential. They are intended for the named recipient(s) only.<br/>
+               If you have received this email in error, please notify the sender immediately and do not disclose the contents to anyone or make copies thereof.</p>
+        </body>
+        </html>
+        """
+        email = EmailMultiAlternatives(
             'Your Invoice',
             email_body,
-            to=[client_email]
+            'ikezhao123@gmail.com',
+            [client_email]
         )
+        email.attach_alternative(email_body, "text/html")
+
+        # 添加内嵌图片
+        image_path = 'staticfiles/logo.png'
+        if os.path.exists(image_path):
+            with open(image_path, 'rb') as img:
+                img_data = img.read()
+                img = MIMEImage(img_data)
+                img.add_header('Content-ID', '<logo>')
+                img.add_header('Content-Disposition', 'inline', filename='logo.png')
+                email.attach(img)
+
         for file in files:
             file_name = os.path.basename(str(file.file))
             file_stem = os.path.splitext(file_name)[0]
-            
             file_path = str(file.file)
 
             if os.path.exists(file_path):
@@ -2289,10 +2354,10 @@ class SendInvoiceEmailAPIView(APIView):
                                     "msg": "file not found on server",
                                 },
                                 status=status.HTTP_404_NOT_FOUND)
+        
         try:
             email.send()
-            file.is_sent = True
-            file.save()
+            files.update(is_sent=True)
             return Response({
                                 "code": 200,
                                 "msg": "Email sent successfully",
@@ -2321,9 +2386,9 @@ class TimeOfInvoice(APIView):
                 required=True
             ),
             openapi.Parameter(
-                'username',
+                'userid',
                 openapi.IN_QUERY,
-                description="用户Username（可选），如果不填默认是该用户",
+                description="用户id（可选），如果不填默认是该用户",
                 type=openapi.TYPE_STRING,
                 required=False
             )
@@ -2373,10 +2438,10 @@ class TimeOfInvoice(APIView):
     )
     def get(self, request):
         uuid = request.GET.get('uuid')
-        username = request.GET.get('username')
+        userid = request.GET.get('userid')
         name = request.user.name
-        if username:
-            user = User.objects.filter(username=username).first()
+        if userid:
+            user = User.objects.filter(id=userid).first()
             file = UpFile.objects.filter(userid=user.id, uuid=uuid).first()
             if user is None:
                 return JsonResponse({"code": 404, "msg": "user not found"}, status=status.HTTP_404_NOT_FOUND)
