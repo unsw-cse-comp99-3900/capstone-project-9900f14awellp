@@ -18,38 +18,48 @@ import CloseIcon from '@mui/icons-material/Close';
 import success from "../assets/success.png";
 
 const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
   width: 400,
-  bgcolor: "background.paper",
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
   boxShadow: 24,
   p: 4,
 };
 
-export const BasicModal = ({ title, description, children, open, onClose }) => {
+export const BasicModal = ({ title, open, onClose, children, actions }) => {
   return (
     <Modal
       open={open}
       onClose={onClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
-      
     >
-      <Box sx={style} style={{ borderRadius: '15px' }}>
-        <Typography id="modal-modal-title" variant="h6" component="h2">
-          {title}
-        </Typography>
-        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-          {description}
-        </Typography>
-        {children && <Box sx={{ mt: 2 }}>{children}</Box>}
+      <Box sx={style}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            {title}
+          </Typography>
+          <IconButton aria-label="close" onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Box sx={{ mt: 2 }}>
+          {children}
+        </Box>
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          {actions && actions.map((action, index) => (
+            <Button key={index} onClick={action.onClick}>
+              {action.label}
+            </Button>
+          ))}
+        </Box>
       </Box>
     </Modal>
   );
 };
-
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
   });

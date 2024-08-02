@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Badge, Descriptions } from "antd";
 import axios from "axios";
-import { ResponsiveAppBar } from "../components/Navbar";
 
 export default function CompanyDetails() {
   const [companyInfo, setCompanyInfo] = useState(null);
   const token = localStorage.getItem("token");
-
   useEffect(() => {
     const fetchCompanyInfo = async () => {
       try {

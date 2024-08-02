@@ -10,6 +10,7 @@ import FormDialog from "../components/Model";
 import loading from "../assets/loading.gif";
 import { CompanyInfo } from "@/apis/gui";
 import { useInvoice } from "@/Content/GuiContent";
+import { UserTextField } from "../components/Inputs";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -162,7 +163,7 @@ export default function Login() {
           </div>
         )}
         <h1 style={{ fontSize: "24px", marginBottom: "16px" }}>Login</h1>
-        <InputTextField
+        <UserTextField
           label="username"
           id="Login-username"
           dataTestId="Login-username"
