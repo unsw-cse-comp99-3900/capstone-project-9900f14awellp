@@ -794,7 +794,7 @@ export function AdminManagementTable() {
               </div>
             </div>
             <div className="statistics-amount">${topSupplier.total}</div>
-            <div className="statistics-tag">App Masters Ltd</div>
+            <div className="statistics-tag">{topSupplier.supplier}</div>
           </div>
         </ShineBorder>
       </div>
