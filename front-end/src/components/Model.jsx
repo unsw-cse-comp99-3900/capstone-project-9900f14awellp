@@ -146,7 +146,6 @@ export default function FormDialog({ onFormSubmit }) {
         onClose={handleClose}
         PaperProps={{
           component: "form",
-          component: "form",
           onSubmit: (event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
