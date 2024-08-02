@@ -68,6 +68,7 @@ export default function Choice() {
         console.log(error.message);
         setAlert({ severity: "error", message: error.message });
       });
+    window.location.reload();
     navigate("/create");
     setOpen(false);
   };
@@ -82,6 +83,8 @@ export default function Choice() {
 
   const handleSubmitCreateForm = () => {
     setOpenCreateForm(false);
+    localStorage.setItem("is_admin", true);
+    window.location.reload();
     navigate("/create");
   };
 

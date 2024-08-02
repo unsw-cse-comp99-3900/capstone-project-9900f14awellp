@@ -3,7 +3,7 @@ import { useInvoice } from "@/Content/GuiContent";
 import "./GuiPreview.css";
 import { Button } from "antd";
 import { FilePdfOutlined, CopyOutlined } from "@ant-design/icons";
-import { createDraft } from "@/apis/gui";
+import { createDraft, updateDraft } from "@/apis/gui";
 import { CustomAlert } from "@/components/Alert/MUIAlert";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +24,7 @@ export function GuiPreview() {
     setAlert({ ...alert, show: false });
   };
   const { invoiceData } = useInvoice();
+  const is_edit = invoiceData.editBefore;
   const navigate = useNavigate();
 
   const handleCreateDraft = async () => {
@@ -38,6 +39,25 @@ export function GuiPreview() {
     } catch (error) {
       console.error("Error creating draft:", error);
       showAlert("Error creating draft: " + error.message, "error");
+    }
+  };
+
+  const handleUpdateDraft = async () => {
+    try {
+      await updateDraft(invoiceData, invoiceData.draftId);
+      showAlert("Draft updated successfully!", "success");
+      navigate("/draft");
+    } catch (error) {
+      console.error("Error updating draft:", error);
+      showAlert("Error updating draft: " + error.message, "error");
+    }
+  };
+
+  const handleSaveDraft = () => {
+    if (is_edit) {
+      handleUpdateDraft();
+    } else {
+      handleCreateDraft();
     }
   };
 
@@ -69,7 +89,7 @@ export function GuiPreview() {
             size="large"
             icon={<CopyOutlined />}
             className="preview-gui-button"
-            onClick={handleCreateDraft}
+            onClick={handleSaveDraft}
           >
             Save as Draft
           </Button>

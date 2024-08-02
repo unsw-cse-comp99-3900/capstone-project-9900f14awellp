@@ -12,7 +12,7 @@ export function InvoiceProvider({ children }) {
     editBefore: false,
     //! draftId用来标识是哪个draft，从draft表格跳转过来的时候更新，
     //! 要在1. 使用patch来部分更新时使用；2. 保存为正式invoice时用来删除相应draft
-    dreaftId: "",
+    draftId: "",
     //TODO: 上面这两个字段需要从draft表格跳转过来的时候更新
     //TODO: 下面的所有字段,从draft表格跳转过来的时候, 用get /invoice-draft接口来获取后更新
     uuid: "",
@@ -67,7 +67,7 @@ export function InvoiceProvider({ children }) {
   const clearInvoiceData = () => {
     setInvoiceData((prevData) => ({
       editBefore: false,
-      dreaftId: "",
+      draftId: "",
       uuid: "",
       invoice_name: "",
       invoice_num: "",
