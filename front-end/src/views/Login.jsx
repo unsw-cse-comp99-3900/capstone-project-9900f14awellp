@@ -17,8 +17,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showIcon, setShowIcon] = useState(false);
   const [alert, setAlert] = useState(null); // 初始状态设置为null
-  const {updateInvoiceData} = useInvoice();
-
+  const { updateInvoiceData } = useInvoice();
 
   const updateCompanyInfo = (companyData) => {
     updateInvoiceData({
