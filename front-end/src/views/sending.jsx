@@ -14,6 +14,7 @@ import shipping from "../assets/shipping.gif";
 import OutlinedAlerts from "../components/Alert";
 import SparklesText from "@/components/SparklesText";
 
+
 export default function Sending() {
   const token = localStorage.getItem("token");
   const [showIcon, setShowIcon] = useState(false);
@@ -28,7 +29,13 @@ export default function Sending() {
   const [selectedInvoices, setSelectedInvoices] = useState([]);
   const [alert, setAlert] = useState(null); // 初始状态设置为null
   const { id } = useParams();
-  console.log(id);
+  if (id){
+    console.log(id);
+    const id_num = id.split('=')[1];
+    console.log(id_num);
+  }
+  
+
 
   const handleClear = () => {
     setFirstName("");
@@ -83,9 +90,12 @@ export default function Sending() {
   const handleSend = () => {
     const uuids = selectedInvoices.map((invoice) => invoiceUuidMap[invoice]);
     const fullMessage = `Dear ${firstName} ${lastName}: \n${message}`;
-    if (!uuids) {
+    if (!uuids||!id_num) {
       setAlert({ severity: "warning", message: "Please select an invoice" });
       return;
+    }
+    if (id_num&& (passedFiles.includes(id_num) || failedFiles.includes(id_num) || unvalidatedFiles.includes(id_num))) {
+      setSelectedInvoices(id_num);
     }
     setShowIcon(true);
     console.log(uuids.join(","), email, fullMessage);
@@ -95,7 +105,7 @@ export default function Sending() {
         { message: fullMessage },
         {
           params: {
-            uuids: uuids.join(","),
+            uuids: uuids.join(",")||id_num,
             email: email,
           },
           headers: {
@@ -179,17 +189,6 @@ export default function Sending() {
         <div
           style={{ margin: "50px", overflow: "auto", height: "calc(450px)" }}
         >
-          {/* <h1
-            style={{
-              fontSize: "45px",
-              marginBottom: "50px",
-              fontWeight: "600",
-              fontFamily: "Lexend Deca",
-              color: "#333",
-            }}
-          >
-            Choice Invoice
-          </h1> */}
           <SparklesText
           style={{ textAlign: 'left', fontSize: '3.5rem' }} 
           text=" Choice Invoice"
@@ -205,17 +204,6 @@ export default function Sending() {
         </div>
         <Divider orientation="vertical" variant="middle" flexItem />
         <div style={{ margin: "50px" }}>
-          {/* <h1
-            style={{
-              fontSize: "45px",
-              marginBottom: "50px",
-              fontWeight: "600",
-              fontFamily: "Lexend Deca",
-              color: "#333",
-            }}
-          >
-            Sending To
-          </h1> */}
           <SparklesText
           style={{ textAlign: 'left', fontSize: '3.5rem' }} 
           text=" Sending To"

@@ -36,6 +36,8 @@ export default function Validation() {
   const [alert, setAlert] = useState(null);
   const [validatedStatus, setValidatedStatus] = useState(null);
   const [open, setOpen] = useState(false);
+  // const { id } = useParams();
+  // const id_num = null;
 
   const handleListClick = (listName) => {
     setOpenList((prev) => ({

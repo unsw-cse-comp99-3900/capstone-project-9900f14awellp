@@ -53,7 +53,7 @@ export default function Dashboard() {
         setUnvalidated(response.data.unvalidated_files);
         setTotalTime(response.data.total_invoice_timebase);
         setSentTime(response.data.send_invoice_timebase);
-        setAlert({ severity: 'success', message: 'upload successfully' });
+        // setAlert({ severity: 'success', message: 'upload successfully' });
     })
     .catch(error => {
         console.log(error.message);
