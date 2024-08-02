@@ -1,11 +1,11 @@
-// import React from "react";
+import React from "react";
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, test, expect, beforeAll, afterAll, vi } from 'vitest';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import Login from '../views/Login';
 import Register from "@/views/Register";
 import { render_page, register_testaccount, exec_async } from "./test_functions";
-import React, { createContext, useState, useContext, useEffect } from "react";
+import { InvoiceProvider } from "@/Content/GuiContent";
 
 describe('Login page unit tests', () => {
   // headline login
@@ -132,10 +132,10 @@ describe('page element functional tests', () => {
   test('navigate to register page link working', () => {
     render(
       <MemoryRouter initialEntries={['/login']}>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Routes>
+        <InvoiceProvider>
+          <Login />
+          <Register />
+        </InvoiceProvider>
     </MemoryRouter>
     );
 
@@ -196,57 +196,76 @@ describe('Login page UI tests', () => {
       
       const username_parent = screen.getByTestId("Login-username");
       const username_field = username_parent.querySelector("#Login-username")
-      fireEvent.change(username_field, { value: "test-user"});
+      fireEvent.change(username_field, { target: { value: "test-user-3" }});
 
       const password_parent = screen.getByTestId("Login-password");
       const password_field = password_parent.querySelector("#Login-password")
-      fireEvent.change(password_field, { value: "123456" });
+      fireEvent.change(password_field, { target: { value: "123456" } });
 
       fireEvent.click(screen.getByRole('button', {name: "Login"}));
 
       await waitFor(() => {
-        expect(screen.getByText('Login failed')).toBeInTheDocument();
+        expect(screen.getByText('User not exists or password is wrong, please check your input.')).toBeInTheDocument();
       });
     });
 
-    // test('login account that has registered', async () => {
-    //   // register account
-    //   register_testaccount();
+    test('login account that has registered', async () => {
+      // render(
+      //   <MemoryRouter initialEntries={['/register']}>
+      //     <InvoiceProvider>
+      //       <Register />
+      //       <Login />
+      //     </InvoiceProvider>
+      //   </MemoryRouter>
+      // );
+      render_page(Register, 'register');
 
-    //   render_page(Login, 'login');
+      await exec_async('python3 src/__tests__/sqlite3_read_script.py test-user-1');
+      // get username input field
+      const username_parent = screen.getByTestId("Register-Username");
+      const username_field = username_parent.querySelector('#Register-Username');
+      // get email input field
+      const email_parent = screen.getByTestId("Register-Email");
+      const email_field = email_parent.querySelector('#Register-Email');
+      // get name input field
+      const name_parent = screen.getByTestId("Register-Name");
+      const name_field = name_parent.querySelector('#Register-Name');
+      // get password input field
+      const password_parent_P = screen.getByTestId("Register-password");
+      const password_field_P = password_parent_P.querySelector('#Register-password');
+      // get confirm password input field
+      const password_parent_CP = screen.getByTestId("Register-confirm-password");
+      const password_field_CP = password_parent_CP.querySelector('#Register-confirm-password');
       
-    //   const username_p = screen.getByTestId("Login-username");
-    //   const username_f = username_p.querySelector("#Login-username")
-    //   fireEvent.change(username_f, { value: "test-user"});
+      fireEvent.change(username_field, { target: { value: "test-user-1" } });
+      fireEvent.change(email_field, { target: { value: "test-email-1@gmail.com" } });
+      fireEvent.change(name_field, { target: { value: 'test-name' } });
+      fireEvent.change(password_field_P, { target: { value: '123456' } });
+      fireEvent.change(password_field_CP, { target: { value: '123456' } });
+
+      fireEvent.click(screen.getByTestId("Sign-up-btn"));
+
+      await waitFor(() => {
+        expect(screen.getByText('Register successfully!')).toBeInTheDocument();
+      });
+
+      render_page(Login, 'login');
+
+      const username_p = screen.getByTestId("Login-username");
+      const username_f = username_p.querySelector("#Login-username")
+      fireEvent.change(username_f, { target: { value: "test-user-1" } });
       
-    //   const password_p = screen.getByTestId("Login-password");
-    //   const password_f = password_p.querySelector("#Login-password")
-    //   fireEvent.change(password_f, { value: "123456" });
+      const password_p = screen.getByTestId("Login-password");
+      const password_f = password_p.querySelector("#Login-password")
+      fireEvent.change(password_f, { target: { value: "123456" } });
 
-    //   fireEvent.click(screen.getByRole('button', {name: "Login"}));
+      fireEvent.click(screen.getByRole('button', {name: "Login"}));
 
-    //   await waitFor(() => {
-    //     expect(screen.getByText('Login successfully!')).toBeInTheDocument();
-    //   });
-    //   await exec_async('python3 src/__tests__/sqlite3_read_script.py');
-    // });
+      await waitFor(() => {
+        expect(screen.getByText('Login successfully!')).toBeInTheDocument();
+      });
+      await exec_async('python3 src/__tests__/sqlite3_read_script.py test-user-1');
+    });
 
   });
 });
-
-
-    // register_testaccount();  
-  // test('only type in username', async () => {
-  //   // register a test user first using
-  //   render_page(Login, 'login');
-
-  //   const username_parent = screen.getByTestId("Login-username");
-  //   const username_field = username_parent.querySelector("#Login-username")
-
-  //   fireEvent.change(username_field, { value: "test-user"});
-  //   fireEvent.click(screen.getByRole('button', {name: "Login"}));
-
-  //   await waitFor(() => {
-  //     expect(screen.getByText(/Login failed/i)).toBeInTheDocument();
-  //   });
-  // });
