@@ -95,16 +95,16 @@ class InvoiceUpfileSerializer(serializers.ModelSerializer):
     
     def get_supplier(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', {}).get('company_invoiced', "")
+        nested_form_data = data.get('form_data', {}).get('company_invoiced', {})
         if not nested_form_data:
             nested_form_data = data.get('client_company_name', "")
         return nested_form_data
     
     def get_total(self, obj):
         data = self.get_file_data(obj)
-        nested_form_data = data.get('form_data', "").get('total', "")
+        nested_form_data = data.get('form_data', {}).get('total', {})
         if not nested_form_data:
-            nested_form_data = data.get('total_amount', "")
+            nested_form_data = data.get('total_amount', {})
         return nested_form_data
     
     def get_state(self, obj):
@@ -224,6 +224,8 @@ class DraftGUISerializer(serializers.ModelSerializer):
     invoice_num = serializers.CharField(required=True)
     userid = serializers.PrimaryKeyRelatedField(read_only=True)  # 设置为只读
     orders = OrderSerializer(many=True,required=False)
+    issue_date = serializers.DateField(required=False,allow_null=True)
+    due_date = serializers.DateField(required=False,allow_null=True)
     class Meta:
         # 使用draft而不是model
         model = Draft
@@ -260,6 +262,17 @@ class DraftGUISerializer(serializers.ModelSerializer):
             "orders"
         ]
 
+    def validate_issue_date(self, value):
+        if value == "":
+            return None
+        return value
+    
+    def validate_due_date(self, value):
+        if value == "":
+            return None
+        return value
+    
+    
     def create(self, validated_data):
         orders_data = validated_data.pop('orders', [])  # 如果 orders 不存在，设置为空列表
         guifile = Draft.objects.create(**validated_data)

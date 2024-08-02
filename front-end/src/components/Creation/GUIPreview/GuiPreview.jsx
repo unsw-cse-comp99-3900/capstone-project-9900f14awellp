@@ -29,7 +29,7 @@ export function GuiPreview() {
   const handleCreateDraft = async () => {
     try {
       if (invoiceData.uuid === "") {
-        const uuid = uuidv4().substring(0, 30);
+        const uuid = uuidv4().substring(0, 28);
         invoiceData.uuid = uuid;
       }
       await createDraft(invoiceData);
@@ -48,9 +48,7 @@ export function GuiPreview() {
         <div className="preview-product-quantity">{order.quantity}</div>
         <div className="preview-product-unit-price">${order.unitPrice}</div>
         <div className="preview-product-gst">{order.gst}%</div>
-        <div className="preview-product-total-price">
-          ${order.totalPrice.toFixed(2)}
-        </div>
+        <div className="preview-product-total-price">${order.totalPrice}</div>
       </div>
     ));
   };

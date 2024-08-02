@@ -82,12 +82,12 @@ class UpFile(models.Model):
         unique_together = ('userid', 'file')
 
 class Order(models.Model):
-    description = models.CharField(max_length=255,default="")
-    unit_price = models.CharField(max_length=20,default="")
-    quantity = models.IntegerField(default=0)
-    net = models.CharField(max_length=20,default="")
-    gst = models.CharField(max_length=10,default="")
-    amount = models.CharField(max_length=20,default="")
+    description = models.CharField(max_length=255,default="",null=True, blank=True)
+    unit_price = models.CharField(max_length=20,default="",null=True, blank=True)
+    quantity = models.IntegerField(default=0,null=True, blank=True)
+    net = models.CharField(max_length=20,default="",null=True, blank=True)
+    gst = models.CharField(max_length=10,default="",null=True, blank=True)
+    amount = models.CharField(max_length=20,default="",null=True, blank=True)
 
     def __str__(self):
         return self.description
@@ -103,35 +103,35 @@ class Order(models.Model):
       
 # 保存draft记录  
 class Draft(models.Model):
-    invoice_name = models.CharField(max_length=30,default="")
-    uuid = models.CharField(max_length=30,default="")
-    invoice_num = models.CharField(max_length=20,unique=True)
-    my_company_name = models.CharField(max_length=255,default="")
-    my_address = models.CharField(max_length=255,default="")
-    my_abn = models.CharField(max_length=20,default="")
-    my_email = models.EmailField(default="")
+    invoice_name = models.CharField(max_length=30,default="",null=True, blank=True)
+    uuid = models.CharField(max_length=30,default="",null=True, blank=True)
+    invoice_num = models.CharField(max_length=20,unique=True,null=True, blank=True)
+    my_company_name = models.CharField(max_length=255,default="",null=True, blank=True)
+    my_address = models.CharField(max_length=255,default="",null=True, blank=True)
+    my_abn = models.CharField(max_length=20,default="",null=True, blank=True)
+    my_email = models.EmailField(default="",null=True, blank=True)
     
-    client_company_name = models.CharField(max_length=100,default="")
-    client_address = models.CharField(max_length=100,default="")
-    client_abn = models.CharField(max_length=100,default="")
-    client_email = models.EmailField(default="")
+    client_company_name = models.CharField(max_length=100,default="",null=True, blank=True)
+    client_address = models.CharField(max_length=100,default="",null=True, blank=True)
+    client_abn = models.CharField(max_length=100,default="",null=True, blank=True)
+    client_email = models.EmailField(default="",null=True, blank=True)
     
-    bank_name = models.CharField(max_length=255,default="")
-    currency = models.CharField(max_length=255,default="")
-    account_num = models.CharField(max_length=20,default="")
-    bsb_num = models.CharField(max_length=20,default="")
-    account_name = models.CharField(max_length=255,default="")
+    bank_name = models.CharField(max_length=255,default="",null=True, blank=True)
+    currency = models.CharField(max_length=255,default="",null=True, blank=True)
+    account_num = models.CharField(max_length=20,default="",null=True, blank=True)
+    bsb_num = models.CharField(max_length=20,default="",null=True, blank=True)
+    account_name = models.CharField(max_length=255,default="",null=True, blank=True)
     
-    issue_date = models.DateField(blank=True, null=True)
-    due_date = models.DateField(blank=True, null=True)
+    issue_date = models.DateField(default=None,blank=True, null=True)
+    due_date = models.DateField(default=None,blank=True, null=True)
     
 
-    subtotal = models.CharField(max_length=20,default="")
-    gst_total = models.CharField(max_length=20,default="")
-    total_amount = models.CharField(max_length=20,default="")
-    note = models.TextField(default="")
+    subtotal = models.CharField(max_length=20,default="",null=True, blank=True)
+    gst_total = models.CharField(max_length=20,default="",null=True, blank=True)
+    total_amount = models.CharField(max_length=20,default="",null=True, blank=True)
+    note = models.TextField(default="",null=True, blank=True)
 
-    orders = models.ManyToManyField(Order)
+    orders = models.ManyToManyField(Order,null=True, blank=True)
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFileDraf",null=True, blank=True)
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
     update_date = models.DateTimeField(auto_now=True, verbose_name='Update Date')
@@ -195,4 +195,3 @@ class GUIFile(models.Model):
             self.total_amount = f"\u0024{self.total_amount}"         
  
         super().save(*args, **kwargs)
-

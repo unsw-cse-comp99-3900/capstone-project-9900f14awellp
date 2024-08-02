@@ -14,7 +14,6 @@ import shipping from "../assets/shipping.gif";
 import OutlinedAlerts from "../components/Alert";
 import SparklesText from "@/components/SparklesText";
 
-
 export default function Sending() {
   const token = localStorage.getItem("token");
   const [showIcon, setShowIcon] = useState(false);
@@ -28,14 +27,8 @@ export default function Sending() {
   const [invoiceUuidMap, setInvoiceUuidMap] = useState({});
   const [selectedInvoices, setSelectedInvoices] = useState([]);
   const [alert, setAlert] = useState(null); // 初始状态设置为null
-  const { id } = useParams();
-  if (id){
-    console.log(id);
-    const id_num = id.split('=')[1];
-    console.log(id_num);
-  }
-  
-
+  // const { id } = useParams();
+  // let id_num = null;
 
   const handleClear = () => {
     setFirstName("");
@@ -90,13 +83,12 @@ export default function Sending() {
   const handleSend = () => {
     const uuids = selectedInvoices.map((invoice) => invoiceUuidMap[invoice]);
     const fullMessage = `Dear ${firstName} ${lastName}: \n${message}`;
-    if (!uuids||!id_num) {
+
+    if (!uuids) {
       setAlert({ severity: "warning", message: "Please select an invoice" });
       return;
     }
-    if (id_num&& (passedFiles.includes(id_num) || failedFiles.includes(id_num) || unvalidatedFiles.includes(id_num))) {
-      setSelectedInvoices(id_num);
-    }
+
     setShowIcon(true);
     console.log(uuids.join(","), email, fullMessage);
     axios
@@ -105,7 +97,7 @@ export default function Sending() {
         { message: fullMessage },
         {
           params: {
-            uuids: uuids.join(",")||id_num,
+            uuids: uuids.join(",") || id_num,
             email: email,
           },
           headers: {
@@ -190,10 +182,10 @@ export default function Sending() {
           style={{ margin: "50px", overflow: "auto", height: "calc(450px)" }}
         >
           <SparklesText
-          style={{ textAlign: 'left', fontSize: '3.5rem' }} 
-          text=" Choice Invoice"
-          className="Choice-Invoice-title"
-        />
+            style={{ textAlign: "left", fontSize: "3.5rem" }}
+            text=" Choice Invoice"
+            className="Choice-Invoice-title"
+          />
           <NestedList
             passedList={passedList}
             failedList={failedList}
@@ -205,10 +197,10 @@ export default function Sending() {
         <Divider orientation="vertical" variant="middle" flexItem />
         <div style={{ margin: "50px" }}>
           <SparklesText
-          style={{ textAlign: 'left', fontSize: '3.5rem' }} 
-          text=" Sending To"
-          className="Sending-To-title"
-        />
+            style={{ textAlign: "left", fontSize: "3.5rem" }}
+            text=" Sending To"
+            className="Sending-To-title"
+          />
           <div
             style={{
               display: "flex",

@@ -68,7 +68,7 @@ export default function Choice() {
         console.log(error.message);
         setAlert({ severity: "error", message: error.message });
       });
-    navigate("/home");
+    navigate("/create");
     setOpen(false);
   };
 
@@ -82,7 +82,7 @@ export default function Choice() {
 
   const handleSubmitCreateForm = () => {
     setOpenCreateForm(false);
-    navigate("/home");
+    navigate("/create");
   };
 
   const [formData, setFormData] = useState({

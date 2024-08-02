@@ -221,9 +221,9 @@ export function GuiTable() {
     });
 
     updateInvoiceData({
-      subtotal: subtotal.toFixed(2),
-      gst_total: gstTotal.toFixed(2),
-      total_amount: totalAmount.toFixed(2),
+      subtotal: subtotal,
+      gst_total: gstTotal,
+      total_amount: totalAmount,
     });
   };
 
@@ -342,7 +342,7 @@ export function GuiTable() {
       }),
       render: (_, record) => {
         const total = calculateTotalPrice(record);
-        return `$${total.toFixed(2)}`;
+        return `$${total}`;
       },
     },
     {

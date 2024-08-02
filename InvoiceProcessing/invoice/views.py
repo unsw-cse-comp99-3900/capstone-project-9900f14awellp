@@ -1282,9 +1282,9 @@ class GUIFileDraft(APIView):
         )
     def post(self,request):
         file_serializer = DraftGUISerializer(data=request.data)
+        
         if file_serializer.is_valid():
             file_serializer.validated_data['userid'] = request.user
-            
             # draft不需要考虑数据完整性，直接创建 或者 更新，通过id作区分
             # 创建和更新的逻辑？
             try: 
