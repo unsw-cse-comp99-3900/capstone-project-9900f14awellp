@@ -1611,7 +1611,7 @@ class FileReport(APIView):
                             },
                             status=status.HTTP_400_BAD_REQUEST)
         
-        file = UpFile.objects.filter(userid=request.user.id, uuid=fileid).first()
+        file = UpFile.objects.filter(uuid=fileid).first()
         if not file:
             return Response({
                                 "code": 404,
