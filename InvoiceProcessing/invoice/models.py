@@ -104,7 +104,7 @@ class Order(models.Model):
 # 保存draft记录  
 class Draft(models.Model):
     invoice_name = models.CharField(max_length=30,default="",null=True, blank=True)
-    uuid = models.CharField(max_length=30,default="",null=True, blank=True)
+    uuid = models.CharField(max_length=100,default="",null=True, blank=True)
     invoice_num = models.CharField(max_length=20,unique=True,null=True, blank=True)
     my_company_name = models.CharField(max_length=255,default="",null=True, blank=True)
     my_address = models.CharField(max_length=255,default="",null=True, blank=True)

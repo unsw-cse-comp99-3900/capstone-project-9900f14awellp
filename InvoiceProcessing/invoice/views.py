@@ -1281,9 +1281,11 @@ class GUIFileDraft(APIView):
             )
         )
     def post(self,request):
+        print(f"{request.data.get('due_date')}   *************") 
         file_serializer = DraftGUISerializer(data=request.data)
-        
+
         if file_serializer.is_valid():
+            print(f"{request.data.get('due_date')}   *************") 
             file_serializer.validated_data['userid'] = request.user
             # draft不需要考虑数据完整性，直接创建 或者 更新，通过id作区分
             # 创建和更新的逻辑？
@@ -1881,18 +1883,18 @@ class FileNumber(APIView):
         }
     )
     def get(self,request):
-        total_files = UpFile.objects.all().count()
-        unvalidated_files = UpFile.objects.filter(is_validated=0).count()
-        successful_files = UpFile.objects.filter(is_validated=1,is_correct=1).count()
-        failed_files = UpFile.objects.filter(is_validated=1,is_correct=0).count()
+        total_files = UpFile.objects.filter(userid=request.user).count()
+        unvalidated_files = UpFile.objects.filter(is_validated=0,userid=request.user).count()
+        successful_files = UpFile.objects.filter(is_validated=1,is_correct=1,userid=request.user).count()
+        failed_files = UpFile.objects.filter(is_validated=1,is_correct=0,userid=request.user).count()
         
-        sent_invoice_counts = UpFile.objects.filter(is_sent=1).annotate(date=TruncDate('create_date')).values('date').annotate(count=Count('id')).order_by('date')
+        sent_invoice_counts = UpFile.objects.filter(is_sent=1,userid=request.user).annotate(date=TruncDate('create_date')).values('date').annotate(count=Count('id')).order_by('date')
         sent_invoice_timebase = [
             {"create_date": item['date'], "count": item['count']}
             for item in sent_invoice_counts
         ]
         
-        invoice_counts = UpFile.objects.annotate(date=TruncDate('create_date')).values('date').annotate(count=Count('id')).order_by('date')
+        invoice_counts = UpFile.objects.filter(userid=request.user).annotate(date=TruncDate('create_date')).values('date').annotate(count=Count('id')).order_by('date')
         total_invoice_timebase = [
             {"create_date": item['date'], "count": item['count']}
             for item in invoice_counts

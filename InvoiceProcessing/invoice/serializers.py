@@ -261,17 +261,12 @@ class DraftGUISerializer(serializers.ModelSerializer):
             # "items",  # 模型中无对应字段
             "orders"
         ]
-
-    def validate_issue_date(self, value):
-        if value == "":
-            return None
-        return value
-    
-    def validate_due_date(self, value):
-        if value == "":
-            return None
-        return value
-    
+    def to_internal_value(self, data):
+        if data.get('issue_date') == "":
+            data['issue_date'] = None
+        if data.get('due_date') == "":
+            data['due_date'] = None
+        return super().to_internal_value(data)
     
     def create(self, validated_data):
         orders_data = validated_data.pop('orders', [])  # 如果 orders 不存在，设置为空列表
