@@ -1612,6 +1612,11 @@ class FileReport(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
         
         file = UpFile.objects.filter(uuid=fileid).first()
+        
+        file_stem = os.path.splitext(str(file.file))[0]
+        
+        file_path = f"{file_stem}_report.json"
+        
         if not file:
             return Response({
                                 "code": 404,
@@ -1627,10 +1632,9 @@ class FileReport(APIView):
                             status=status.HTTP_400_BAD_REQUEST
                             )
             
-        file_name = os.path.basename(str(file.file))
-        file_stem = os.path.splitext(file_name)[0]
+
         
-        file_path = f"staticfiles/{request.user.id}/{file_stem}_report.json"
+
         try:
             with open(file_path, 'r', encoding='utf-8') as file:
                 file_data = json.load(file)
