@@ -11,3 +11,4 @@ exec_cursor.execute('delete from invoice_user where username="test-user";')
 
 sql_connection.commit()
 sql_connection.close()
+
