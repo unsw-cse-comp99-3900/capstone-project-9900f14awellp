@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
-import { ResponsiveAppBar } from "../components/Navbar";
-import OutlinedAlerts from "../components/Alert";
-import SparklesText from "@/components/SparklesText";
-import { DashboardCard } from "@/components/CardBorder";
-import PieActiveArc from "@/components/Pie";
-import SimpleLineChart from "@/components/SimpleLineChart";
-import { Card, CardContent, Typography } from "@mui/material";
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import OutlinedAlerts from '../components/Alert';
+import SparklesText from '@/components/SparklesText';
+import { DashboardCard } from '@/components/CardBorder';
+import PieActiveArc from '@/components/Pie';
+import SimpleLineChart from '@/components/SimpleLineChart';
+import { Card, CardContent, Typography } from '@mui/material';
 
 export default function Dashboard() {
   const token = localStorage.getItem("token");
@@ -62,9 +61,9 @@ export default function Dashboard() {
         setUnvalidated(response.data.unvalidated_files);
         setTotalTime(response.data.total_invoice_timebase);
         setSentTime(response.data.send_invoice_timebase);
-        setAlert({ severity: "success", message: "upload successfully" });
-      })
-      .catch((error) => {
+        // setAlert({ severity: 'success', message: 'upload successfully' });
+    })
+    .catch(error => {
         console.log(error.message);
         setAlert({ severity: "error", message: error.message });
       });
@@ -74,24 +73,81 @@ export default function Dashboard() {
     fetchNumData();
   }, [fetchNumData]);
 
-  return (
-    <div className="full-page">
-      {alert && (
-        <div
-          style={{
-            position: "fixed",
-            top: "11vh",
-            right: 10,
-            width: "30%",
-            zIndex: 9999,
-          }}
-        >
-          <OutlinedAlerts
-            severity={alert.severity}
-            onClose={() => setAlert(null)}
-          >
-            {alert.message}
-          </OutlinedAlerts>
+    return (
+        <div style={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center'
+          }}>
+            {alert && (
+              <div style={{
+                  position: 'fixed',
+                  top: '11vh',
+                  right: 10,
+                  width: '30%',
+                  zIndex: 9999
+              }}>
+                  <OutlinedAlerts severity={alert.severity} onClose={() => setAlert(null)}>
+                      {alert.message}
+                  </OutlinedAlerts>
+              </div>
+              )}
+              <div>
+              <div className="container mx-auto p-7"style={{
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'row',
+              }}>
+                <SparklesText
+                  text="Hi, Welcome Back!"
+                  colors={{ first: "#FFD700", second: "#FF4500" }}
+                  className="my-custom-class"
+                  sparklesCount={8}
+                  style={{ textAlign: 'left', fontSize: '2rem' }} // 直接在style中设置
+                />
+              </div>
+              <div style={{
+                  margin: '10px',
+                  width: '90%',
+                  padding: '10px',             
+              }}>
+              <DashboardCard
+                total={total}
+                success={success}
+                fail={fail}
+                unvalidated={unvalidated}
+              ></DashboardCard>
+ 
+              <div style={{ display: 'flex', gap: '20px', marginTop:'30px' }}>
+                <Card style={{ width: '50%', padding: '20px' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      NUMBERS
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      Total invoices and sent invoices
+                    </Typography>
+                    <SimpleLineChart 
+                xLabels={xLabels}
+                aLine={totalInvoiceCounts}
+                bLIne={sendInvoiceCounts}
+                />
+                  </CardContent>
+                </Card>
+                <Card style={{ width: '50%', padding: '20px' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Current Numbers
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      Hover your mouse
+                    </Typography>
+                    <PieActiveArc data={data} />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>  
+              </div>
         </div>
       )}
       <div

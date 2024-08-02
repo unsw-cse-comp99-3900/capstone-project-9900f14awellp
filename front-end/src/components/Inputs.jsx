@@ -11,14 +11,7 @@ import FormControl from "@mui/material/FormControl";
 import { alpha, styled } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 
-export const UserTextField = ({
-  id,
-  label,
-  helperText,
-  value,
-  onChange,
-  ...props
-}) => {
+export const UserTextField = ({ label, id, variant, value, onChange, dataTestId }) => {
   return (
     <Box
       component="form"
@@ -30,13 +23,14 @@ export const UserTextField = ({
     >
       <div>
         <TextField
-          required
+          fullWidth
           id={id}
+          data-testid={dataTestId}
           label={label}
+          variant={variant}
           value={value}
           onChange={onChange}
-          helperText={helperText}
-          {...props}
+          margin="normal"
         />
       </div>
     </Box>

@@ -6,6 +6,7 @@ import { UnderlineLink} from '../components/Link';
 import { AlertDialogSlide } from '../components/Model';
 import axios from 'axios';
 import OutlinedAlerts from '../components/Alert';
+import { UserTextField } from "../components/Inputs";
 
 export default function Register() {
     const [username, setUsername] = useState('');
@@ -81,7 +82,7 @@ export default function Register() {
                     </div>
                 )}
                 <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Create an account</h1>
-                <InputTextField 
+                <UserTextField 
                 label="Username" 
                 id="Register-Username" 
                 dataTestId="Register-Username" 
@@ -89,7 +90,7 @@ export default function Register() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}  
                 />
-                <InputTextField 
+                <UserTextField 
                 label="Email" 
                 id="Register-Email" 
                 dataTestId="Register-Email" 
@@ -97,7 +98,7 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}  
                 />
-                <InputTextField 
+                <UserTextField 
                 label="Name" 
                 id="Register-Name"
                 dataTestId="Register-Name"

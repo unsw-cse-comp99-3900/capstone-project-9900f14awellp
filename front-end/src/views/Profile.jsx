@@ -137,8 +137,8 @@ export default function Profile() {
     }
   };
 
-  const getAvatarUrl = (avatarPath) => {
-    if (!avatarPath || typeof avatarPath !== "string")
+  const getAvatarUrl = (avatarPath) =>{
+    if ( !avatarPath || typeof avatarPath !== "string") 
       return "https://via.placeholder.com/150";
     return `${import.meta.env.VITE_API_URL}${avatarPath}`;
   };
@@ -146,10 +146,9 @@ export default function Profile() {
   return (
     <div>
       {alert && (
-        <div
-          style={{
-            position: "fixed",
-            top: "11vh",
+      <div style={{
+          position: 'fixed',
+          top: '11vh',
             right: 10,
             width: "30%",
             zIndex: 9999,
@@ -222,7 +221,6 @@ export default function Profile() {
                   />
                   <label htmlFor="avatar-upload">
                     {/* <Avatar
-
                       src={
                         profileData.avatar || "https://via.placeholder.com/150"
                       }
@@ -232,7 +230,6 @@ export default function Profile() {
                         cursor: isEditing ? "pointer" : "default",
                       }}
                       component={isEditing ? "span" : "div"}
-
                     /> */}
                     <Avatar
                       src={getAvatarUrl(profileData.avatar)}
