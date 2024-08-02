@@ -92,13 +92,13 @@ class Order(models.Model):
     def __str__(self):
         return self.description
     def save(self, *args, **kwargs): 
-        if not self.unit_price.startswith('$'):
+        if self.unit_price and not self.unit_price.startswith('$'):
             self.unit_price = f"\u0024{self.unit_price}" 
-        if not self.net.startswith('$'):
+        if self.net and not self.net.startswith('$'):
             self.net = f"\u0024{self.net}"   
-        if not self.amount.startswith('$'):
+        if self.amount and not self.amount.startswith('$'):
             self.amount = f"\u0024{self.amount}" 
-               
+            
         super().save(*args, **kwargs)
       
 # 保存draft记录  
