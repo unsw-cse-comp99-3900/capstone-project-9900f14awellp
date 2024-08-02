@@ -1631,17 +1631,22 @@ class FileReport(APIView):
         file_stem = os.path.splitext(file_name)[0]
         
         file_path = f"staticfiles/{request.user.id}/{file_stem}_report.json"
-        if not os.path.isfile(file_path):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                file_data = json.load(file)
+        except Exception as e:
             return Response({
-                                "code": 404,
-                                "msg": "Report file not found",
+                                "code": 500,
+                                "msg": f"Failed to read report file: {str(e)}",
                             },
-                            status=status.HTTP_404_NOT_FOUND
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR
                             )
+            
+
         return Response({
                             "code": 200,
                             "msg": "success",
-                            "data": file_path
+                            "data": file_data
                         },
                         status=status.HTTP_200_OK
                         )
