@@ -33,14 +33,50 @@ export function GuiForm() {
   const [myEmailError, setMyEmailError] = useState("");
   const [clientEmailError, setClientEmailError] = useState("");
 
+  const [myABNError, setMyABNError] = useState("");
+  const [clientABNError, setClientABNError] = useState("");
+
   const validateEmail = (email) => {
     const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return re.test(String(email).toLowerCase());
   };
 
+  const validateABN = (abn) => {
+    // 允许数字之间有0到多个空格，总共11个数字
+    const re = /^\d(?:\s*\d){10}$/;
+
+    // 移除所有空格
+    const cleanedAbn = abn.replace(/\s+/g, "");
+
+    // 检查格式是否正确且清理后的ABN长度为11
+    if (!re.test(abn) || cleanedAbn.length !== 11) {
+      return false;
+    } else {
+      return true;
+    }
+
+    // ABN 校验算法
+    // const weights = [10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
+    // let sum = 0;
+
+    // for (let i = 0; i < 11; i++) {
+    //   sum += (parseInt(cleanedAbn[i]) - (i === 0 ? 1 : 0)) * weights[i];
+    // }
+
+    // return sum % 89 === 0;
+  };
+
   const handleEmailBlur = (field, value, setError) => {
     if (!validateEmail(value)) {
       setError("Please enter a valid email address");
+    } else {
+      setError("");
+    }
+  };
+
+  const handleABNBlur = (field, value, setError) => {
+    if (!validateABN(value)) {
+      setError("Please enter a 11-digital ABN");
     } else {
       setError("");
     }
@@ -142,12 +178,20 @@ export function GuiForm() {
 
           <div className="title-and-input">
             <div>ABN*</div>
-            <Input
-              size="large"
-              placeholder="ABN"
-              value={invoiceData.my_ABN}
-              onChange={(e) => handleInputChange("my_ABN", e.target.value)}
-            />
+            <Form.Item
+              validateStatus={myABNError ? "error" : ""}
+              help={myABNError}
+            >
+              <Input
+                size="large"
+                placeholder="ABN"
+                value={invoiceData.my_ABN}
+                onChange={(e) => handleInputChange("my_ABN", e.target.value)}
+                onBlur={(e) =>
+                  handleABNBlur("my_ABN", e.target.value, setMyABNError)
+                }
+              />
+            </Form.Item>
           </div>
 
           <div className="title-and-input">
@@ -197,12 +241,22 @@ export function GuiForm() {
 
           <div className="title-and-input">
             <div>ABN*</div>
-            <Input
-              size="large"
-              placeholder="ABN"
-              value={invoiceData.client_ABN}
-              onChange={(e) => handleInputChange("client_ABN", e.target.value)}
-            />
+            <Form.Item
+              validateStatus={clientABNError ? "error" : ""}
+              help={clientABNError}
+            >
+              <Input
+                size="large"
+                placeholder="ABN"
+                value={invoiceData.client_ABN}
+                onChange={(e) =>
+                  handleInputChange("client_ABN", e.target.value)
+                }
+                onBlur={(e) =>
+                  handleABNBlur("client_ABN", e.target.value, setMyABNError)
+                }
+              />
+            </Form.Item>
           </div>
 
           <div className="title-and-input">
