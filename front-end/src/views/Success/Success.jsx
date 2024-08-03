@@ -18,31 +18,31 @@ export default function Success() {
 
   useEffect(() => {
     const end = Date.now() + 3 * 1000; // 3 seconds
-    const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
+    const colors = ["#9DBEA1", "#E3A4A2", "#eca184", "#f8deb1"];
 
     const frame = () => {
       if (Date.now() > end) return;
 
       confetti({
-        particleCount: 5,
+        particleCount: 3,
         angle: 30,
         spread: 150,
         origin: { x: 0, y: 0.6 },
         colors: colors,
         scalar: 1.7, // 增加粒子大小
         gravity: 0.8, // 减小重力效果，让粒子飘得更远
-        ticks: 350, // 增加粒子的生命周期
+        ticks: 230, // 增加粒子的生命周期
       });
 
       confetti({
-        particleCount: 5,
+        particleCount: 3,
         angle: 150,
         spread: 150,
         origin: { x: 1, y: 0.5 },
         colors: colors,
         scalar: 1.7, // 增加粒子大小
         gravity: 0.8, // 减小重力效果，让粒子飘得更远
-        ticks: 350, // 增加粒子的生命周期
+        ticks: 230, // 增加粒子的生命周期
       });
 
       requestAnimationFrame(frame);

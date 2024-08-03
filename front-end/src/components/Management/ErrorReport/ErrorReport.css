@@ -1,0 +1,12 @@
+.error-report-container{
+    display: flex;
+    flex-direction: column;
+
+}
+
+.error-report-section{
+    display: flex;
+    flex-direction: column;
+
+    margin-left: 10px;
+}
