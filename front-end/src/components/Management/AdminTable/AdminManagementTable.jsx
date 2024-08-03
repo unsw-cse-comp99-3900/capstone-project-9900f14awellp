@@ -244,7 +244,7 @@ export function AdminManagementTable() {
 
   //*获取数据
   const [data, _setData] = useState([]);
-  console.log(data);
+  // console.log(data);
   const [upcoming30DaysInfo, setUpcoming30DaysInfo] = useState({
     totalAmount: "0.00",
     count: 0,

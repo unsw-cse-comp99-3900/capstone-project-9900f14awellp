@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const SparklesText = ({
   text,
-  colors = { first: "#9E7AFF", second: "#FE8BBB" },
+  colors = { first: "#FFD254", second: "#FE8BBB" },
   className,
   sparklesCount = 10,
   style, // 添加 style 属性

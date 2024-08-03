@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import "./GuiForm.css";
 import { GuiTable } from "../GUITable/GuiTable";
 import { useInvoice } from "@/Content/GuiContent";
 
-import { Input, DatePicker, Select, InputNumber } from "antd";
+import { Input, DatePicker, Select, InputNumber, Form } from "antd";
 import dayjs from "dayjs";
 import { FlagIcon } from "react-flag-kit";
 
@@ -28,6 +28,22 @@ export function GuiForm() {
   const { invoiceData, updateInvoiceData, clearInvoiceData } = useInvoice();
   const handleInputChange = (field, value) => {
     updateInvoiceData({ [field]: value });
+  };
+
+  const [myEmailError, setMyEmailError] = useState("");
+  const [clientEmailError, setClientEmailError] = useState("");
+
+  const validateEmail = (email) => {
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const handleEmailBlur = (field, value, setError) => {
+    if (!validateEmail(value)) {
+      setError("Please enter a valid email address");
+    } else {
+      setError("");
+    }
   };
 
   return (
@@ -136,12 +152,20 @@ export function GuiForm() {
 
           <div className="title-and-input">
             <div>Email*</div>
-            <Input
-              size="large"
-              placeholder="Email Address"
-              value={invoiceData.my_email}
-              onChange={(e) => handleInputChange("my_email", e.target.value)}
-            />
+            <Form.Item
+              validateStatus={myEmailError ? "error" : ""}
+              help={myEmailError}
+            >
+              <Input
+                size="large"
+                placeholder="Email Address"
+                value={invoiceData.my_email}
+                onChange={(e) => handleInputChange("my_email", e.target.value)}
+                onBlur={(e) =>
+                  handleEmailBlur("my_email", e.target.value, setMyEmailError)
+                }
+              />
+            </Form.Item>
           </div>
         </div>
       </div>
@@ -183,14 +207,26 @@ export function GuiForm() {
 
           <div className="title-and-input">
             <div>Email*</div>
-            <Input
-              size="large"
-              placeholder="Email Address"
-              value={invoiceData.client_email}
-              onChange={(e) =>
-                handleInputChange("client_email", e.target.value)
-              }
-            />
+            <Form.Item
+              validateStatus={clientEmailError ? "error" : ""}
+              help={clientEmailError}
+            >
+              <Input
+                size="large"
+                placeholder="Email Address"
+                value={invoiceData.client_email}
+                onChange={(e) =>
+                  handleInputChange("client_email", e.target.value)
+                }
+                onBlur={(e) =>
+                  handleEmailBlur(
+                    "client_email",
+                    e.target.value,
+                    setClientEmailError
+                  )
+                }
+              />
+            </Form.Item>
           </div>
         </div>
       </div>

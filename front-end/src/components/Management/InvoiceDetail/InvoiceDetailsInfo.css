@@ -51,6 +51,7 @@
 
 .invoice-pdf-img-container{
     width: 63%;
+    height: fit-content;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -81,7 +82,7 @@
 .invoice-log-container{
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 20px;
     width: 32%;
 }
 
@@ -144,4 +145,22 @@
     width: 2px;
     background-color:#F6F8FA; /* 与背景色相同 */
     z-index: 1;
+  }
+
+  .invoice-time-log-container{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .invoice-error-log-container{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .error-collapse-container{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }

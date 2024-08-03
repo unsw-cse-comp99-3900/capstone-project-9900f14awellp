@@ -10,6 +10,9 @@ import {
 } from "@/apis/management";
 
 import { Button } from "antd";
+
+import { ErrorReport } from "../ErrorReport/ErrorReport";
+
 import {
   ApiOutlined,
   CloudDownloadOutlined,
@@ -98,8 +101,8 @@ export function InvoiceDetailsInfo() {
       if (originalInvoice.state !== "Failed") {
         return;
       }
-      const data = await fetchErrorReport(originalInvoice.uuid);
-      setErrorReport(data.data);
+      const res = await fetchErrorReport(originalInvoice.uuid);
+      setErrorReport(res.data.reports);
     };
     getErrorReportData();
   }, [originalInvoice]);
@@ -129,6 +132,7 @@ export function InvoiceDetailsInfo() {
   // console.log("validatelog", validatelog);
   // console.log("sendlog", sendlog);
   // console.log("emailReceiver", emailReceiver);
+  console.log("errorReport", errorReport);
 
   const goValidate = () => {
     navigate(`/validate/${paramId}`);
@@ -227,49 +231,63 @@ export function InvoiceDetailsInfo() {
           <img src={realpath} alt="Specific Invoice" style={{ width: "86%" }} />
         </div>
         <div className="invoice-log-container">
-          <div style={{ fontSize: "24px", marginBottom: "9px" }}>Log</div>
-          <div className="invoice-time-log">
-            {sendlog !== "" && (
-              <div className="invoice-time-log-row">
-                <div className="log-icon-container">
-                  <SendOutlinedIcon
-                    style={{ fontSize: "28px", color: "#419B73" }}
-                  />
-                </div>
-                <div className="log-info-container">
-                  <div className="log-info-title">
-                    Invoice was sent to {emailReceiver}
+          <div className="invoice-time-log-container">
+            <div style={{ fontSize: "24px", marginBottom: "9px" }}>Log</div>
+            <div className="invoice-time-log">
+              {sendlog !== "" && (
+                <div className="invoice-time-log-row">
+                  <div className="log-icon-container">
+                    <SendOutlinedIcon
+                      style={{ fontSize: "28px", color: "#419B73" }}
+                    />
                   </div>
-                  <div className="log-info-details">{sendlog}</div>
+                  <div className="log-info-container">
+                    <div className="log-info-title">
+                      Invoice was sent to {emailReceiver}
+                    </div>
+                    <div className="log-info-details">{sendlog}</div>
+                  </div>
                 </div>
-              </div>
-            )}
-            {validatelog !== "" && (
+              )}
+              {validatelog !== "" && (
+                <div className="invoice-time-log-row">
+                  <div className="log-icon-container">
+                    <PublishedWithChangesOutlinedIcon
+                      style={{ fontSize: "28px", color: "#419B73" }}
+                    />
+                  </div>
+                  <div className="log-info-container">
+                    <div className="log-info-title">Invoice was validated</div>
+                    <div className="log-info-details">{validatelog}</div>
+                  </div>
+                </div>
+              )}
               <div className="invoice-time-log-row">
                 <div className="log-icon-container">
-                  <PublishedWithChangesOutlinedIcon
+                  <FilePresentOutlinedIcon
                     style={{ fontSize: "28px", color: "#419B73" }}
                   />
                 </div>
-                <div className="log-info-container">
-                  <div className="log-info-title">Invoice was validated</div>
-                  <div className="log-info-details">{validatelog}</div>
-                </div>
-              </div>
-            )}
-            <div className="invoice-time-log-row">
-              <div className="log-icon-container">
-                <FilePresentOutlinedIcon
-                  style={{ fontSize: "28px", color: "#419B73" }}
-                />
-              </div>
 
-              <div className="log-info-container">
-                <div className="log-info-title">Invoice was created</div>
-                <div className="log-info-details">{createlog}</div>
+                <div className="log-info-container">
+                  <div className="log-info-title">Invoice was created</div>
+                  <div className="log-info-details">{createlog}</div>
+                </div>
               </div>
             </div>
           </div>
+          {originalInvoice.state === "Failed" && (
+            <div className="invoice-error-log-containe">
+              <div style={{ fontSize: "24px", marginBottom: "9px" }}>
+                Error Report
+              </div>
+              <div>
+                {errorReport && typeof errorReport === "object" ? (
+                  <ErrorReport errorReport={errorReport} />
+                ) : null}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

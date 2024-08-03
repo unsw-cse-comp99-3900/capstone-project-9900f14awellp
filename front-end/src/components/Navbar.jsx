@@ -102,7 +102,7 @@ export const ResponsiveAppBar = () => {
 
   return (
     <AppBar position="fixed" sx={{ backgroundColor: "white" }}>
-      <Container maxWidth="xl">
+      <Container maxWidth="100vw">
         <Toolbar disableGutters>
           <Typography
             variant="h6"
