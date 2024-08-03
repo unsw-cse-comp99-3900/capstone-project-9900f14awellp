@@ -848,10 +848,10 @@ class UpFileAPIView(APIView):
                     xml_str = prettify(xml_elem)
                     with open(f"staticfiles/{request.user.id}/{file_stem}.xml", "w", encoding="utf-8") as f:
                         f.write(xml_str)
+                        
                     converter_xml(f"staticfiles/{request.user.id}/{file_stem}.xml")
-                    
-                    pdf_path = f"staticfiles/{request.user.id}/{filename}"
-
+                        
+                    pdf_path = f"staticfiles/{request.user.id}/{file_stem}.pdf"
                     pdf_to_png(pdf_path, f"staticfiles/{request.user.id}/{file_stem}.png")
                     
             return Response({
@@ -1119,7 +1119,8 @@ class GUIFileAPIView(APIView):
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE
                 )
-            
+
+            sleep(0.5)
             
             pdf_path = f"staticfiles/{request.user.id}/{filename}.pdf"
 

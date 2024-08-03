@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
-'''
+
 
 # test For models.py
 class UserModelTest(TestCase):
@@ -127,22 +127,8 @@ class CompanyModelTest(TestCase):
                 address="321 Test St, Test City, Test State",
             )
 
-    def test_nullable_fields(self):
-        """
-        test if Company model instance's logo.
-        """
-        company = Company.objects.create(
-            name="Another Company",
-            phone_number="1234567890",
-            email="anothercompany@example.com",
-            ABN="123456789",
-            address="123 Test St, Test City, Test State",
-        )
-        self.assertIsNone(company.logo)
 
-'''
 
-'''
 # test For serializers.py
 class RegisterSerializerTest(TestCase):
 
@@ -211,7 +197,7 @@ class RegisterSerializerTest(TestCase):
    
 class UserInfoSerializerTest(TestCase):
 
-    def setUp(self):
+    def setUp(self): 
         # creat company instance
         self.company = Company.objects.create(
             name="Test Company",
@@ -258,10 +244,9 @@ class UserInfoSerializerTest(TestCase):
         self.assertEqual(data['username'], self.user_without_company.username)
         self.assertEqual(data['email'], self.user_without_company.email)
 
-'''
 
 
-'''
+
 # test For views.py
 
 class RegisterViewTest(TestCase):
@@ -353,9 +338,9 @@ class RegisterViewTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('username', response.data)
 
-'''
 
-'''
+
+
 # test For urls.py
 class URLTests(TestCase):
 
@@ -373,4 +358,3 @@ class URLTests(TestCase):
         url = reverse('create-company')
         self.assertEqual(resolve(url).func.view_class, CreateCompanyView)
         
-'''

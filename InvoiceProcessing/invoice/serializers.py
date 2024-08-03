@@ -217,7 +217,7 @@ class FileUploadSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['description', 'unit_price', 'quantity', 'net', 'gst', 'amount']
+        fields = ['description', 'unçit_price', 'quantity', 'net', 'gst', 'amount']
                
 class DraftGUISerializer(serializers.ModelSerializer):
     #invoice_name = serializers.CharField(required=True)

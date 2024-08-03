@@ -131,7 +131,7 @@ class Draft(models.Model):
     total_amount = models.CharField(max_length=20,default="",null=True, blank=True)
     note = models.TextField(default="",null=True, blank=True)
 
-    orders = models.ManyToManyField(Order,null=True, blank=True)
+    orders = models.ManyToManyField(Order)
     userid = models.ForeignKey(User, on_delete=models.CASCADE,related_name="GUIFileDraf",null=True, blank=True)
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='Create Date')
     update_date = models.DateTimeField(auto_now=True, verbose_name='Update Date')
