@@ -264,7 +264,8 @@ class UserInfo(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        errors = [f"{msg}" for value in serializer.errors.values() for msg in value]
+        return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_summary="发送用户邮件",
@@ -511,8 +512,10 @@ class CreateCompanyView(APIView):
             request.user.save()
 
             return Response({"success": "Company created successfully"}, status=status.HTTP_201_CREATED)
-        return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        
+        errors = [f"{msg}" for value in ser.errors.values() for msg in value]
+        return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
+    
 class CompanyWorkersInfo(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, CompanyWorker]
@@ -862,7 +865,8 @@ class UpFileAPIView(APIView):
                             status=status.HTTP_200_OK
                             )
         else:
-            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            errors = [f"{msg}" for value in file_serializer.errors.values() for msg in value]
+            return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_summary='获取用户上传的发票文件路径',
@@ -1135,12 +1139,9 @@ class GUIFileAPIView(APIView):
                             status=status.HTTP_200_OK
                             )
         else:
-            return Response({
-                                "code": 400,
-                                "msg": "bad request",
-                                "data": file_serializer.errors
-                            },
-                            status=status.HTTP_400_BAD_REQUEST)
+
+            errors = [f"{msg}" for value in file_serializer.errors.values() for msg in value]
+            return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
 
             
 class GUIFilePreview(APIView):
@@ -1228,12 +1229,8 @@ class GUIFilePreview(APIView):
                             status=status.HTTP_201_CREATED
                             )
         else:
-            return Response({
-                                "code": 400,
-                                "msg": "bad request",
-                                "data": file_serializer.errors
-                            },
-                            status=status.HTTP_400_BAD_REQUEST)
+            errors = [f"{msg}" for value in file_serializer.errors.values() for msg in value]
+            return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class GUIFileDraft(APIView):
     authentication_classes = [JWTAuthentication]
@@ -1304,12 +1301,8 @@ class GUIFileDraft(APIView):
                                     "msg": "invoice_num is duplicate", 
                 })
         else:
-            return Response({
-                    "code": 400,
-                    "msg": "bad request",
-                    "data": file_serializer.errors
-                },
-                status=status.HTTP_400_BAD_REQUEST)
+            errors = [f"{msg}" for value in file_serializer.errors.values() for msg in value]
+            return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
             
     @swagger_auto_schema(
         operation_summary='获取草稿报告',
@@ -1468,13 +1461,8 @@ class GUIFileDraft(APIView):
                                     "msg": "invoice_num is duplicate", 
                 })
         else:
-            return Response({
-                                "code": 400,
-                                "msg": "bad request",
-                                "data": file_serializer.errors
-                            },
-            )
-
+            errors = [f"{msg}" for value in file_serializer.errors.values() for msg in value]
+            return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
     @swagger_auto_schema(
@@ -2528,7 +2516,8 @@ class PasswordResetRequestView(APIView):
     def post(self, request):
         ser = PasswordResetSerializer(data=request.data)
         if not ser.is_valid():
-            return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+            errors = [f"{msg}" for value in ser.errors.values() for msg in value]
+            return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
         email = request.data.get('email')
         username = request.data.get('username')
 
