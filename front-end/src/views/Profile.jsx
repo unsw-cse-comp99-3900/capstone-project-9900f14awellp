@@ -110,6 +110,13 @@ export default function Profile() {
           severity: "success",
           message: "Profile updated successfully",
         });
+        // Update the local state with the new avatar URL
+      // setProfileData((prevState) => ({
+      //   ...prevState,
+      //   avatar: response.data.avatar, // Assuming the server responds with the updated avatar URL
+      // }));
+      // setIsEditing(false);
+        window.location.reload();
       })
       .catch((error) => {
         if (error.response) {
@@ -137,11 +144,12 @@ export default function Profile() {
     }
   };
 
-  const getAvatarUrl = (avatarPath) =>{
-    if ( !avatarPath || typeof avatarPath !== "string") 
+  const getAvatarUrl = (avatarPath) => {
+    if (!avatarPath || typeof avatarPath !== "string")
       return "https://via.placeholder.com/150";
-    return `${import.meta.env.VITE_API_URL}${avatarPath}`;
+    return avatarPath.startsWith('data:') ? avatarPath : `${import.meta.env.VITE_API_URL}${avatarPath}`;
   };
+  
 
   return (
     <div>
@@ -192,7 +200,6 @@ export default function Profile() {
                   alignItems: "flex-start",
                   width: "100%",
                 }}
-                fullWidth
               >
                 <div
                   style={{
@@ -220,17 +227,6 @@ export default function Profile() {
                     onChange={handleAvatarChange}
                   />
                   <label htmlFor="avatar-upload">
-                    {/* <Avatar
-                      src={
-                        profileData.avatar || "https://via.placeholder.com/150"
-                      }
-                      sx={{
-                        width: 50,
-                        height: 50,
-                        cursor: isEditing ? "pointer" : "default",
-                      }}
-                      component={isEditing ? "span" : "div"}
-                    /> */}
                     <Avatar
                       src={getAvatarUrl(profileData.avatar)}
                       component={isEditing ? "span" : "div"}
@@ -244,12 +240,12 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* </Grid> */}
               <Grid item xs={12}>
                 <FormControl fullWidth>
                   {isEditing ? (
                     <TextField
                       disabled
+                      fullWidth
                       id="profile-role"
                       label="Role"
                       value={profileData.is_staff ? "Admin" : "User"}
@@ -278,7 +274,7 @@ export default function Profile() {
               <Grid item xs={12}>
                 {isEditing ? (
                   <TextField
-                    fullWidth
+                  fullWidth
                     id="profile-username"
                     label="Username"
                     name="username"
