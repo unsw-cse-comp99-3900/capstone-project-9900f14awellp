@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Badge, Descriptions } from "antd";
 import axios from "axios";
 
+// this is company details page
 export default function CompanyDetails() {
   const [companyInfo, setCompanyInfo] = useState(null);
   const token = localStorage.getItem("token");
+  // get all the information about your company
   useEffect(() => {
     const fetchCompanyInfo = async () => {
       try {
@@ -80,7 +82,6 @@ export default function CompanyDetails() {
         <>
           Boss ID: {companyInfo.boss_id}
           <br />
-          {/* Add any other relevant config info here */}
         </>
       ),
     },

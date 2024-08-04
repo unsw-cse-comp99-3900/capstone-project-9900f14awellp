@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
+// text in the welcome page
 export default function AnimatedGradientText({ children, className, onClick }) {
   return (
     <div

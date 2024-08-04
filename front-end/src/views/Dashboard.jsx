@@ -7,6 +7,7 @@ import PieActiveArc from "@/components/Pie";
 import SimpleLineChart from "@/components/SimpleLineChart";
 import { Card, CardContent, Typography } from "@mui/material";
 
+// this is dashboard page
 export default function Dashboard() {
   const token = localStorage.getItem("token");
   const [alert, setAlert] = useState(null);
@@ -16,27 +17,27 @@ export default function Dashboard() {
   const [unvalidated, setUnvalidated] = useState(0);
   const [totalTime, setTotalTime] = useState([]);
   const [sentTime, setSentTime] = useState([]);
-
+// set the data for x-axis label in line chart
   const xLabels = [
     ...new Set([
       ...sentTime.map((d) => d.create_date),
       ...totalTime.map((d) => d.create_date),
     ]),
   ].sort((a, b) => new Date(a) - new Date(b));
-
+// get key is a create_date and the corresponding value is the count for send invoives
   const sendDataMap = sentTime.reduce((acc, curr) => {
     acc[curr.create_date] = curr.count;
     return acc;
   }, {});
-
+// get key is a create_date and the corresponding value is the count for total invoives
   const totalDataMap = totalTime.reduce((acc, curr) => {
     acc[curr.create_date] = curr.count;
     return acc;
   }, {});
-
+// set the number for y-axis label in line chart
   const sendInvoiceCounts = xLabels.map((date) => sendDataMap[date] || 0);
   const totalInvoiceCounts = xLabels.map((date) => totalDataMap[date] || 0);
-
+// for pie chart
   const data = [
     { id: 0, value: success, label: "Validation Successful", color: "#FED5D4" },
     { id: 1, value: fail, label: "Validation Failed", color: "#D5F9EF" },
@@ -47,7 +48,7 @@ export default function Dashboard() {
       color: "#F8D4BC",
     },
   ];
-
+// get the numbers of invoices 
   const fetchNumData = useCallback(() => {
     axios
       .get("http://localhost:8000/invoice/invoice-number", {
@@ -57,7 +58,6 @@ export default function Dashboard() {
         },
       })
       .then((response) => {
-        console.log(response.data);
         setTotal(response.data.total_files);
         setSuccess(response.data.successful_files);
         setFail(response.data.failed_files);
@@ -66,7 +66,6 @@ export default function Dashboard() {
         setSentTime(response.data.send_invoice_timebase);
       })
       .catch((error) => {
-        console.log(error.message);
         setAlert({ severity: "error", message: error.message });
       });
   }, [token]);

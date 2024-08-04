@@ -14,9 +14,10 @@ import {
 } from "@mui/material";
 import FaceIcon from "@mui/icons-material/Face";
 
+// this is profile page
 export default function Profile() {
   const token = localStorage.getItem("token");
-  const [alert, setAlert] = useState(null); // 初始状态设置为null
+  const [alert, setAlert] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     username: "",
@@ -37,27 +38,29 @@ export default function Profile() {
     is_staff: false,
   });
 
+// edit for profile
   const handleEditClick = () => {
     setIsEditing(true);
   };
 
+// cancel the editing for profile
   const handleCancelClick = () => {
     setProfileData(initialProfileData);
     setIsEditing(false);
   };
 
+// save the editing for profile
   const handleSaveClick = () => {
     handleSaveData();
     setIsEditing(false);
   };
-
-  const handleFormSubmit = (event) => {
-    // 阻止自动刷新
+  
+// Prevent automatic refresh
+  const handleFormSubmit = (event) => { 
     event.preventDefault();
-    // 处理表单提交逻辑
-    // setIsEditing(false);
   };
 
+// get this user information
   const fetchProfileData = useCallback(() => {
     axios
       .get("http://127.0.0.1:8000/invoice/user-info/", {
@@ -85,13 +88,14 @@ export default function Profile() {
     console.log("Updated profileData:", profileData);
   }, [profileData]);
 
+  // post the change information of editing to backend and receive response
   const handleSaveData = () => {
     const formData = new FormData();
     formData.append("username", profileData.username);
     formData.append("email", profileData.email);
     formData.append("name", profileData.name);
     formData.append("bio", profileData.bio);
-    // formData.append('is_staff', profileData.is_staff);
+    
     if (profileData.avatarFile) {
       formData.append("avatar", profileData.avatarFile);
     }
@@ -123,6 +127,7 @@ export default function Profile() {
         }
       });
   };
+  // for changeing avatar
   const handleAvatarChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -137,7 +142,7 @@ export default function Profile() {
       reader.readAsDataURL(file);
     }
   };
-
+// get avatar url
   const getAvatarUrl = (avatarPath) => {
     if (!avatarPath || typeof avatarPath !== "string")
       return "https://via.placeholder.com/150";

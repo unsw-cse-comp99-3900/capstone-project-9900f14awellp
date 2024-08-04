@@ -3,6 +3,7 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
 
+// for the numbers of invoices card in the dashboard 
 function ShineBorder({
   borderRadius = 8,
   borderWidth = 2,
@@ -10,14 +11,14 @@ function ShineBorder({
   color = "#000000",
   className,
   children,
-  padding = 2, // 新增padding属性，默认为10px
+  padding = 2,
 }) {
   return (
     <div
       style={{
         "--border-radius": `${borderRadius}px`,
         "--border-width": `${borderWidth}px`,
-        "--padding": `${padding}px`, // 设置padding样式变量
+        "--padding": `${padding}px`, 
       }}
       className={cn(
         "relative w-full h-full rounded-[--border-radius]",

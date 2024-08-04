@@ -10,6 +10,7 @@ import miniSend from "../assets/welcomePage/miniSend.jpg";
 import miniValidation from "../assets/welcomePage/miniValidate.jpg";
 import minimanagement from "../assets/welcomePage/minimanagement.jpg";
 
+// hover navbar in the welcome page
 export const Navbar = ({ className }) => {
   const navigate = useNavigate();
   const [active, setActive] = useState(null);

@@ -8,15 +8,16 @@ import axios from 'axios';
 import OutlinedAlerts from '../components/Alert';
 import { UserTextField } from "../components/Inputs";
 
+// this is register page
 export default function Register() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [alert, setAlert] = useState(null); // 初始状态设置为null
+    const [alert, setAlert] = useState(null); 
 
-    //* 路由跳转
+    // go to other page
     const navigate = useNavigate();
     const goLogin = () => {
         navigate("/login");
@@ -25,12 +26,13 @@ export default function Register() {
     const goChoice = () => {
         navigate("/choice");
     }
+    // post the register information to backend and receive response
     const handleRegister = () => {
         if (password !== confirmPassword) {
             setAlert({ severity: 'warning', message: 'Passwords do not match' });
             return;
         }
-        // console.log(username,password,confirmPassword,name,email)
+        
         axios.post('http://127.0.0.1:8000/invoice/register/', {    
                 username: username,
                 password: password,
@@ -46,19 +48,14 @@ export default function Register() {
         .then(response => {
             localStorage.setItem('token', response.data.access);
             localStorage.setItem('userid', response.data.userid);
-            // console.log(response.data);
             setAlert({ severity: 'success', message: 'Register successfully!'});
             goChoice();
         })
         .catch(error => {
             if (error.response) {
-                console.log(username,password,confirmPassword,name,email)
                 setAlert({ severity: 'error', message: error.response.data.error || 'Registration failed' });
-                console.log(error.response.data);
-
             } else {
                 setAlert({ severity: 'error', message: error.message });
-                console.log(error.message);
             }
         });
     };

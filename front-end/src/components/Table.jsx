@@ -36,13 +36,6 @@ function createData(id, invoiceNumber, progress, createTime, updateTime) {
   };
 }
 
-// const rows = [
-//   createData(1, 'INV001', 30, '2023-01-01', '2023-01-02'),
-//   createData(2, 'INV002', 50, '2023-01-02', '2023-01-03'),
-//   createData(3, 'INV003', 70, '2023-01-03', '2023-01-04'),
-//   createData(4, 'INV004', 100, '2023-01-04', '2023-01-05'),
-//   createData(5, 'INV005', 20, '2023-01-05', '2023-01-06'),
-// ];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -138,7 +131,6 @@ function EnhancedTableHead(props) {
             align={headCell.numeric ? "right" : "left"}
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
-            // sx={{ backgroundColor: 'grey', color: 'white' }}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
@@ -236,7 +228,7 @@ export default function EnhancedTable() {
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [alert, setAlert] = useState(null); // 初始状态设置为null
+  const [alert, setAlert] = useState(null); 
   const token = localStorage.getItem("token");
   const [rows, setRows] = React.useState([]);
   const { updateInvoiceData } = useInvoice(); // Use the context

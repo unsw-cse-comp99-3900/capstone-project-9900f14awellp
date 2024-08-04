@@ -1,46 +1,41 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { OutlinedCard } from "../components/Card";
-// import { BasicModal } from '../components/Model';
 import { ChoiceCompanyForm } from "../components/Form";
 import { CreateCompanyForm } from "../components/Form";
 import axios from "axios";
 import OutlinedAlerts from "../components/Alert";
 
+// this is a choice company page, after register
 export default function Choice() {
-  //const userid = '9'; // Replace with the actual user ID
-  // const userid = localStorage.getItem('userid'); // 从 localStorage 获取 userid
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [openCreateForm, setOpenCreateForm] = useState(false);
   const [names, setNames] = useState([]);
-  const [alert, setAlert] = useState(null); // 初始状态设置为null
-
+  const [alert, setAlert] = useState(null); 
+// get the company names which have existed
   const handleOpen = () => {
     axios
       .get(`http://127.0.0.1:8000/invoice/join-company/`, {
         headers: {
-          Accept: "application/json", // Setting the Accept header
+          Accept: "application/json", 
           Authorization: `Bearer ${token}`,
         },
       })
       .then((response) => {
-        console.log(response.data);
-        setNames(response.data); // 确保响应数据是一个数组
-        // handleSubmitCreateForm();
+        setNames(response.data); 
         setOpen(true);
       })
       .catch((error) => {
-        console.log(formData);
-        console.log(error.message);
         setAlert({ severity: "error", message: error.message });
       });
   };
+  // close the company name list
   const handleClose = () => {
     setOpen(false);
   };
-
+// post the company name you have choose to backend
   const handleSubmit = (names) => {
     axios
       .post(
@@ -58,29 +53,25 @@ export default function Choice() {
       )
       .then((response) => {
         console.log(response.data);
-        console.log(formData);
         handleSubmitCreateForm();
-        // alert(response.data.success);
         setAlert({ severity: "success", message: "You join a company!" });
       })
       .catch((error) => {
-        console.log(formData);
-        console.log(error.message);
         setAlert({ severity: "error", message: error.message });
       });
     setOpen(false);
     navigate("/home");
     window.location.reload();
   };
-
+// open the create a company form
   const handleOpenCreateForm = () => {
     setOpenCreateForm(true);
   };
-
+// close the create a company form
   const handleCloseCreateForm = () => {
     setOpenCreateForm(false);
   };
-
+// submit the create a company form
   const handleSubmitCreateForm = () => {
     setOpenCreateForm(false);
     localStorage.setItem("is_admin", true);
@@ -103,7 +94,7 @@ export default function Choice() {
       [name]: value,
     });
   };
-
+// post the company details to backend
   const handleChioceCompany = () => {
     axios
       .post(`http://127.0.0.1:8000/invoice/create-company/`, formData, {
@@ -115,18 +106,14 @@ export default function Choice() {
       })
       .then((response) => {
         console.log("Response:", response.data);
-        console.log(formData);
         setAlert({ severity: "success", message: "You create a company!" });
         handleSubmitCreateForm();
       })
       .catch((error) => {
         if (error.response) {
-          console.log(formData);
           setAlert({ severity: "error", message: error.response.data.error });
-          console.log(error.response);
         } else {
           setAlert({ severity: "error", message: error.message });
-          console.log(error.message);
         }
       });
   };
@@ -148,7 +135,6 @@ export default function Choice() {
             position: "fixed",
             top: "11vh",
             right: 10,
-            // transform: 'translateX(-50%)',
             width: "30%",
             zIndex: 9999,
           }}

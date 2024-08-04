@@ -18,9 +18,6 @@ export const OutlinedCard = ({ button, title, onClick }) => {
       <CardContent
         sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
       >
-        {/* <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-          Word of the Day
-        </Typography> */}
         <Typography variant="h5" component="div">
           {title}
         </Typography>

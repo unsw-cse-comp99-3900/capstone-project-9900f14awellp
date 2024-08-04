@@ -5,12 +5,13 @@ import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
+// for sparkle text in the title
 const SparklesText = ({
   text,
   colors = { first: "#FFD254", second: "#FE8BBB" },
   className,
   sparklesCount = 10,
-  style, // 添加 style 属性
+  style, 
   ...props
 }) => {
   const [sparkles, setSparkles] = useState([]);
@@ -52,12 +53,12 @@ const SparklesText = ({
 
   return (
     <div
-      className={cn("font-bold", className)} // 移除默认的text-6xl以便可以通过style覆盖
+      className={cn("font-bold", className)} 
       {...props}
       style={{
         "--sparkles-first-color": colors.first,
         "--sparkles-second-color": colors.second,
-        ...style, // 合并传递的style
+        ...style, 
       }}
     >
       <span className="relative inline-block">

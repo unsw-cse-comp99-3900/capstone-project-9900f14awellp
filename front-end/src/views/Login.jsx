@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { InputTextField, PasswordTextField } from "../components/Inputs";
+import { PasswordTextField } from "../components/Inputs";
 import { ButtonSizes } from "../components/Buttons";
 import { UnderlineLink, AlignRight } from "../components/Link";
 import { AlertDialogSlide } from "../components/Model";
@@ -12,13 +12,14 @@ import { CompanyInfo } from "@/apis/gui";
 import { useInvoice } from "@/Content/GuiContent";
 import { UserTextField } from "../components/Inputs";
 
+// this is login page
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showIcon, setShowIcon] = useState(false);
-  const [alert, setAlert] = useState(null); // 初始状态设置为null
+  const [alert, setAlert] = useState(null);
   const { updateInvoiceData } = useInvoice();
-
+// update the company information
   const updateCompanyInfo = (companyData) => {
     updateInvoiceData({
       my_company_name: companyData.name,
@@ -28,7 +29,7 @@ export default function Login() {
     });
   };
 
-  //* 路由跳转
+  // go to other page
   const navigate = useNavigate();
   const goRegister = () => {
     navigate("/register");
@@ -36,6 +37,7 @@ export default function Login() {
   const goDashboard = () => {
     navigate("/home");
   };
+  // post username and password to backend and receive response
   const handleLogin = () => {
     axios
       .post("http://127.0.0.1:8000/invoice/login/", null, {
@@ -49,16 +51,14 @@ export default function Login() {
       })
       .then((response) => {
         console.log(response.data);
-        // const token = response.data.token;
+        // storage the token, userid, admin or user
         localStorage.setItem("token", response.data.access);
         localStorage.setItem("userid", response.data.userid);
         localStorage.setItem("is_admin", response.data.is_admin);
-        // alert(response.data.state);
         setAlert({ severity: "success", message: "Login successfully!" });
         return CompanyInfo();
       })
       .then((companyInfoResponse) => {
-        // 处理公司信息
         const companyData = companyInfoResponse.data;
         updateCompanyInfo(companyData);
         goDashboard();
@@ -70,21 +70,14 @@ export default function Login() {
             severity: "error",
             message: error.response.data.error || "Login failed",
           });
-          // alert(error.response.data.detail || 'Login failed');
-          console.log(username, password);
-          console.log(error.response);
         } else {
           setAlert({ severity: "error", message: error.message });
-          console.log(error.message);
         }
       });
   };
-
+// post the username and email to backend to reset password
   const handleEmailSubmit = ({ email, username }) => {
-    console.log("Email submitted:", email);
-    console.log("Username submitted:", username);
     setShowIcon(true);
-    // 你可以在这里处理 email 值，例如更新状态或调用 API
     axios
       .post(
         "http://127.0.0.1:8000/invoice/password_reset/",
@@ -94,29 +87,25 @@ export default function Login() {
         },
         {
           headers: {
-            accept: "application/json", // Setting the Accept header
+            accept: "application/json",
             "Content-Type": "application/json",
           },
         }
       )
       .then((response) => {
-        console.log(response.data);
-        setShowIcon(false); // 隐藏等待图标
+        setShowIcon(false); 
         setAlert({ severity: "success", message: response.data.message });
       })
       .catch((error) => {
         if (error.response) {
           setAlert({ severity: "error", message: error.response.data.error });
-          console.log(username, email);
-          console.log(error.response);
         } else {
           setAlert({
             severity: "error",
             message: error.message || "Reset password failed",
           });
-          console.log(error.message);
         }
-        setShowIcon(false); // 隐藏等待图标
+        setShowIcon(false);
       });
   };
   return (
@@ -147,7 +136,6 @@ export default function Login() {
               position: "fixed",
               top: "11vh",
               right: 10,
-              // transform: 'translateX(-50%)',
               width: "30%",
               zIndex: 9999,
             }}

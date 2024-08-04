@@ -24,6 +24,7 @@ import SparklesText from "@/components/SparklesText";
 import { useParams } from "react-router-dom";
 import "./global.css";
 
+// this is validation page
 export default function Validation() {
   const token = localStorage.getItem("token");
   const [showIcon, setShowIcon] = useState(false);
@@ -48,10 +49,8 @@ export default function Validation() {
       const idParts = id.split('=');
       if (idParts.length > 1) {
         setIdNum(idParts[1]);
-        console.log(idNum);
       } else {
         setIdNum(id); // If there is no '=' character, just use the id as is
-        console.log(idNum);
       }
     } else {
       console.log('No ID in the URL');
@@ -61,22 +60,14 @@ export default function Validation() {
   useEffect(() => {
     if (idNum && invoiceUuidMap) {
       // Find the file name corresponding to the idNum (UUID)
-      const idName = Object.keys(invoiceUuidMap).find(key => invoiceUuidMap[key] === idNum);
-      if (idName) {
-        setIdName(idName); // Set the file name in state
-        setSelectedInvoice([idName]); // Select the invoice file name
-        console.log(selectedInvoice);
+      const foundIdName = Object.keys(invoiceUuidMap).find(key => invoiceUuidMap[key] === idNum);
+      if (foundIdName) {
+        setIdName(foundIdName); // Set the file name in state
+        setSelectedInvoice([foundIdName]); // Select the invoice file name
       }
     }
   }, [idNum, invoiceUuidMap]); // Run the effect when `idNum` or `invoiceUuidMap` changes
 
- 
-
-  // useEffect(() => {
-  //   if (selectedInvoice && !invoices.includes(selectedInvoice)) {
-  //     setSelectedInvoice("");
-  //   }
-  // }, [invoices, selectedInvoice]);
 
   const handleListClick = (listName) => {
     setOpenList((prev) => ({
@@ -103,7 +94,7 @@ export default function Validation() {
     setSelectedRules([]);
     setSelectedInvoice("");
   };
-
+// get all invoices data
   const fetchInvoiceData = useCallback(() => {
     axios
       .get(`http://127.0.0.1:8000/invoice/invoice-info/`, {
@@ -127,7 +118,6 @@ export default function Validation() {
         setInvoiceUuidMap(uuidMap);
       })
       .catch((error) => {
-        console.log(error.message);
         setAlert({ severity: "error", message: error.message });
       });
   }, [token]);
@@ -136,6 +126,7 @@ export default function Validation() {
     fetchInvoiceData();
   }, [token, fetchInvoiceData]);
 
+// post validation information and receive the backend validated report
   const handleValidate = () => {
     const selectedUuid = invoiceUuidMap[selectedInvoice];
     if (!selectedUuid) {
@@ -159,7 +150,7 @@ export default function Validation() {
           response.data.validation_report.report.successful;
         setValidatedStatus(validatedStatus);
         setValidationReport(response.data.validation_report);
-        console.log(response.data);
+        // console.log(response.data);
         setShowIcon(false);
         handleClear();
         fetchInvoiceData();
@@ -174,9 +165,6 @@ export default function Validation() {
           setValidationReport(error.response.data.validation_report);
         } else {
           setAlert({ severity: "error", message: error.message });
-          console.log(error.message);
-          setAlert({ severity: "error", message: error.message });
-          console.log(error.message);
         }
         setShowIcon(false);
         setOpen(true);  // Open the modal even if validation fails
