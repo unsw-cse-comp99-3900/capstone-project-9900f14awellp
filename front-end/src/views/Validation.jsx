@@ -21,7 +21,7 @@ import Typography from "@mui/material/Typography";
 import OutlinedAlerts from "../components/Alert";
 import success from "../assets/success.png";
 import SparklesText from "@/components/SparklesText";
-
+import { useParams } from "react-router-dom";
 import "./global.css";
 
 export default function Validation() {
@@ -36,8 +36,47 @@ export default function Validation() {
   const [alert, setAlert] = useState(null);
   const [validatedStatus, setValidatedStatus] = useState(null);
   const [open, setOpen] = useState(false);
-  // const { id } = useParams();
-  // const id_num = null;
+  const { id } = useParams(); // Destructure the id from useParams
+  const [idNum, setIdNum] = useState(null);
+  const [idName, setIdName] = useState(""); // State to store the file name corresponding to idNum
+ 
+  // Extract idNum from URL parameter if present
+  useEffect(() => {
+    if (id) {
+      // Assuming the id is a string and might contain the '=' character
+      console.log(id);
+      const idParts = id.split('=');
+      if (idParts.length > 1) {
+        setIdNum(idParts[1]);
+        console.log(idNum);
+      } else {
+        setIdNum(id); // If there is no '=' character, just use the id as is
+        console.log(idNum);
+      }
+    } else {
+      console.log('No ID in the URL');
+    }
+  }, [id]); // Only run the effect when `id` changes
+
+  useEffect(() => {
+    if (idNum && invoiceUuidMap) {
+      // Find the file name corresponding to the idNum (UUID)
+      const idName = Object.keys(invoiceUuidMap).find(key => invoiceUuidMap[key] === idNum);
+      if (idName) {
+        setIdName(idName); // Set the file name in state
+        setSelectedInvoice([idName]); // Select the invoice file name
+        console.log(selectedInvoice);
+      }
+    }
+  }, [idNum, invoiceUuidMap]); // Run the effect when `idNum` or `invoiceUuidMap` changes
+
+ 
+
+  // useEffect(() => {
+  //   if (selectedInvoice && !invoices.includes(selectedInvoice)) {
+  //     setSelectedInvoice("");
+  //   }
+  // }, [invoices, selectedInvoice]);
 
   const handleListClick = (listName) => {
     setOpenList((prev) => ({
@@ -97,12 +136,6 @@ export default function Validation() {
     fetchInvoiceData();
   }, [token, fetchInvoiceData]);
 
-  useEffect(() => {
-    if (selectedInvoice && !invoices.includes(selectedInvoice)) {
-      setSelectedInvoice("");
-    }
-  }, [invoices, selectedInvoice]);
-
   const handleValidate = () => {
     const selectedUuid = invoiceUuidMap[selectedInvoice];
     if (!selectedUuid) {
@@ -113,7 +146,7 @@ export default function Validation() {
     axios
       .post("http://127.0.0.1:8000/invoice/invoice-validation/", null, {
         params: {
-          uuid: selectedUuid,
+          uuid: selectedUuid || idNum,
           rules: selectedRules.join(","),
         },
         headers: {
