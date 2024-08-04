@@ -1271,11 +1271,9 @@ class GUIFileDraft(APIView):
             )
         )
     def post(self,request):
-        print(f"{request.data.get('due_date')}   *************") 
         file_serializer = DraftGUISerializer(data=request.data)
 
         if file_serializer.is_valid():
-            print(f"{request.data.get('due_date')}   *************") 
             file_serializer.validated_data['userid'] = request.user
 
             try: 
