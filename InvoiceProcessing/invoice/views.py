@@ -2262,7 +2262,7 @@ class SendInvoiceEmailAPIView(APIView):
         custom_message = request.data.get('message') 
         if not uuids or not client_email:
             return Response({
-                                "error": "File ID and client email are required",
+                                "error": "Please select an invoice and enter the client email",
                             },
                             status=status.HTTP_400_BAD_REQUEST)
             
