@@ -13,9 +13,7 @@ from datetime import datetime
 import fitz  # PyMuPDF
 
 from django.http import JsonResponse
-from django.core.mail import EmailMessage
 from django.conf import settings
-from django.db.models.signals import post_save # 用户已经建好了，才触发generate_token函数生成token
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.core.validators import validate_email, ValidationError
@@ -43,7 +41,6 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.parsers import MultiPartParser
 
 from .serializers import CompanySerializer,RegisterSerializer,\
                         FileUploadSerializer, FileGUISerializer, PasswordResetSerializer, InvoiceUpfileSerializer,\
@@ -53,10 +50,9 @@ from .converter import converter_xml
 from .permission import IsAdminUser,CompanyWorker
 # Create your views here.
 user_directory = os.path.join(settings.STATICFILES_DIRS[0])
-
-# 用户注册
+# user register
 class RegisterView(APIView):
-    authentication_classes = []  # 禁用认证
+    authentication_classes = []  
     permission_classes = []
     
     @swagger_auto_schema(
@@ -152,11 +148,11 @@ class RegisterView(APIView):
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# 用户登录
+# user login
 
 
 class LoginView(APIView):
-    authentication_classes = []  # 禁用认证
+    authentication_classes = []  
     permission_classes = []
     
     @swagger_auto_schema(
@@ -381,11 +377,11 @@ class UserInfo(APIView):
         from_email = 'ikezhao123@gmail.com'
         recipient_list = [email]
         
-        # 创建邮件对象
+        # create email message
         email_message = EmailMultiAlternatives(subject, '', from_email, recipient_list)
         email_message.attach_alternative(html_content, "text/html")
 
-        # 添加内嵌图片
+        # add logo
         image_path = 'staticfiles/logo.png'
         if os.path.exists(image_path):
             with open(image_path, 'rb') as img:
@@ -506,7 +502,7 @@ class CreateCompanyView(APIView):
                 email=validated_data['email'],
                 ABN = validated_data['ABN'],
                 address=validated_data['address'],
-                boss_id=request.user,  # 将 boss_id 设置为当前用户
+                boss_id=request.user,  # set boss_id to current user
             )
             company.save()
             request.user.company = company
@@ -620,7 +616,7 @@ class CompanyWorkersInfo(APIView):
         
 class JoinCompanyView(APIView):
     permission_classes = [IsAuthenticated,]
-    # permission_classes = [IsAdminUser] # 判断 is_staff 是不是1
+    # permission_classes = [IsAdminUser] # judge if user is admin
     authentication_classes = [JWTAuthentication]
     
     @swagger_auto_schema(
@@ -710,7 +706,6 @@ class JoinCompanyView(APIView):
 
         if request.user.is_staff:
             return Response({'error': 'You have created a company, you cannot join another company.'}, status=status.HTTP_400_BAD_REQUEST)
-        # 暂时先不处理[重复加入公司的情况，用户后面再加上
         request.user.company = company
         request.user.join_company_date = datetime.now()
         request.user.save()
@@ -785,8 +780,9 @@ class UpFileAPIView(APIView):
             file_serializer.save(userid=request.user)
             
             # 上传的pdf文件直接转化为json和xml文件
+            # upload the pdf file and convert it to json and xml files
             file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
-            # 异步处理pdf文件
+            # sync processing of pdf file
             # extract_pdf_data.delay(str(file.file),request.user.id)
             file_name = os.path.basename(str(file.file))
             file_stem = os.path.splitext(file_name)[0]
@@ -807,10 +803,10 @@ class UpFileAPIView(APIView):
                 payload = {'user': 'LianqiangZhao',
                         'pwd': 'Zlq641737796',
                         'APIKey': '626843fc-1b6d-4b8f-8441-a786bab52708'}
-                # 保留cookie
+                # retain cookie
                 r = requests.get(url + '/Login', params=payload)
                 
-                # 1.2 上传pdf文件
+                # 1.2 upload pdf file to ezzydoc
                 with open(str(file.file), 'rb') as img_file:
                     img_name = f"{file_stem}.pdf"
                     data = img_file.read()
@@ -826,7 +822,7 @@ class UpFileAPIView(APIView):
                                     params=api_key,
                                     headers={'Content-Type': 'application/json'})
                     invoiceID = str(r2.json().get("invoice_id"))
-                # 1.3 获得传回的json数据
+                # 1.3 get the json data back
                 payload2 = {'invoiceid':invoiceID,
                             'APIKey': '626843fc-1b6d-4b8f-8441-a786bab52708'}
             
@@ -924,7 +920,7 @@ class UpFileAPIView(APIView):
                             status=status.HTTP_404_NOT_FOUND
                             )
         file_url = file.file.url
-        # 把pdf内容当成乱码返回
+
         """response = FileResponse(file_iterator(str(file.file)))
         response['Content-Type'] = 'application/octet-stream'
         # Content-Disposition就是当用户想把请求所得的内容存为一个文件的时候提供一个默认的文件名
@@ -1281,8 +1277,7 @@ class GUIFileDraft(APIView):
         if file_serializer.is_valid():
             print(f"{request.data.get('due_date')}   *************") 
             file_serializer.validated_data['userid'] = request.user
-            # draft不需要考虑数据完整性，直接创建 或者 更新，通过id作区分
-            # 创建和更新的逻辑？
+
             try: 
                 file_serializer.save(userid=request.user)
                 return Response({
