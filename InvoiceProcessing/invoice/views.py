@@ -150,8 +150,11 @@ class RegisterView(APIView):
                             'access': str(refresh.access_token)}, 
                             status=status.HTTP_201_CREATED)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 # 用户登录
+
+
 class LoginView(APIView):
     authentication_classes = []  # 禁用认证
     permission_classes = []
@@ -219,7 +222,7 @@ class LoginView(APIView):
                 'access': str(refresh.access_token),
                 'is_admin':user.is_staff,
             }, status=status.HTTP_200_OK)
-        return Response({'detail': 'User not exists or password is wrong, please check your input.'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': 'User not exists or password is wrong, please check your input.'}, status=status.HTTP_401_UNAUTHORIZED)
     
 
 class UserInfo(APIView):
@@ -765,21 +768,19 @@ class UpFileAPIView(APIView):
     )
     def post(self, request):
         if request.user.company == None:
-            return Response({"code": 400, "msg": "Please create a company or join a company first."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Please create a company or join a company first."}, status=status.HTTP_400_BAD_REQUEST)
         file_serializer = FileUploadSerializer(data=request.data)
         if file_serializer.is_valid():
             uuid = file_serializer.validated_data.get('uuid')
             filename = file_serializer.validated_data.get('file')
             if UpFile.objects.filter(userid=request.user.id, file=f"staticfiles/{request.user.id}/{filename}").exists():
                 return Response({
-                    "code": 400,
-                    "msg": "File name exists for this user",
+                    "error": "File name exists for this user",
                 }, status=status.HTTP_400_BAD_REQUEST)
 
             if UpFile.objects.filter(uuid=uuid).exists():
                 return Response({
-                    "code": 400,
-                    "msg": "File ID exists",
+                    "error": "File ID exists",
                 }, status=status.HTTP_400_BAD_REQUEST)
             file_serializer.save(userid=request.user)
             
@@ -911,16 +912,14 @@ class UpFileAPIView(APIView):
         uuid = request.GET.get('uuid')
         if not uuid:
             return Response({
-                                "code": 400,
-                                "msg": "File ID is required",
+                                "error": "File ID is required",
                             },
                             status=status.HTTP_400_BAD_REQUEST)
         
         file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
         if file is None or file.file is None :
             return Response({
-                                "code": 404,
-                                "msg": "file not found",
+                                "error": "file not found",
                             },
                             status=status.HTTP_404_NOT_FOUND
                             )
@@ -1051,14 +1050,12 @@ class GUIFileAPIView(APIView):
             # 检查同一个用户下filename是否一样
             if GUIFile.objects.filter(userid=request.user, invoice_name=filename).exists() or UpFile.objects.filter(userid=request.user, file=filename).exists():
                 return Response({
-                    "code": 400,
-                    "msg": "File name exists for this user",
+                    "error": "File name exists for this user",
                 }, status=status.HTTP_400_BAD_REQUEST)
             # 检查uuid是否已存在
             if UpFile.objects.filter(uuid=uuid).exists() or GUIFile.objects.filter(uuid=uuid).exists():
                 return Response({
-                    "code": 400,
-                    "msg": "File UUID exists",
+                    "error": "File UUID exists",
                 }, status=status.HTTP_400_BAD_REQUEST)
                     
             # 将数据保存在数据库的同时，创建json文件并保存进去
@@ -1086,8 +1083,7 @@ class GUIFileAPIView(APIView):
                 draft = Draft.objects.filter(userid=request.user, id=file_id).first()
                 if draft == None:
                     return Response({
-                        "code": 400,
-                        "msg": "File id not exist",
+                        "error": "File id not exist",
                     },
                     status=status.HTTP_400_BAD_REQUEST)
 
@@ -1297,8 +1293,7 @@ class GUIFileDraft(APIView):
                 )
             except IntegrityError as e:
                 return Response({
-                                    "code": 400,
-                                    "msg": "invoice_num is duplicate", 
+                                    "error": "invoice_num is duplicate", 
                 })
         else:
             errors = [f"{msg}" for value in file_serializer.errors.values() for msg in value]
@@ -1435,14 +1430,14 @@ class GUIFileDraft(APIView):
         if not fileid:
             return Response({
                                 "code": 400,
-                                "msg": "File id is required",
+                                "error": "File id is required",
                             },
             )
         file = Draft.objects.filter(userid=request.user, id=fileid).first()
         if not file:
             return Response({
                                 "code": 404,
-                                "msg": "File not found",
+                                "error": "File not found",
                             },
             )
         file_serializer = DraftGUISerializer(file,data=request.data,partial=True)
@@ -1458,7 +1453,7 @@ class GUIFileDraft(APIView):
             except IntegrityError as e:
                 return Response({
                                     "code": 400,
-                                    "msg": "invoice_num is duplicate", 
+                                    "error": "invoice_num is duplicate", 
                 })
         else:
             errors = [f"{msg}" for value in file_serializer.errors.values() for msg in value]
@@ -1513,8 +1508,7 @@ class GUIFileDraft(APIView):
         ids = request.data.get('ids')
         if not ids:
             return Response({
-                                "code": 400,
-                                "msg": "IDs are required",
+                                "error": "IDs are required",
                             },
                             status=status.HTTP_400_BAD_REQUEST)
         
@@ -1528,8 +1522,7 @@ class GUIFileDraft(APIView):
 
         if not_found_ids:
             return Response({
-                                "code": 404,
-                                "msg": "Some files not found",
+                                "error": "Some files not found",
                                 "not_found_ids": not_found_ids
                             },
                             status=status.HTTP_404_NOT_FOUND)
@@ -1595,8 +1588,7 @@ class FileReport(APIView):
         fileid = request.GET.get('uuid')
         if not fileid:
             return Response({
-                                "code": 400,
-                                "msg": "File id is required",
+                                "error": "File id is required",
                             },
                             status=status.HTTP_400_BAD_REQUEST)
         
@@ -1608,15 +1600,13 @@ class FileReport(APIView):
         
         if not file:
             return Response({
-                                "code": 404,
-                                "msg": "File not found",
+                                "error": "File not found",
                             },
                             status=status.HTTP_404_NOT_FOUND
                             )
         if file.is_validated == 0:
             return Response({
-                                "code": 400,
-                                "msg": "File is not validated",
+                                "error": "File is not validated",
                             },
                             status=status.HTTP_400_BAD_REQUEST
                             )
@@ -1629,8 +1619,7 @@ class FileReport(APIView):
                 file_data = json.load(file)
         except Exception as e:
             return Response({
-                                "code": 500,
-                                "msg": f"Failed to read report file: {str(e)}",
+                                "error": f"Failed to read report file: {str(e)}",
                             },
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR
                             )
@@ -1687,16 +1676,14 @@ class DeleteFileAPIView(APIView):
         uuid = request.query_params.get('uuid')
         if not uuid:
             return Response({
-                                "code": 400,
-                                "msg": "File ID is required",
+                                "error": "File ID is required",
                             },
                             status=status.HTTP_400_BAD_REQUEST)
         
         file = UpFile.objects.filter(uuid=uuid).first()
         if file is None:
             return Response({
-                                "code": 404,
-                                "msg": "file not found",
+                                "error": "file not found",
                             },
                             status=status.HTTP_404_NOT_FOUND
                             )
@@ -2107,8 +2094,7 @@ class FileValidationsAPIView(APIView):
         rule = request.query_params.getlist('rules')
         if not uuid or not rule:
             return Response({
-                                "code": 400,
-                                "msg": "File ID and Validation Rule is required",
+                                "error": "File ID and Validation Rule is required",
                             },
                             status=status.HTTP_400_BAD_REQUEST)
         
@@ -2116,8 +2102,7 @@ class FileValidationsAPIView(APIView):
         file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
         if file is None:
             return Response({
-                                "code": 404,
-                                "msg": "file not found",
+                                "error": "file not found",
                             },
                             status=status.HTTP_404_NOT_FOUND
                             )
@@ -2190,7 +2175,7 @@ class FileValidationsAPIView(APIView):
                     with open(json_file_path, 'w', encoding='utf-8') as json_file:
                         json.dump(report, json_file, ensure_ascii=False, indent=4)
                 except Exception as e:
-                    return JsonResponse({"code": 500, "msg": f"Failed to save report: {str(e)}"}, status=500)
+                    return JsonResponse({"error": f"Failed to save report: {str(e)}"}, status=500)
                 
             return Response({
                                 "code": 200,
@@ -2201,7 +2186,7 @@ class FileValidationsAPIView(APIView):
         else:
             return Response({
                                 "code": validation_response.status_code,
-                                "msg": "Validation failed",
+                                "error": "Validation failed",
                                 "details": validation_response.text
                             },
                             status=validation_response.status_code)
@@ -2277,8 +2262,7 @@ class SendInvoiceEmailAPIView(APIView):
         custom_message = request.data.get('message') 
         if not uuids or not client_email:
             return Response({
-                                "code": 400,
-                                "msg": "File ID and client email are required",
+                                "error": "File ID and client email are required",
                             },
                             status=status.HTTP_400_BAD_REQUEST)
             
@@ -2289,8 +2273,7 @@ class SendInvoiceEmailAPIView(APIView):
         files = UpFile.objects.filter(userid=request.user.id, uuid__in=uuids)
         if not files.exists():
             return Response({
-                                "code": 404,
-                                "msg": "No files found",
+                                "error": "No files found",
                             },
                             status=status.HTTP_404_NOT_FOUND)
 
@@ -2350,8 +2333,7 @@ class SendInvoiceEmailAPIView(APIView):
                     email.attach_file(f"staticfiles/{request.user.id}/{file_stem}_report.json")
             else:
                 return Response({
-                                    "code": 404,
-                                    "msg": "file not found on server",
+                                    "error": "file not found on server",
                                 },
                                 status=status.HTTP_404_NOT_FOUND)
         
@@ -2365,8 +2347,7 @@ class SendInvoiceEmailAPIView(APIView):
                             status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                                "code": 500,
-                                "msg": f"Failed to send email: {str(e)}",
+                                "error": f"Failed to send email: {str(e)}",
                             },
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
      
@@ -2444,14 +2425,14 @@ class TimeOfInvoice(APIView):
             user = User.objects.filter(id=userid).first()
             file = UpFile.objects.filter(userid=user.id, uuid=uuid).first()
             if user is None:
-                return JsonResponse({"code": 404, "msg": "user not found"}, status=status.HTTP_404_NOT_FOUND)
+                return JsonResponse({ "error": "user not found"}, status=status.HTTP_404_NOT_FOUND)
             name = user.name
             
         else:
             file = UpFile.objects.filter(userid=request.user, uuid=uuid).first()
             
         if file is None:
-            return JsonResponse({"code": 404, "msg": "file not found"}, status=status.HTTP_404_NOT_FOUND)
+            return JsonResponse({"error": "file not found"}, status=status.HTTP_404_NOT_FOUND)
         create_date = file.create_date
         validation_date = file.validation_date
         sending_date = file.sending_date
