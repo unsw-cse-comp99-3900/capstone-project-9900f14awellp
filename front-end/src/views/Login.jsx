@@ -68,13 +68,12 @@ export default function Login() {
         if (error.response) {
           setAlert({
             severity: "error",
-            message: error.response.data.detail || "Login failed",
+            message: error.response.error || "Login failed",
           });
           // alert(error.response.data.detail || 'Login failed');
           console.log(username, password);
           console.log(error.response);
         } else {
-          // alert(error.message);
           setAlert({ severity: "error", message: error.message });
           console.log(error.message);
         }
@@ -107,7 +106,7 @@ export default function Login() {
       })
       .catch((error) => {
         if (error.response) {
-          setAlert({ severity: "error", message: error.response.data.error });
+          setAlert({ severity: "error", message: error.response.error });
           console.log(username, email);
           console.log(error.response);
         } else {
