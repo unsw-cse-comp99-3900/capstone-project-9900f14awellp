@@ -5,8 +5,12 @@ import { CustomAlert } from "@/components/Alert/MUIAlert";
 import { Highlight, TagHighlight } from "./HeroHighlight";
 
 import "./ErrorReport.css";
-import { color } from "framer-motion";
 
+/**
+ * Extracts location information from a given location string
+ * @param {string} location - The location string to extract information from
+ * @returns {string} Extracted location information or "Unknown location" if not found
+ */
 function extractLocationInfo(location) {
   const regex = /\*:(\w+)/g;
   const matches = [...location.matchAll(regex)];
@@ -19,23 +23,40 @@ function extractLocationInfo(location) {
   return elements.join(" > ");
 }
 
+/**
+ * ErrorReport component for displaying error reports
+ * @param {Object} props - Component props
+ * @param {Object} props.errorReport - The error report object to display
+ */
 export function ErrorReport({ errorReport }) {
-  //*二次封装的alert组件
+  // State for managing alert visibility and content
   const [alert, setAlert] = useState({
     show: false,
     message: "",
     severity: "info",
   });
 
-  //*显示alert
+  /**
+   * Shows an alert with the given message and severity
+   * @param {string} message - The message to display in the alert
+   * @param {string} severity - The severity level of the alert (default: "info")
+   */
   const showAlert = (message, severity = "info") => {
     setAlert({ show: true, message, severity });
   };
 
-  //*隐藏alert
+  /**
+   * Hides the currently displayed alert
+   */
   const hideAlert = () => {
     setAlert({ ...alert, show: false });
   };
+
+  /**
+   * Copies the error information to the clipboard
+   * @param {string} location - The location of the error
+   * @param {string} text - The error text
+   */
   const copyToClipboard = (location, text) => {
     const extractedLocation = extractLocationInfo(location);
     const copyText = `${extractedLocation}: ${text}`;
@@ -44,12 +65,14 @@ export function ErrorReport({ errorReport }) {
         showAlert("Copy successfully to the clipboard.", "success");
       },
       (err) => {
-        console.log("无法复制文本: ", err);
+        showAlert("Copy failed to the clipboard:" + err.message, "error");
       }
     );
   };
+
   return (
     <div className="error-report-container">
+      {/* Display alert if show is true */}
       {alert.show && (
         <CustomAlert
           message={alert.message}
@@ -57,6 +80,7 @@ export function ErrorReport({ errorReport }) {
           onClose={hideAlert}
         />
       )}
+      {/* Map through error report entries */}
       {Object.entries(errorReport).map(([key, value]) => (
         <div key={key} className="error-report-section">
           <h3
@@ -68,6 +92,7 @@ export function ErrorReport({ errorReport }) {
           >
             Rules: {value.rules}
           </h3>
+          {/* Collapse component for displaying error details */}
           <Collapse
             style={{
               fontFamily: "Lexend Deca",
@@ -88,7 +113,6 @@ export function ErrorReport({ errorReport }) {
                     flexDirection: "row",
                     gap: "4%",
                     alignItems: "start",
-                    // backgroundColor: "white",
                     padding: "8px",
                   }}
                 >
@@ -100,6 +124,7 @@ export function ErrorReport({ errorReport }) {
                     }}
                   >
                     <div>
+                      {/* Display extracted location information */}
                       <TagHighlight
                         defaultLightBg="#FFD4D4"
                         defaultLightText="#992720"
@@ -110,6 +135,7 @@ export function ErrorReport({ errorReport }) {
                       </TagHighlight>
                     </div>
 
+                    {/* Display error text with highlighting */}
                     <Highlight
                       startColor="#eca184"
                       endColor="#f8deb1"
@@ -118,6 +144,7 @@ export function ErrorReport({ errorReport }) {
                       {error.text}
                     </Highlight>
                   </div>
+                  {/* Copy to clipboard button */}
                   <CopyOutlined
                     size="small"
                     style={{
@@ -127,7 +154,7 @@ export function ErrorReport({ errorReport }) {
                       cursor: "pointer",
                     }}
                     onClick={(e) => {
-                      e.stopPropagation(); // 阻止事件冒泡，防止触发 Collapse 的展开/收起
+                      e.stopPropagation(); // Prevent event bubbling to avoid triggering Collapse expand/collapse
                       copyToClipboard(error.location, error.text);
                     }}
                   />

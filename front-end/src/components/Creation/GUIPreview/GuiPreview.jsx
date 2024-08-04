@@ -9,26 +9,34 @@ import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 
 export function GuiPreview() {
-  //二次封装的alert组件
+  // State for managing custom alert component
   const [alert, setAlert] = useState({
     show: false,
     message: "",
     severity: "info",
   });
-  //显示alert
+
+  // Function to display alert
   const showAlert = (message, severity = "info") => {
     setAlert({ show: true, message, severity });
   };
-  //隐藏alert
+
+  // Function to hide alert
   const hideAlert = () => {
     setAlert({ ...alert, show: false });
   };
+
+  // Get invoice data from custom hook
   const { invoiceData } = useInvoice();
+  // Check if this is an edit operation
   const is_edit = invoiceData.editBefore;
+  // Hook for programmatic navigation
   const navigate = useNavigate();
 
+  // Function to create a new draft invoice
   const handleCreateDraft = async () => {
     try {
+      // Generate UUID if not present
       if (invoiceData.uuid === "") {
         const uuid = uuidv4().substring(0, 28);
         invoiceData.uuid = uuid;
@@ -42,6 +50,7 @@ export function GuiPreview() {
     }
   };
 
+  // Function to update an existing draft invoice
   const handleUpdateDraft = async () => {
     try {
       await updateDraft(invoiceData, invoiceData.draftId);
@@ -53,6 +62,7 @@ export function GuiPreview() {
     }
   };
 
+  // Function to handle saving draft (create or update based on edit status)
   const handleSaveDraft = () => {
     if (is_edit) {
       handleUpdateDraft();
@@ -61,6 +71,7 @@ export function GuiPreview() {
     }
   };
 
+  // Function to render product rows
   const renderProductRows = () => {
     return invoiceData.orders.map((order, index) => (
       <div key={order.key} className="preview-product-row">
@@ -75,6 +86,7 @@ export function GuiPreview() {
 
   return (
     <div className="gui-preview">
+      {/* Render custom alert if show is true */}
       {alert.show && (
         <CustomAlert
           message={alert.message}
@@ -95,12 +107,16 @@ export function GuiPreview() {
           </Button>
         </div>
       </div>
+      {/* Main preview content */}
       <div className="preview-pdf-page">
+        {/* Invoice title */}
         <div className="preview-title-container">
           <div className="preview-invoice-name">{invoiceData.invoice_name}</div>
         </div>
+        {/* Bill to/from and invoice details */}
         <div className="preview-second-row">
           <div className="bill-from-to-info">
+            {/* Bill to section */}
             <div className="preview-second-row-title">Bill to: </div>
             <div className="preview-second-row-content">
               <div>{invoiceData.client_company_name}</div>
@@ -108,6 +124,7 @@ export function GuiPreview() {
               <div>{invoiceData.client_email}</div>
               <div>{invoiceData.client_address}</div>
             </div>
+            {/* Bill from section */}
             <div className="preview-second-row-title">Bill from: </div>
             <div className="preview-second-row-content">
               <div>{invoiceData.my_company_name}</div>
@@ -116,6 +133,7 @@ export function GuiPreview() {
               <div>{invoiceData.my_address}</div>
             </div>
           </div>
+          {/* Invoice details */}
           <div className="bill-info">
             <div className="preview-second-row-title">Invoice Subject: </div>
             <div className="preview-second-row-content">
@@ -139,6 +157,7 @@ export function GuiPreview() {
             </div>
           </div>
         </div>
+        {/* Product details table */}
         <div className="preview-products-row">
           <div className="preview-products-header">
             <div className="header-product">Description</div>
@@ -149,7 +168,9 @@ export function GuiPreview() {
           </div>
           {renderProductRows()}
         </div>
+        {/* Payment details and total */}
         <div className="preview-product-total-settle-pay-details">
+          {/* Payment account details */}
           <div className="preview-pay-details-row">
             <div className="preview-settle-title">PAY INTO ACCOUNT</div>
             <div className="preview-pay-details">
@@ -171,6 +192,7 @@ export function GuiPreview() {
               </div>
             </div>
           </div>
+          {/* Total calculation */}
           <div className="preview-total-settle-row">
             <div className="flex flex-row justify-between w-full">
               <div className="preview-settle-title">SUBTOTAL</div>
@@ -192,6 +214,7 @@ export function GuiPreview() {
             </div>
           </div>
         </div>
+        {/* Additional notes */}
         <div className="preview-note-row">
           <div className="preview-note-title">Note: </div>
           <div className="preview-note-content">{invoiceData.note}</div>

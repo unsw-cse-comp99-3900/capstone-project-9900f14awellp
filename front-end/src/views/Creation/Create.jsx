@@ -15,6 +15,11 @@ import { useInvoice } from "@/Content/GuiContent";
 
 import "./global.css";
 
+/**
+ * Validates the invoice data to ensure all required fields are filled
+ * @param {Object} data - The invoice data to validate
+ * @returns {Object} An object with isValid flag and array of empty fields if any
+ */
 function validateInvoiceData(data) {
   const requiredFields = [
     "invoice_name",
@@ -38,7 +43,7 @@ function validateInvoiceData(data) {
     "gst_total",
     "total_amount",
   ];
-
+  // Filter out empty fields
   const emptyFields = requiredFields.filter((field) => !data[field]);
 
   if (emptyFields.length > 0) {
@@ -48,7 +53,7 @@ function validateInvoiceData(data) {
     };
   }
 
-  // 检查订单数组
+  // Check each order item for required fields
   if (!data.orders || data.orders.length === 0) {
     return {
       isValid: false,
@@ -77,10 +82,12 @@ function validateInvoiceData(data) {
   return { isValid: true };
 }
 
+/**
+ * Main component for creating an invoice
+ */
 export default function Create() {
   const { invoiceData, clearInvoiceData, updateInvoiceData } = useInvoice();
-  console.log("invoiceData", invoiceData);
-
+  // State variables
   const [selectedCard, setSelectedCard] = useState(null);
   const [showCardSelector, setShowCardSelector] = useState(true);
   const [showUploadContent, setShowUploadContent] = useState(false);
@@ -90,38 +97,30 @@ export default function Create() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
-
-  // useEffect(() => {
-  //   console.log("Current step changed:", currentStep);
-  // }, [currentStep]);
-
-  // useEffect(() => {
-  //   console.log("Upload progress changed:", uploadProgress);
-  // }, [uploadProgress]);
-
+  // Define steps for the progress indicator
   const steps = ["Select", "Fill/Upload", "Done"];
-
+  // Define card options for selection
   const cards = [
     { icon: "✏️", title: "GUI Form", route: "form" },
     { icon: "📋", title: "File Upload", route: "upload" },
   ];
 
-  //二次封装的alert组件
+  // Alert state and functions
   const [alert, setAlert] = useState({
     show: false,
     message: "",
     severity: "info",
   });
-  //显示alert
+  //show alert
   const showAlert = (message, severity = "info") => {
     setAlert({ show: true, message, severity });
   };
-  //隐藏alert
+  //hide alert
   const hideAlert = () => {
     setAlert({ ...alert, show: false });
   };
 
-  // 根据当前路由的改变显示不同的内容
+  // Effect to update UI based on current route
   useEffect(() => {
     // isUploadRoute返回true或false来判断当前路由是否是'/create/upload'
     const isUploadRoute = location.pathname === "/create/upload";
@@ -130,15 +129,13 @@ export default function Create() {
     setCurrentStep(location.pathname === "/create" ? 0 : 1);
   }, [location]);
 
-  // 选择卡片，根据选择卡片的index设置selectedCard
+  // Handle card selection
   const handleCardSelect = (index) => {
     setSelectedCard(index);
   };
 
-  // 点击Continue按钮，根据selectedCard的值跳转到对应的路由
+  // Handle continue button click
   const handleContinue = async () => {
-    // console.log("handleContinue called. Current step:", currentStep);
-
     if (currentStep === 0) {
       if (selectedCard !== null) {
         // console.log(
@@ -158,14 +155,12 @@ export default function Create() {
       // 检查是否有文件被选择
       const fileInput = document.querySelector('input[type="file"]');
       if (fileInput && fileInput.files.length > 0) {
-        // console.log("File selected, starting upload");
-        // 开始上传进度动画
+        // Start upload progress animation
         setUploadProgress(0);
         let timer = setInterval(() => {
           setUploadProgress((prev) => {
             const newProgress =
               prev >= 100 || uploadComplete ? 100 : prev + 100 / 60;
-            //console.log("Upload progress:", newProgress);
             if (newProgress >= 100 || uploadComplete) {
               clearInterval(timer);
             }
@@ -173,13 +168,13 @@ export default function Create() {
           });
         }, 1000);
 
-        // 触发文件上传
+        // Trigger file upload
         window.dispatchEvent(new Event("uploadFile"));
       } else {
-        // console.log("No file selected");
         showAlert("submit after selecting a file", "warning");
       }
     } else if (currentStep === 1 && location.pathname === "/create/form") {
+      // Validate invoice data
       const validationResult = validateInvoiceData(invoiceData);
       if (!validationResult.isValid) {
         const emptyFieldsMessage = validationResult.emptyFields.join(", ");
@@ -190,12 +185,13 @@ export default function Create() {
         );
         return;
       }
-      //点击Continue按钮时，如果invoiceData中没有uuid，则生成一个uuid
+      // Generate UUID if not present
       if (invoiceData.uuid === "") {
         const newUuid = uuidv4();
         updateInvoiceData({ uuid: newUuid });
       }
 
+      // Submit invoice
       try {
         await submitInvoice(invoiceData);
         showAlert("submit successful", "success");
@@ -205,15 +201,14 @@ export default function Create() {
           navigate("/success");
         }, 2000);
       } catch (error) {
-        console.error("提交发票时出错:", error);
         showAlert(error.message, "error");
       }
     }
   };
 
+  // Handle back button click
   const handleBack = () => {
     if (currentStep === 1) {
-      // console.log("Attempting to navigate back to /create");
       if (location.pathname === "/create/form") {
         setShowModal(true);
       } else {
@@ -224,8 +219,8 @@ export default function Create() {
     }
   };
 
+  // Handle modal OK button click
   const handleModalOk = () => {
-    // console.log("Navigating back to /create");
     if (location.pathname === "/create/form") {
       clearInvoiceData();
     }
@@ -234,7 +229,6 @@ export default function Create() {
     window.history.pushState({}, "", "/create");
     window.dispatchEvent(new CustomEvent("locationchange"));
     setShowModal(false);
-    // console.log("Custom navigation event dispatched");
   };
 
   const handleModalCancel = () => {
@@ -243,7 +237,6 @@ export default function Create() {
 
   useEffect(() => {
     const handleLocationChange = () => {
-      // console.log("Location changed event triggered");
       setShowCardSelector(window.location.pathname === "/create");
       setCurrentStep(window.location.pathname === "/create" ? 0 : 1);
     };

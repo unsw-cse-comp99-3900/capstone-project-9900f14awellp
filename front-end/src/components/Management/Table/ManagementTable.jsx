@@ -47,8 +47,11 @@ const statusMapping = {
   Passed: "Success",
 };
 
-// 格式化日期
-// Format date
+/**
+ * Formats a date string to a more readable format
+ * @param {string} dateString - The date string to format
+ * @returns {string} The formatted date string
+ */
 const formatDate = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -59,8 +62,11 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
-// 格式化total
-// Format total
+/**
+ * Formats a price value to a currency string
+ * @param {number|string} price - The price to format
+ * @returns {string} The formatted price string
+ */
 const formatPrice = (price) => {
   if (price === null || price === undefined) return "";
   if (typeof price === "string" && price.startsWith("$")) {
@@ -69,8 +75,12 @@ const formatPrice = (price) => {
   return `$${Number(price).toFixed(2)}`;
 };
 
-// 截断单元格
-// Truncate cell
+/**
+ * A component that truncates long text content
+ * @param {Object} props - The component props
+ * @param {string} props.content - The text content to truncate
+ * @param {number} [props.maxLength=20] - The maximum length before truncation
+ */
 const TruncatedCell = ({ content, maxLength = 20 }) => {
   if (content.length <= maxLength) return content;
 
@@ -84,6 +94,10 @@ const TruncatedCell = ({ content, maxLength = 20 }) => {
   );
 };
 
+/**
+ * Renders a custom tag for the status filter
+ * @param {Object} props - The tag render props
+ */
 const tagRender = (props) => {
   const { label, value, closable, onClose } = props;
   return (
@@ -95,7 +109,9 @@ const tagRender = (props) => {
     />
   );
 };
-
+/**
+ * The main ManageTable component
+ */
 export const ManageTable = forwardRef((props, ref) => {
   // const data = defaultData;
   const [data, _setData] = React.useState([]);
@@ -112,7 +128,10 @@ export const ManageTable = forwardRef((props, ref) => {
     pageIndex: 0,
     pageSize: 8,
   });
+
+  //Navigation function
   const navigate = useNavigate();
+  //govalidata and gosend withe uuid
   const goValidate = (uuid) => {
     navigate(`/validate/id=${uuid}`);
   };
@@ -120,6 +139,7 @@ export const ManageTable = forwardRef((props, ref) => {
     navigate(`/send/id=${uuid}`);
   };
 
+  //Dropdown menu items
   const items = [
     {
       key: "1",
@@ -151,7 +171,7 @@ export const ManageTable = forwardRef((props, ref) => {
     }
   };
 
-  //*获取数据
+  //fetches data from API
   useEffect(() => {
     invoiceBasicInfo()
       .then((response) => {

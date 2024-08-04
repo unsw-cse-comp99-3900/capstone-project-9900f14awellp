@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { ResponsiveAppBar } from "../../components/Navbar";
 import { ManageTable } from "@/components/Management/Table/ManagementTable";
 import { AdminManagementTable } from "@/components/Management/AdminTable/AdminManagementTable";
 import { CustomAlert } from "../../components/Alert/MUIAlert";
@@ -19,33 +18,28 @@ export function InvoiceManagement() {
     navigate("/create");
   };
 
-  //二次封装的alert组件
+  // alert state
   const [alert, setAlert] = useState({
     show: false,
     message: "",
     severity: "info",
   });
-  //显示alert
+  //show alert
   const showAlert = (message, severity = "info") => {
     setAlert({ show: true, message, severity });
   };
-  //隐藏alert
+  //hide alert
   const hideAlert = () => {
     setAlert({ ...alert, show: false });
   };
 
+  // export to excel
   const handleExport = async () => {
-    //console.log('Export button clicked');
-
     try {
       if (tableRef.current) {
-        //console.log('tableRef is available');
-
         const selectedData = tableRef.current.getSelectedData();
-        //console.log('Selected data:', selectedData);
 
         if (selectedData.length === 0) {
-          //console.log('No data selected');
           showAlert("Select at least one row to export", "info");
           return;
         }
@@ -53,9 +47,6 @@ export function InvoiceManagement() {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Invoices");
 
-        //console.log('Workbook and worksheet created');
-
-        // 添加表头
         worksheet.addRow([
           "No.",
           "Invoice",
@@ -65,8 +56,6 @@ export function InvoiceManagement() {
           "Payment Due",
           "Price",
         ]);
-
-        // 添加数据
         selectedData.forEach((row) => {
           worksheet.addRow([
             row.invoice_number,
@@ -79,33 +68,11 @@ export function InvoiceManagement() {
           ]);
         });
 
-        //console.log('Data added to worksheet'); // 调试日志
-
-        // 生成Excel文件并下载
         const buffer = await workbook.xlsx.writeBuffer();
-        //console.log('Excel buffer created'); // 调试日志
-
-        // const blob = new Blob([buffer], {
-        // 	type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        // });
-        // const url = window.URL.createObjectURL(blob);
-        // const a = document.createElement('a');
-        // a.style.display = 'none';
-        // a.href = url;
-        // a.download = 'invoices.xlsx';
-        // document.body.appendChild(a);
-        // a.click();
-        // window.URL.revokeObjectURL(url);
-        // document.body.removeChild(a);
         saveAs(new Blob([buffer]), "invoices.xlsx");
-
-        //console.log('File download initiated'); }// 调试日志
-        // } else {
-        //console.error('tableRef is not available'); // 错误日志
       }
     } catch (error) {
-      //console.error('Error in handleExport:', error); // 错误日志
-      alert("error in handleExport:", error);
+      showAlert(error.message, "error");
     }
   };
 

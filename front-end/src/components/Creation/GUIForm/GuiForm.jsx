@@ -9,6 +9,7 @@ import { FlagIcon } from "react-flag-kit";
 
 const { TextArea } = Input;
 
+// Currency options for the select dropdown
 const options = [
   {
     value: "AUD",
@@ -25,47 +26,54 @@ const options = [
 ];
 
 export function GuiForm() {
+  // Custom hook to manage invoice data
   const { invoiceData, updateInvoiceData, clearInvoiceData } = useInvoice();
+
+  // Generic handler for input changes
   const handleInputChange = (field, value) => {
     updateInvoiceData({ [field]: value });
   };
 
+  // State for validation errors
   const [myEmailError, setMyEmailError] = useState("");
   const [clientEmailError, setClientEmailError] = useState("");
-
   const [myABNError, setMyABNError] = useState("");
   const [clientABNError, setClientABNError] = useState("");
 
+  // Email validation function
   const validateEmail = (email) => {
     const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return re.test(String(email).toLowerCase());
   };
 
+  // ABN validation function
   const validateABN = (abn) => {
-    // 允许数字之间有0到多个空格，总共11个数字
+    // Allow 0 to multiple spaces between digits, total 11 digits
     const re = /^\d(?:\s*\d){10}$/;
 
-    // 移除所有空格
+    // Remove all spaces
     const cleanedAbn = abn.replace(/\s+/g, "");
 
-    // 检查格式是否正确且清理后的ABN长度为11
+    // Check if format is correct and cleaned ABN length is 11
     if (!re.test(abn) || cleanedAbn.length !== 11) {
       return false;
     } else {
       return true;
     }
-
-    // ABN 校验算法
-    // const weights = [10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
-    // let sum = 0;
-
-    // for (let i = 0; i < 11; i++) {
-    //   sum += (parseInt(cleanedAbn[i]) - (i === 0 ? 1 : 0)) * weights[i];
-    // }
-
-    // return sum % 89 === 0;
   };
 
+  // ABN validation algorithm
+  //   const weights = [10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
+  //   let sum = 0;
+
+  //   for (let i = 0; i < 11; i++) {
+  //     sum += (parseInt(cleanedAbn[i]) - (i === 0 ? 1 : 0)) * weights[i];
+  //   }
+
+  //   return sum % 89 === 0;
+  // };
+
+  // Handle email validation on blur
   const handleEmailBlur = (field, value, setError) => {
     if (!validateEmail(value)) {
       setError("Please enter a valid email address");
@@ -74,9 +82,10 @@ export function GuiForm() {
     }
   };
 
+  // Handle ABN validation on blur
   const handleABNBlur = (field, value, setError) => {
     if (!validateABN(value)) {
-      setError("Please enter a 11-digital ABN");
+      setError("Please enter a valid ABN");
     } else {
       setError("");
     }
@@ -84,9 +93,11 @@ export function GuiForm() {
 
   return (
     <div className="form-container">
+      {/* Invoice Details Section */}
       <div className="details-container">
         <div className="details-title">Invoice Details</div>
         <div className="inputs-group">
+          {/* Subject Input */}
           <div className="title-and-input">
             <div>Subject*</div>
             <Input
@@ -98,6 +109,7 @@ export function GuiForm() {
               }
             />
           </div>
+          {/* Invoice Number Input */}
           <div className="title-and-input">
             <div>Invoice Number*</div>
             <Input
@@ -107,6 +119,7 @@ export function GuiForm() {
               onChange={(e) => handleInputChange("invoice_num", e.target.value)}
             />
           </div>
+          {/* Date Pickers */}
           <div className="title-and-input">
             <div>Dates*</div>
             <div className="datepicker-groups">
@@ -134,6 +147,7 @@ export function GuiForm() {
               />
             </div>
           </div>
+          {/* Currency Select */}
           <div className="title-and-input">
             <div>Currency*</div>
             <Select
@@ -150,11 +164,14 @@ export function GuiForm() {
           </div>
         </div>
       </div>
+
+      {/* My Details Section */}
       <div className="details-container">
         <div className="title-row">
           <div className="details-title">My Details</div>
         </div>
         <div className="inputs-group">
+          {/* Company Name Input */}
           <div className="title-and-input">
             <div>Company Name*</div>
             <Input
@@ -166,6 +183,7 @@ export function GuiForm() {
               }
             />
           </div>
+          {/* Address Input */}
           <div className="title-and-input">
             <div>Address*</div>
             <Input
@@ -175,7 +193,7 @@ export function GuiForm() {
               onChange={(e) => handleInputChange("my_address", e.target.value)}
             />
           </div>
-
+          {/* ABN Input with validation */}
           <div className="title-and-input">
             <div>ABN*</div>
             <Form.Item
@@ -193,7 +211,7 @@ export function GuiForm() {
               />
             </Form.Item>
           </div>
-
+          {/* Email Input with validation */}
           <div className="title-and-input">
             <div>Email*</div>
             <Form.Item
@@ -213,9 +231,12 @@ export function GuiForm() {
           </div>
         </div>
       </div>
+
+      {/* Client Details Section */}
       <div className="details-container">
         <div className="details-title">Client Details</div>
         <div className="inputs-group">
+          {/* Client Company Name Input */}
           <div className="title-and-input">
             <div>Company Name*</div>
             <Input
@@ -227,6 +248,7 @@ export function GuiForm() {
               }
             />
           </div>
+          {/* Client Address Input */}
           <div className="title-and-input">
             <div>Address*</div>
             <Input
@@ -238,7 +260,7 @@ export function GuiForm() {
               }
             />
           </div>
-
+          {/* Client ABN Input with validation */}
           <div className="title-and-input">
             <div>ABN*</div>
             <Form.Item
@@ -258,7 +280,7 @@ export function GuiForm() {
               />
             </Form.Item>
           </div>
-
+          {/* Client Email Input with validation */}
           <div className="title-and-input">
             <div>Email*</div>
             <Form.Item
@@ -284,13 +306,18 @@ export function GuiForm() {
           </div>
         </div>
       </div>
+
+      {/* Products Section */}
       <div className="details-container">
         <div className="details-title">Products</div>
         <GuiTable />
       </div>
+
+      {/* Payment Details Section */}
       <div className="details-container">
         <div className="details-title">Payment Details</div>
         <div className="inputs-group">
+          {/* Bank Name Input */}
           <div className="title-and-input">
             <div>Bank Name*</div>
             <Input
@@ -300,6 +327,7 @@ export function GuiForm() {
               onChange={(e) => handleInputChange("bank_name", e.target.value)}
             />
           </div>
+          {/* Account Info Inputs */}
           <div className="title-and-input">
             <div>Account Info*</div>
             <div className="datepicker-groups">
@@ -321,6 +349,7 @@ export function GuiForm() {
               />
             </div>
           </div>
+          {/* Account Name Input */}
           <div className="title-and-input">
             <div>Account Name*</div>
             <Input
@@ -334,6 +363,8 @@ export function GuiForm() {
           </div>
         </div>
       </div>
+
+      {/* Notes Section */}
       <div className="details-container">
         <div className="details-title">Notes</div>
         <TextArea

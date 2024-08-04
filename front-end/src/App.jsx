@@ -11,7 +11,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: "Lexend Deca", // 字体
+    fontFamily: "Lexend Deca", // font family for all text
   },
 });
 
