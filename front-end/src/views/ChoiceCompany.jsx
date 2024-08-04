@@ -116,14 +116,18 @@ export default function Choice() {
       .then((response) => {
         console.log("Response:", response.data);
         console.log(formData);
-        // alert('You create a company!');
         setAlert({ severity: "success", message: "You create a company!" });
         handleSubmitCreateForm();
       })
       .catch((error) => {
-        console.log(formData);
-        console.log(error.message);
-        setAlert({ severity: "error", message: error.message });
+        if (error.response) {
+          console.log(formData);
+          setAlert({ severity: "error", message: error.response.data.error });
+          console.log(error.response);
+        } else {
+          setAlert({ severity: "error", message: error.message });
+          console.log(error.message);
+        }
       });
   };
 

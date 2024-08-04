@@ -109,18 +109,12 @@ export default function Profile() {
         setAlert({
           severity: "success",
           message: "Profile updated successfully",
-        });
-        // Update the local state with the new avatar URL
-      // setProfileData((prevState) => ({
-      //   ...prevState,
-      //   avatar: response.data.avatar, // Assuming the server responds with the updated avatar URL
-      // }));
-      // setIsEditing(false);
+        })
         window.location.reload();
       })
       .catch((error) => {
         if (error.response) {
-          setAlert({ severity: "error", message: "Profile updated fail" });
+          setAlert({ severity: "error", message: error.response.data.error });
           console.log(profileData);
         } else {
           setAlert({ severity: "error", message: error.message });

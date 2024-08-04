@@ -97,7 +97,7 @@ export default function Sending() {
         { message: fullMessage },
         {
           params: {
-            uuids: uuids.join(",") || id_num,
+            uuids: uuids.join(","),
             email: email,
           },
           headers: {
@@ -109,7 +109,6 @@ export default function Sending() {
       )
       .then((response) => {
         console.log(response.data);
-        // alert(response.data.msg);
         setAlert({ severity: "success", message: response.data.msg });
         setShowIcon(false); // 隐藏等待图标
         handleClear();
@@ -119,9 +118,9 @@ export default function Sending() {
         if (error.response) {
           setAlert({
             severity: "error",
-            message: error.response.data.detail || "Please input details.",
+            message: error.response.data.error || "Please input details.",
           });
-          //alert(error.response.data.detail || 'Send failed');
+          console.log(error.response);
         } else {
           setAlert({ severity: "error", message: error.message });
           console.log(error.message);

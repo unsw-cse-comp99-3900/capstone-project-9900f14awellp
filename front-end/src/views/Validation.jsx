@@ -136,7 +136,7 @@ export default function Validation() {
         if (error.response) {
           setAlert({
             severity: "error",
-            message: error.response.data.detail || "validate failed",
+            message: error.response.data.error || "validate failed",
           });
           setValidationReport(error.response.data.validation_report);
         } else {
