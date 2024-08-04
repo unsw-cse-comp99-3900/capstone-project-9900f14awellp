@@ -18,7 +18,6 @@ export const UserTextField = ({ label, id, variant, value, onChange, dataTestId 
       sx={{
         "& .MuiTextField-root": { m: 1, width: "25ch" },
       }}
-      // noValidate
       autoComplete="on"
     >
       <div>
@@ -99,7 +98,6 @@ export const PasswordTextField = ({
   label,
   value,
   onChange,
-  helperText,
 }) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -111,7 +109,6 @@ export const PasswordTextField = ({
     <Box sx={{ display: "flex", flexWrap: "wrap" }}>
       <div>
         <FormControl sx={{ m: 1, width: "25ch" }} variant="outlined">
-          {/* <InputLabel htmlFor={id}>{label}</InputLabel> */}
           <InputLabel htmlFor="all-password">{label}</InputLabel>
           <OutlinedInput
             required

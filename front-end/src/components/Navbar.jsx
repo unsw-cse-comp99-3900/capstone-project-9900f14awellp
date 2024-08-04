@@ -15,9 +15,9 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { getCurrentUserInfo } from "@/apis/users";
-import { DownOutlined } from "@ant-design/icons";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
+// for navbar in many pages
 const pages = ["Create", "Validate", "Send", "Manage"];
 const settings = ["Profile", "Draft", "Company Details", "Logout"];
 const admin_settings = [
@@ -30,6 +30,7 @@ const admin_settings = [
 
 const is_admin = localStorage.getItem("is_admin") === "true";
 
+// say hello message in the narbar
 const getGreeting = () => {
   const currentHour = new Date().getHours();
 
@@ -43,7 +44,7 @@ const getGreeting = () => {
     return "Good Night 👋";
   }
 };
-
+// navbar
 export const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -68,7 +69,7 @@ export const ResponsiveAppBar = () => {
     navigate(`/${page.toLowerCase().replace(" ", "-")}`);
     handleCloseNavMenu();
   };
-
+// for logout
   const handleNavigateProfile = (setting) => {
     const path = setting.toLowerCase().replace(" ", "-");
     if (path === "logout") {
@@ -198,7 +199,6 @@ export const ResponsiveAppBar = () => {
                   display: "flex",
                   alignItems: "center",
                   gap: 1,
-                  // border: "1px solid #333",
                   borderRadius: "30px",
                 }}
               >

@@ -28,7 +28,7 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-
+// basic model
 export const BasicModal = ({ title, open, onClose, children, actions }) => {
   return (
     <Modal
@@ -64,6 +64,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
   });
   
+// this is a model for policy
 export const AlertDialogSlide = ({ fontsize }) => {
     const [open, setOpen] = React.useState(false);
   
@@ -94,7 +95,7 @@ export const AlertDialogSlide = ({ fontsize }) => {
         href="#" 
         underline="hover" 
         color="inherit"
-        style={{ fontSize: fontsize }} // 调整字体大小
+        style={{ fontSize: fontsize }} 
         >
           By clicking Login, you agree to our Terms of Service and Privacy
           Policy
@@ -121,7 +122,7 @@ export const AlertDialogSlide = ({ fontsize }) => {
       </React.Fragment>
     );
 };
-
+// this is a model for forget password
 export default function FormDialog({ onFormSubmit }) {
   const [open, setOpen] = React.useState(false);
 
@@ -135,9 +136,6 @@ export default function FormDialog({ onFormSubmit }) {
 
   return (
     <React.Fragment>
-      {/* <Button variant="outlined" onClick={handleClickOpen}>
-        Forget your password?
-      </Button> */}
       <UnderlineLink onClick={handleClickOpen} fontsize="9px">
                         Forget your password?
         </UnderlineLink>
@@ -153,7 +151,7 @@ export default function FormDialog({ onFormSubmit }) {
             const email = formJson.email;
             const username = formJson.username;
             console.log(email, username);
-            onFormSubmit({ email, username }); // 调用父组件传递的回调函数
+            onFormSubmit({ email, username });
             handleClose();
           },
         }}
@@ -214,9 +212,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 export const CustomizedDialogs =() => {
   const [open, setOpen] = React.useState(true);
 
-  // const handleClickOpen = () => {
-  //   setOpen(true);
-  // };
+  
   const handleClose = () => {
     setOpen(false);
   };

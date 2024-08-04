@@ -3,6 +3,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import { useEffect } from 'react';
 
+// alert
 export default function OutlinedAlert({ severity, children, onClose }) {
   useEffect(() => {
     const timer = setTimeout(() => {

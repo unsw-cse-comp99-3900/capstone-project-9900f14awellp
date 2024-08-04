@@ -2,7 +2,7 @@ import * as React from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
 
 
-
+// for the pie chart in the dashboard
 export default function PieActiveArc({data}) {
   return (
     <PieChart

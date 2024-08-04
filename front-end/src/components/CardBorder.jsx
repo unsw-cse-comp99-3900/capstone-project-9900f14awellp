@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, Col, Row, Statistic } from 'antd';
-import ShineBorder from './ShineBorder'; // 假设ShineBorder文件在同一个目录下
+import ShineBorder from './ShineBorder'; 
 
+// for the card border in the dashboard
 export const DashboardCard = ({total, success,fail,unvalidated}) => (
   <Row gutter={16}>
     <Col span={6}>

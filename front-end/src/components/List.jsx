@@ -4,7 +4,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { FixedSizeList } from 'react-window';
-//import ListSubheader from '@mui/material/ListSubheader';
 import List from '@mui/material/List';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Collapse from '@mui/material/Collapse';
@@ -26,16 +25,16 @@ function renderRow(props) {
     </ListItem>
   );
 }
-
+// list
 export const VirtualizedList = ({ height }) => {
   return (
     <Box
       sx={{ 
         width: {
-          xs: '30%', // 宽度在小屏幕设备上
-          sm: '30%', // 30% 宽度在中等屏幕设备上
-          md: '30%', // 30% 宽度在较大屏幕设备上
-          lg: '30%', // 30% 宽度在超大屏幕设备上
+          xs: '30%', 
+          sm: '30%', 
+          md: '30%', 
+          lg: '30%', 
         },
         height: height, 
         maxWidth: 360, 
@@ -67,8 +66,7 @@ export const VirtualizedList = ({ height }) => {
 }
 
 
-// const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
-
+// for nested list in sending page
 export const NestedList = ({ passedList, failedList, unvalidatedList, onInvoiceSelect, selectedInvoices }) =>{
   const [openValidatedPass, setOpenValidatedPass] = React.useState(true);
   const [openValidatedFail, setOpenValidatedFail] = React.useState(true);
@@ -92,11 +90,6 @@ export const NestedList = ({ passedList, failedList, unvalidatedList, onInvoiceS
       sx={{ width: '100%', maxWidth: 360 }}
       component="nav"
       aria-labelledby="nested-list-subheader"
-      // subheader={
-      //   <ListSubheader component="div" id="nested-list-subheader">
-      //     Choice your invoices
-      //   </ListSubheader>
-      // }
     >
       <ListItemButton onClick={passClick}>
         <ListItemIcon>

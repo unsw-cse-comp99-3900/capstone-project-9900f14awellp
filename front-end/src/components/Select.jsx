@@ -7,6 +7,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import OutlinedInput from "@mui/material/OutlinedInput";
 
+// for selected invoices in validation page
 export const SelectSmall = ({ invoices, selectedInvoice, onChange, dataTestId }) => {
   return (
     <FormControl sx={{ m: 1, minWidth: 100, width: '100%', maxHeight: 400 }} size="small">
@@ -58,6 +59,7 @@ const MenuProps = {
   },
 };
 
+// for selected rules in validation page
 export const MultipleSelect = ({lists, onChange, selected, dataTestId}) => {
   const theme = useTheme();
   const [personName, setPersonName] = React.useState([]);
@@ -74,7 +76,7 @@ export const MultipleSelect = ({lists, onChange, selected, dataTestId}) => {
       // On autofill we get a stringified value.
       typeof value === "string" ? value.split(",") : value
     );
-    onChange(value); // 调用父组件传递的onChange处理函数
+    onChange(value); 
   };
 
   return (

@@ -13,6 +13,7 @@ import shipping from "../assets/shipping.gif";
 import OutlinedAlerts from "../components/Alert";
 import SparklesText from "@/components/SparklesText";
 
+// this is send page
 export default function Sending() {
   const token = localStorage.getItem("token");
   const [showIcon, setShowIcon] = useState(false);
@@ -37,10 +38,8 @@ export default function Sending() {
       const idParts = id.split('=');
       if (idParts.length > 1) {
         setIdNum(idParts[1]);
-        console.log(idNum);
       } else {
         setIdNum(id); // If there is no '=' character, just use the id as is
-        console.log(idNum);
       }
     } else {
       console.log('No ID in the URL');
@@ -50,10 +49,10 @@ export default function Sending() {
   useEffect(() => {
     if (idNum && invoiceUuidMap) {
       // Find the file name corresponding to the idNum (UUID)
-      const idName = Object.keys(invoiceUuidMap).find(key => invoiceUuidMap[key] === idNum);
-      if (idName) {
-        setIdName(idName); // Set the file name in state
-        setSelectedInvoices([idName]); // Select the invoice file name
+      const foundIdName = Object.keys(invoiceUuidMap).find(key => invoiceUuidMap[key] === idNum);
+      if (foundIdName) {
+        setIdName(foundIdName); // Set the file name in state
+        setSelectedInvoices([foundIdName]); // Select the invoice file name
       }
     }
   }, [idNum, invoiceUuidMap]); // Run the effect when `idNum` or `invoiceUuidMap` changes
@@ -65,7 +64,7 @@ export default function Sending() {
     setMessage("");
     setSelectedInvoices([]);
   };
-
+// get all invoices data
   const fetchInvoiceData = useCallback(() => {
     axios
       .get(`http://127.0.0.1:8000/invoice/invoice-info/`, {
@@ -75,7 +74,6 @@ export default function Sending() {
         },
       })
       .then((response) => {
-        console.log(response.data);
         const passedData = response.data.filter(
           (entry) => entry.state === "Passed"
         );
@@ -89,19 +87,6 @@ export default function Sending() {
         const passedList = passedData.map((entry) => entry.file.split("/").pop());
         const failedList = failedData.map((entry) => entry.file.split("/").pop());
         const unvalidatedList = unvalidatedData.map((entry) => entry.file.split("/").pop());
-
-        // if (idName) {
-        //   // Only include the invoice with idNum if it exists in the lists
-        //   setPassedList(passedList.includes(idName) ? [idName] : []);
-        //   setFailedList(failedList.includes(idName) ? [idName] : []);
-        //   setUnvalidatedList(unvalidatedList.includes(idName) ? [idName] : []);
-        //   console.log('1');
-        // } else {
-        //   setPassedList(passedList);
-        //   setFailedList(failedList);
-        //   setUnvalidatedList(unvalidatedList);
-        //   console.log(selectedInvoices)
-        // }
         setPassedList(passedList);
         setFailedList(failedList);
         setUnvalidatedList(unvalidatedList);
@@ -113,7 +98,6 @@ export default function Sending() {
         setInvoiceUuidMap(uuidMap);
       })
       .catch((error) => {
-        console.log(error.message);
         setAlert({ severity: "error", message: error.message });
       });
   }, [token]);
@@ -122,6 +106,7 @@ export default function Sending() {
     fetchInvoiceData();
   }, [token, fetchInvoiceData]);
 
+// post invoice id and input details to backend
   const handleSend = () => {
     const uuids = selectedInvoices.map((invoice) => invoiceUuidMap[invoice]);
     const fullMessage = `Dear ${firstName} ${lastName}: \n${message}`;
@@ -150,9 +135,9 @@ export default function Sending() {
         }
       )
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
         setAlert({ severity: "success", message: response.data.msg });
-        setShowIcon(false); // 隐藏等待图标
+        setShowIcon(false); 
         handleClear();
         fetchInvoiceData();
       })
@@ -161,13 +146,11 @@ export default function Sending() {
           setAlert({
             severity: "error",
             message: error.response.data.error || "Please input details.",
-          });
-          console.log(error.response);
+          });     
         } else {
           setAlert({ severity: "error", message: error.message });
-          console.log(error.message);
         }
-        setShowIcon(false); // 隐藏等待图标，即使出错也要隐藏
+        setShowIcon(false); 
       });
   };
 
@@ -188,7 +171,6 @@ export default function Sending() {
             position: "fixed",
             top: "11vh",
             right: 10,
-            // transform: 'translateX(-50%)',
             width: "30%",
             zIndex: 9999,
           }}
@@ -204,22 +186,18 @@ export default function Sending() {
       <Box
         sx={{
           height: "calc(100vh - 80px)",
-          // height: '80vh',
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           borderColor: "divider",
           borderRadius: 2,
           overflow: "hidden",
-          // bgcolor: 'background.paper',
-          // color: 'text.secondary',
           marginTop: "10px",
           "& svg": {
             m: 1,
           },
         }}
       >
-        {/* maxHeight: 'calc(100vh - 300px)', minHeight: 'calc(100vh - 350px)' */}
         <div
           style={{ margin: "50px", overflow: "auto", height: "calc(450px)" }}
         >

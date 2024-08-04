@@ -1,5 +1,7 @@
 import React from 'react';
 import { Flex, Progress } from 'antd';
+
+// for process in the draft
 const Colors = {
     '0%': '#ffccc7',
     '50%': '#ffe58f',
