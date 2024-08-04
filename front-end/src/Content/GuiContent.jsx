@@ -2,19 +2,26 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { CompanyInfo } from "@/apis/gui";
 
+// Create a context for invoice data
 const InvoiceContext = createContext();
 
+// Get the authentication token from local storage
 const token = localStorage.getItem("token");
 
+/**
+ * InvoiceProvider component to manage and provide invoice data context
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
+ */
 export function InvoiceProvider({ children }) {
+  // State to hold invoice data
   const [invoiceData, setInvoiceData] = useState({
-    //! editBefore用来标识是否是编辑之前的数据，如果从draft表格跳转过来，就是true
+    // Flag to indicate if this is data before editing (true if coming from draft table)
     editBefore: false,
-    //! draftId用来标识是哪个draft，从draft表格跳转过来的时候更新，
-    //! 要在1. 使用patch来部分更新时使用；2. 保存为正式invoice时用来删除相应draft
+    // ID of the draft invoice, used for updating or deleting when finalizing
     draftId: "",
-    //TODO: 上面这两个字段需要从draft表格跳转过来的时候更新
-    //TODO: 下面的所有字段,从draft表格跳转过来的时候, 用get /invoice-draft接口来获取后更新
+    // NOTE: The above two fields need to be updated when navigating from the draft table
+    // NOTE: All fields below should be updated using the GET /invoice-draft API when coming from the draft table
     uuid: "",
     invoice_name: "",
     invoice_num: "",
@@ -40,6 +47,7 @@ export function InvoiceProvider({ children }) {
     orders: [],
   });
 
+  // Fetch company info if user is authenticated
   if (token) {
     useEffect(() => {
       const fetchCompanyInfo = async () => {
@@ -60,10 +68,17 @@ export function InvoiceProvider({ children }) {
     }, []);
   }
 
+  /**
+   * Update invoice data
+   * @param {Object} newData - New data to update
+   */
   const updateInvoiceData = (newData) => {
     setInvoiceData((prevData) => ({ ...prevData, ...newData }));
   };
 
+  /**
+   * Clear invoice data, resetting most fields except company info
+   */
   const clearInvoiceData = () => {
     setInvoiceData((prevData) => ({
       editBefore: false,
@@ -94,6 +109,7 @@ export function InvoiceProvider({ children }) {
     }));
   };
 
+  // Provide the invoice context to child components
   return (
     <InvoiceContext.Provider
       value={{ invoiceData, updateInvoiceData, clearInvoiceData }}
@@ -103,4 +119,8 @@ export function InvoiceProvider({ children }) {
   );
 }
 
+/**
+ * Custom hook to use the invoice context
+ * @returns {Object} Invoice context value
+ */
 export const useInvoice = () => useContext(InvoiceContext);

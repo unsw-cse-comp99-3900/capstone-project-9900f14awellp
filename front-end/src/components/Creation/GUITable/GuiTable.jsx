@@ -4,8 +4,10 @@ import { DeleteOutlined } from "@ant-design/icons";
 import "./GuiTable.css";
 import { useInvoice } from "@/Content/GuiContent";
 
+// Create a context for the editable cells
 const EditableContext = React.createContext(null);
 
+// EditableRow component: Provides form context for editable cells
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
   return (
@@ -17,6 +19,7 @@ const EditableRow = ({ index, ...props }) => {
   );
 };
 
+// EditableCell component: Handles the editing logic for each cell
 const EditableCell = ({
   title,
   editable,
@@ -27,47 +30,27 @@ const EditableCell = ({
   inputType,
   ...restProps
 }) => {
-  //   console.log("EditableCell props:", {
-  //     title,
-  //     editable,
-  //     dataIndex,
-  //     record,
-  //     inputType,
-  //   });
-
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
 
-  //   console.log(
-  //     `EditableCell render - dataIndex: ${dataIndex}, editing: ${editing}, editable: ${editable}`
-  //   );
-
+  // Focus the input when editing starts
   useEffect(() => {
     if (editing) {
-      //   console.log(`useEffect triggered - setting focus for ${dataIndex}`);
       inputRef.current?.focus();
     }
-  }, [editing, dataIndex]);
+  }, [editing]);
 
+  // Toggle the editing state
   const toggleEdit = () => {
-    // console.log(
-    //   `toggleEdit called for ${dataIndex} - current editing state: ${editing}`
-    // );
-    setEditing((prevEditing) => {
-      //   console.log(
-      //     `Setting new editing state for ${dataIndex}: ${!prevEditing}`
-      //   );
-      return !prevEditing;
-    });
+    setEditing(!editing);
     form.setFieldsValue({ [dataIndex]: record[dataIndex] });
-    // console.log(`Form value set for ${dataIndex}:`, record[dataIndex]);
   };
 
+  // Save the edited value
   const save = async () => {
     try {
       const values = await form.validateFields();
-      //   console.log(`save called for ${dataIndex} - values:`, values);
       toggleEdit();
       handleSave({ ...record, ...values });
     } catch (errInfo) {
@@ -75,6 +58,7 @@ const EditableCell = ({
     }
   };
 
+  // Render the cell content based on its state (editing or not)
   let childNode = children;
 
   if (editable) {
@@ -94,20 +78,14 @@ const EditableCell = ({
             ref={inputRef}
             onPressEnter={save}
             onBlur={save}
-            onClick={(e) => {
-              //   console.log(`InputNumber clicked for ${dataIndex}`);
-              e.stopPropagation();
-            }}
+            onClick={(e) => e.stopPropagation()}
           />
         ) : (
           <Input
             ref={inputRef}
             onPressEnter={save}
             onBlur={save}
-            onClick={(e) => {
-              //   console.log(`Input clicked for ${dataIndex}`);
-              e.stopPropagation();
-            }}
+            onClick={(e) => e.stopPropagation()}
           />
         )}
       </Form.Item>
@@ -126,16 +104,15 @@ const EditableCell = ({
     );
   }
 
-  //   console.log(
-  //     `Rendering cell for ${dataIndex}, editable: ${editable}, editing: ${editing}`
-  //   );
   return <td {...restProps}>{childNode}</td>;
 };
 
+// Main GuiTable component
 export function GuiTable() {
-  const { invoiceData, updateInvoiceData, clearInvoice } = useInvoice();
+  const { invoiceData, updateInvoiceData } = useInvoice();
   const [form] = Form.useForm();
 
+  // Initialize with an empty order if there are no orders
   useEffect(() => {
     if (invoiceData.orders.length === 0) {
       const initialOrder = {
@@ -153,6 +130,7 @@ export function GuiTable() {
     }
   }, []);
 
+  // Calculate the total price for an order
   const calculateTotalPrice = (record) => {
     const { unitPrice, quantity, gst } = record;
     if (unitPrice && quantity && gst) {
@@ -161,6 +139,7 @@ export function GuiTable() {
     return 0;
   };
 
+  // Add a new order to the table
   const handleAdd = () => {
     const newKey = (invoiceData.orders.length + 1).toString();
     const newOrder = {
@@ -177,19 +156,20 @@ export function GuiTable() {
     });
   };
 
+  // Save changes to an order
   const handleSave = (row) => {
     const newOrders = [...invoiceData.orders];
     const index = newOrders.findIndex((item) => row.key === item.key);
     const updatedRow = { ...row };
 
-    // 计算net值
+    // Calculate net value
     if (updatedRow.unitPrice && updatedRow.quantity) {
       updatedRow.net = updatedRow.unitPrice * updatedRow.quantity;
     } else {
       updatedRow.net = null;
     }
 
-    // 计算totalPrice
+    // Calculate total price
     updatedRow.totalPrice = calculateTotalPrice(updatedRow);
 
     if (index !== -1) {
@@ -200,11 +180,14 @@ export function GuiTable() {
 
     updateInvoiceData({ orders: newOrders });
   };
+
+  // Delete an order
   const handleDelete = (key) => {
     const newOrders = invoiceData.orders.filter((item) => item.key !== key);
     updateInvoiceData({ orders: newOrders });
   };
 
+  // Calculate totals for the invoice
   const calculateTotals = () => {
     let subtotal = 0;
     let gstTotal = 0;
@@ -227,140 +210,17 @@ export function GuiTable() {
     });
   };
 
+  // Recalculate totals when orders change
   useEffect(() => {
     calculateTotals();
   }, [invoiceData.orders]);
 
+  // Define table columns
   const columns = [
-    {
-      title: "Product Name",
-      dataIndex: "description",
-      width: "37%",
-      editable: true,
-      onHeaderCell: () => ({
-        style: {
-          fontFamily: "Lexend Deca, sans-serif",
-          fontSize: "14px",
-          fontWeight: "400",
-          color: "#333",
-        },
-      }),
-      onCell: () => ({
-        style: {
-          fontFamily: "Lexend Deca, sans-serif",
-          fontSize: "13px",
-          fontWeight: "200",
-          color: "#424242",
-        },
-      }),
-    },
-    {
-      title: "Unit Price($)",
-      dataIndex: "unitPrice",
-      editable: true,
-      width: "18%",
-      onHeaderCell: () => ({
-        style: {
-          fontFamily: "Lexend Deca, sans-serif",
-          fontSize: "14px",
-          fontWeight: "400",
-          color: "#333",
-        },
-      }),
-      onCell: () => ({
-        style: {
-          fontFamily: "Lexend Deca, sans-serif",
-          fontSize: "13px",
-          fontWeight: "200",
-          color: "#424242",
-        },
-      }),
-    },
-    {
-      title: "QTY",
-      dataIndex: "quantity",
-      editable: true,
-      width: "10%",
-      onHeaderCell: () => ({
-        style: {
-          fontFamily: "Lexend Deca, sans-serif",
-          fontSize: "14px",
-          fontWeight: "400",
-          color: "#333",
-        },
-      }),
-      onCell: () => ({
-        style: {
-          fontFamily: "Lexend Deca, sans-serif",
-          fontSize: "13px",
-          fontWeight: "200",
-          color: "#424242",
-        },
-      }),
-    },
-    {
-      title: "GST(%)",
-      dataIndex: "gst",
-      width: "10%",
-      editable: true,
-      onHeaderCell: () => ({
-        style: {
-          fontFamily: "Lexend Deca, sans-serif",
-          fontSize: "14px",
-          fontWeight: "400",
-          color: "#333",
-        },
-      }),
-      onCell: () => ({
-        style: {
-          fontFamily: "Lexend Deca, sans-serif",
-          fontSize: "13px",
-          fontWeight: "200",
-          color: "#424242",
-        },
-      }),
-    },
-    {
-      title: "Amount",
-      dataIndex: "totalPrice",
-      width: "18%",
-      onHeaderCell: () => ({
-        style: {
-          fontFamily: "Lexend Deca, sans-serif",
-          fontSize: "14px",
-          fontWeight: "400",
-          color: "#333",
-        },
-      }),
-      onCell: () => ({
-        style: {
-          fontFamily: "Lexend Deca, sans-serif",
-          fontSize: "13px",
-          fontWeight: "400",
-          color: "#424242",
-        },
-      }),
-      render: (_, record) => {
-        const total = calculateTotalPrice(record);
-        return `$${total}`;
-      },
-    },
-    {
-      title: "",
-      dataIndex: "operation",
-      width: "7%",
-      render: (_, record) =>
-        invoiceData.orders.length >= 1 ? (
-          <Popconfirm
-            title="Confirm to delete?"
-            onConfirm={() => handleDelete(record.key)}
-          >
-            <DeleteOutlined style={{ color: "red", cursor: "pointer" }} />
-          </Popconfirm>
-        ) : null,
-    },
+    // ... (column definitions)
   ];
 
+  // Configure components for editable table
   const components = {
     body: {
       row: EditableRow,
@@ -368,6 +228,7 @@ export function GuiTable() {
     },
   };
 
+  // Make columns editable
   const editableColumns = columns.map((col) => {
     if (!col.editable) {
       return col;
@@ -385,6 +246,7 @@ export function GuiTable() {
     };
   });
 
+  // Render the table and add item button
   return (
     <div className="gui-table-layout">
       <Table

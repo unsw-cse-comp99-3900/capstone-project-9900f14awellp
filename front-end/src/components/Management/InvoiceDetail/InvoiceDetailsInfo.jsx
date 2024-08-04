@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+// Importing API functions
 import {
   invoiceAdminManage,
   invoiceBasicInfo,
@@ -13,6 +14,7 @@ import { Button } from "antd";
 
 import { ErrorReport } from "../ErrorReport/ErrorReport";
 
+// Importing icons
 import {
   ApiOutlined,
   CloudDownloadOutlined,
@@ -25,24 +27,27 @@ import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import { StatusTag } from "@/components/Management/StatusTag/StatusTag";
 import "./InvoiceDetailsInfo.css";
 
+// Helper function to find the current invoice from the data array
 const findCurrentInvoice = (data, id) => {
   return data.find((invoice) => invoice.uuid === id);
 };
 
+// Helper function to get the full PDF URL
 const getPdfUrl = (pdfPath) => {
   return `${import.meta.env.VITE_API_URL}${pdfPath}`;
 };
 
+// Check if the user is an admin
 const is_admin = localStorage.getItem("is_admin") === "true";
 
-// 映射状态
-// Status mapping
+// Status mapping object
 const statusMapping = {
   Failed: "Rejected",
   unvalidated: "Unvalidated",
   Passed: "Success",
 };
 
+// Helper function to format date and time
 function formatDateTime(dateTimeString) {
   const date = new Date(dateTimeString);
 
@@ -58,6 +63,7 @@ function formatDateTime(dateTimeString) {
   return new Intl.DateTimeFormat("en-US", options).format(date);
 }
 
+// Function to fetch error report
 const fetchErrorReport = async (uuid) => {
   try {
     const response = await getErrorReport(uuid);
@@ -70,6 +76,7 @@ const fetchErrorReport = async (uuid) => {
 };
 
 export function InvoiceDetailsInfo() {
+  // Get the current invoice ID from URL parameters
   const curId = useParams().id.slice(3);
   const [originalInvoice, setOriginalInvoice] = useState({});
   const [realpath, setRealpath] = useState(null);
@@ -81,8 +88,9 @@ export function InvoiceDetailsInfo() {
   const paramId = useParams().id;
   const navigate = useNavigate();
 
+  // Fetch invoice data on component mount
   useEffect(() => {
-    //如果是管理员，调用invoiceAdminManage，否则调用invoiceBasicInfo
+    // if the user is not an admin, fetch the basic info of the invoice
     const fetchData = is_admin ? invoiceAdminManage : invoiceBasicInfo;
 
     fetchData().then((res) => {
@@ -93,6 +101,7 @@ export function InvoiceDetailsInfo() {
     });
   }, []);
 
+  // Fetch error report if invoice state is "Failed"
   useEffect(() => {
     const getErrorReportData = async () => {
       if (originalInvoice.uuid === undefined) {
@@ -107,6 +116,7 @@ export function InvoiceDetailsInfo() {
     getErrorReportData();
   }, [originalInvoice]);
 
+  // Fetch invoice log
   useEffect(() => {
     const fetchInvoiceLog = async () => {
       if (originalInvoice.uuid === undefined) {
@@ -128,32 +138,32 @@ export function InvoiceDetailsInfo() {
     fetchInvoiceLog();
   }, [originalInvoice]);
 
-  // console.log("createlog", createlog);
-  // console.log("validatelog", validatelog);
-  // console.log("sendlog", sendlog);
-  // console.log("emailReceiver", emailReceiver);
   console.log("errorReport", errorReport);
 
+  // Navigation function for validation page
   const goValidate = () => {
     navigate(`/validate/${paramId}`);
   };
 
+  // Navigation function for send page
   const goSend = () => {
     navigate(`/send/${paramId}`);
   };
 
+  // Function to delete invoice
   const deleteInvoice = (uuid) => {
     invoiceDeletion(uuid);
     navigate("/management");
   };
 
+  // Function to download invoice
   const downloadInvoice = (path) => {
     try {
       const pdfUrl = path;
       console.log(pdfUrl);
       const realUrl = `${import.meta.env.VITE_API_URL}${path}`;
 
-      // 在新标签页中打开 PDF
+      // Open PDF in a new tab
       window.open(realUrl, "_blank");
     } catch (error) {
       console.error(error);
@@ -162,7 +172,9 @@ export function InvoiceDetailsInfo() {
 
   return (
     <div className="invoice-detail-page">
+      {/* Header section */}
       <div className="info-details-header-row">
+        {/* Left side of header */}
         <div className="info-details-header-row-left">
           <div className="invoice-details-header-row">
             <div className="invoice-details-title">
@@ -188,6 +200,7 @@ export function InvoiceDetailsInfo() {
             <div>Due at {originalInvoice.due_date}</div>
           </div>
         </div>
+        {/* Right side of header with action buttons */}
         <div className="info-details-header-row-right">
           <Button
             icon={<ApiOutlined style={{ color: "#787B88" }} />}
@@ -226,14 +239,19 @@ export function InvoiceDetailsInfo() {
           </Button>
         </div>
       </div>
+      {/* Body section */}
       <div className="info-details-body">
+        {/* Invoice image */}
         <div className="invoice-pdf-img-container">
           <img src={realpath} alt="Specific Invoice" style={{ width: "86%" }} />
         </div>
+        {/* Log and error report container */}
         <div className="invoice-log-container">
+          {/* Time log section */}
           <div className="invoice-time-log-container">
             <div style={{ fontSize: "24px", marginBottom: "9px" }}>Log</div>
             <div className="invoice-time-log">
+              {/* Sent log */}
               {sendlog !== "" && (
                 <div className="invoice-time-log-row">
                   <div className="log-icon-container">
@@ -249,6 +267,7 @@ export function InvoiceDetailsInfo() {
                   </div>
                 </div>
               )}
+              {/* Validated log */}
               {validatelog !== "" && (
                 <div className="invoice-time-log-row">
                   <div className="log-icon-container">
@@ -262,6 +281,7 @@ export function InvoiceDetailsInfo() {
                   </div>
                 </div>
               )}
+              {/* Created log */}
               <div className="invoice-time-log-row">
                 <div className="log-icon-container">
                   <FilePresentOutlinedIcon
@@ -276,6 +296,7 @@ export function InvoiceDetailsInfo() {
               </div>
             </div>
           </div>
+          {/* Error report section */}
           {originalInvoice.state === "Failed" && (
             <div className="invoice-error-log-containe">
               <div style={{ fontSize: "24px", marginBottom: "9px" }}>

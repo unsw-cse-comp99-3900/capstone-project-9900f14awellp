@@ -53,7 +53,6 @@ import { invoiceAdminManage, invoiceDeletion } from "@/apis/management";
 
 import "./AdminManagementTable.css";
 
-// 映射状态
 // Status mapping
 const statusMapping = {
   Failed: "Rejected",
@@ -61,7 +60,6 @@ const statusMapping = {
   Passed: "Success",
 };
 
-// 格式化total
 // Format total
 const formatPrice = (price) => {
   if (price === null || price === undefined) return "";
@@ -71,7 +69,6 @@ const formatPrice = (price) => {
   return `$${Number(price).toFixed(2)}`;
 };
 
-// 格式化日期
 // Format date
 const formatDate = (dateString) => {
   if (!dateString) return "";
@@ -83,7 +80,6 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
-//计算即将到期的30天的发票金额
 // Calculate the amount of invoices that will expire in 30 days
 const calculateUpcoming30DueDateInfo = (invoices) => {
   const currentDate = new Date();
@@ -120,13 +116,11 @@ const calculateUpcoming30DueDateInfo = (invoices) => {
   };
 };
 
-// 计算不重复的supplier数量
 // Calculate the number of unique suppliers
 const countUniqueSuppliers = (invoices) => {
   return new Set(invoices.map((invoice) => invoice.supplier.trim())).size;
 };
 
-//计算已经收到的发票总额和数量
 // Calculate the total amount and count of invoices received
 const calculateOverdueInfo = (invoices) => {
   const currentDate = new Date();
@@ -159,7 +153,6 @@ const calculateOverdueInfo = (invoices) => {
   };
 };
 
-// 查找总金额最高的供应商
 // Find the supplier with the highest total amount
 const findSupplierWithHighestTotal = (invoices) => {
   const parseAmount = (amount) => {
@@ -171,9 +164,12 @@ const findSupplierWithHighestTotal = (invoices) => {
   };
 
   const supplierTotals = invoices.reduce((acc, invoice) => {
-    const supplier = invoice.supplier.trim();
-    const amount = parseAmount(invoice.total);
-    acc[supplier] = (acc[supplier] || 0) + amount;
+    const supplier = invoice.supplier?.trim();
+    // chech if supplier exists
+    if (supplier) {
+      const amount = parseAmount(invoice.total);
+      acc[supplier] = (acc[supplier] || 0) + amount;
+    }
     return acc;
   }, {});
 
@@ -186,7 +182,6 @@ const findSupplierWithHighestTotal = (invoices) => {
   return { supplier: topSupplier, total: maxTotal.toFixed(2) };
 };
 
-// 计算所有不为 Failed 的发票的总金额和数量
 // Calculate the total amount and count of all invoices that are not Failed
 const calculateNonFailedInvoicesInfo = (invoices) => {
   const parseAmount = (amount) => {
@@ -216,62 +211,70 @@ const calculateNonFailedInvoicesInfo = (invoices) => {
   };
 };
 
-//TODO: 这个table包括
-//TODO：1. 发票id（不用发票名称）
-//TODO：2. 客户名称
-//TODO：3. 发票状态
-//TODO：4. 发票创建的timestamp
-//TODO：5. 是谁创建的
-//TODO：6. 发票金额
-//TODO：7. 操作（查看，验证，发送，删除）
 export function AdminManagementTable() {
-  //*二次封装的alert组件
+  //* Wrapped alert component
   const [alert, setAlert] = useState({
     show: false,
     message: "",
     severity: "info",
   });
 
-  //*显示alert
+  //* Show alert
   const showAlert = (message, severity = "info") => {
     setAlert({ show: true, message, severity });
   };
 
-  //*隐藏alert
+  //* Hide alert
   const hideAlert = () => {
     setAlert({ ...alert, show: false });
   };
 
-  //*获取数据
+  // State to hold the main data array
   const [data, _setData] = useState([]);
-  // console.log(data);
+
+  // State to hold information about invoices due in the next 30 days
   const [upcoming30DaysInfo, setUpcoming30DaysInfo] = useState({
-    totalAmount: "0.00",
-    count: 0,
-  });
-  const [overdueInfo, setOverdueInfo] = useState({
-    totalAmount: "0.00",
-    count: 0,
-  });
-  const [uniqueSuppliersCount, setUniqueSuppliersCount] = useState(0);
-  const [topSupplier, setTopSupplier] = useState({
-    supplier: "",
-    total: "0.00",
-  });
-  const [nonFailedInvoicesInfo, setNonFailedInvoicesInfo] = useState({
-    totalAmount: "0.00",
-    count: 0,
+    totalAmount: "0.00", // Total amount of invoices due in the next 30 days
+    count: 0, // Count of invoices due in the next 30 days
   });
 
+  // State to hold information about overdue invoices
+  const [overdueInfo, setOverdueInfo] = useState({
+    totalAmount: "0.00", // Total amount of overdue invoices
+    count: 0, // Count of overdue invoices
+  });
+
+  // State to hold the count of unique suppliers
+  const [uniqueSuppliersCount, setUniqueSuppliersCount] = useState(0);
+
+  // State to hold information about the top supplier
+  const [topSupplier, setTopSupplier] = useState({
+    supplier: "", // Name of the top supplier
+    total: "0.00", // Total amount associated with the top supplier
+  });
+
+  // State to hold information about non-failed invoices
+  const [nonFailedInvoicesInfo, setNonFailedInvoicesInfo] = useState({
+    totalAmount: "0.00", // Total amount of non-failed invoices
+    count: 0, // Count of non-failed invoices
+  });
+
+  // State to hold the selected payment status filter
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState("all");
+
+  // State to hold the filtered data based on the selected payment status
   const [filteredData, setFilteredData] = useState([]);
 
+  // State to hold the search value for filtering data
   const [searchValue, setSearchValue] = useState("");
 
+  // State to control the visibility of the delete confirmation modal
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+
+  // State to hold the UUID of the currently selected item for deletion
   const [currentUuid, setCurrentUuid] = useState(null);
 
-  //* 获取数据
+  //* Get data from API and set it to state
   useEffect(() => {
     invoiceAdminManage()
       .then((response) => {
@@ -288,13 +291,13 @@ export function AdminManagementTable() {
       });
   }, []);
 
-  //* 删除发票
+  // Handle deletion of invoice
   const handleDelete = (uuid) => {
     setCurrentUuid(uuid);
     setIsDeleteModalVisible(true);
   };
 
-  //* 确认删除发票
+  // Confirm deletion of invoice
   const confirmDelete = () => {
     if (currentUuid) {
       invoiceDeletion(currentUuid)
@@ -303,19 +306,18 @@ export function AdminManagementTable() {
           refreshData();
         })
         .catch((error) => {
-          console.error("删除发票时出错:", error);
           showAlert("Deletion of invoice failed, please try again", "error");
         });
     }
     setIsDeleteModalVisible(false);
   };
 
-  //* 取消删除发票
+  // Cancel deletion of invoice
   const cancelDelete = () => {
     setIsDeleteModalVisible(false);
   };
 
-  //* 当删除发票后，调用该函数来刷新表格数据
+  // Call this function when invoice is deleted to refresh table data
   const refreshData = () => {
     invoiceAdminManage()
       .then((response) => {
@@ -328,12 +330,11 @@ export function AdminManagementTable() {
         setNonFailedInvoicesInfo(calculateNonFailedInvoicesInfo(response.data));
       })
       .catch((error) => {
-        console.error("刷新数据时出错:", error);
         showAlert("Refresh data failed, please try again", "error");
       });
   };
 
-  //* 根据选择的支付状态过滤数据
+  // Filter data based on selected payment status
   const filterData = (status) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -363,17 +364,19 @@ export function AdminManagementTable() {
     }
   };
 
-  //* 点击修改支付状态的切换键时调用的方法
+  // Method called when payment status switch is clicked
   const handlePaymentStatusClick = (status) => {
     setSelectedPaymentStatus(status);
     filterData(status);
   };
 
-  //* 操作列的方法
+  // Methods for the actions column
   const navigate = useNavigate();
+  //goValidate page with uuid
   const goValidate = (uuid) => {
     navigate(`/validate/id=${uuid}`);
   };
+  //goSend page with uuid
   const goSend = (uuid) => {
     navigate(`/send/id=${uuid}`);
   };
@@ -382,11 +385,12 @@ export function AdminManagementTable() {
     navigate("/create");
   };
 
+  //view details page with uuid
   const goDetails = (uuid) => {
     navigate(`/manage/id=${uuid}`);
   };
 
-  //* 操作列的具体内容
+  //define the content of the actions column
   const items = [
     {
       key: "1",
@@ -406,7 +410,6 @@ export function AdminManagementTable() {
       label: "Send",
       icon: <SendOutlined />,
       onClick: (uuid) => {
-        // console.log(uuid);
         goSend(uuid);
       },
     },
@@ -424,7 +427,7 @@ export function AdminManagementTable() {
     },
   ];
 
-  //* 点击下拉按钮后使用的方法
+  // Method called when the dropdown button is clicked
   const onMenuClick = (menuInfo, row) => {
     //const { key } = info; 这行代码使用了 JavaScript 的解构赋值（Destructuring assignment）语法。这是 ES6 （ECMAScript 2015）引入的一个特性，允许我们从对象或数组中提取值，赋给变量
     //这行代码等同于：const key = info.key;
@@ -436,6 +439,7 @@ export function AdminManagementTable() {
     }
   };
 
+  //define the content of the table header and content
   const columnHelper = createColumnHelper();
   const columns = [
     columnHelper.display({
@@ -571,13 +575,14 @@ export function AdminManagementTable() {
       ),
     }),
   ];
-  //*分页
+
+  //set initial pagination
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 4,
   });
 
-  //*table初始化
+  //initial table state
   const table = useReactTable({
     data: filteredData,
     columns,
@@ -586,6 +591,7 @@ export function AdminManagementTable() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
+    //set global filter and pagination
     state: {
       globalFilter: searchValue,
       pagination,
@@ -606,23 +612,24 @@ export function AdminManagementTable() {
     },
   });
 
-  //* 导出excel的选中数据
+  // export the rows that are selected to excel
   const handleExport = async () => {
     //* selectedData是选中的行的数据
+    // the selectedData is the data of the rows that are selected in the table
     const selectedData = table
       .getSelectedRowModel()
       .rows.map((row) => row.original);
-    // console.log(selectedData);
 
     if (selectedData.length === 0) {
       showAlert("Select at least one row to export", "warning");
       return;
     }
-    // 创建工作簿和工作表
+
+    // create workbook and worksheet
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("admin_invoices");
 
-    // 添加表头
+    //add the header row
     worksheet.addRow([
       "Invoice Number",
       "Invoice Name",
@@ -634,7 +641,7 @@ export function AdminManagementTable() {
       "Total",
     ]);
 
-    // 添加数据
+    // add the data from table
     selectedData.forEach((row) => {
       worksheet.addRow([
         row.invoice_number,
@@ -648,7 +655,7 @@ export function AdminManagementTable() {
       ]);
     });
 
-    // 生成Excel文件并下载
+    // generate the file and download it
     workbook.xlsx.writeBuffer().then((buffer) => {
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -657,10 +664,12 @@ export function AdminManagementTable() {
     });
   };
 
+  // Custom pagination size changer
   const [customPageSize, setCustomPageSize] = useState(
     table.getState().pagination.pageSize
   );
 
+  // Custom pagination size changer
   const renderCustomSizeChanger = () => (
     <InputNumber
       changeOnWheel
@@ -679,6 +688,7 @@ export function AdminManagementTable() {
     />
   );
 
+  // Custom pagination size calculator
   const total = table.getFilteredRowModel().rows.length;
   const pageIndex = table.getState().pagination.pageIndex;
   const pageSize = table.getState().pagination.pageSize;
