@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { ResponsiveAppBar } from "../components/Navbar";
 import { NestedList } from "../components/List";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -26,9 +25,38 @@ export default function Sending() {
   const [unvalidatedList, setUnvalidatedList] = useState([]);
   const [invoiceUuidMap, setInvoiceUuidMap] = useState({});
   const [selectedInvoices, setSelectedInvoices] = useState([]);
-  const [alert, setAlert] = useState(null); // 初始状态设置为null
-  // const { id } = useParams();
-  // let id_num = null;
+  const [alert, setAlert] = useState(null);
+  const { id } = useParams(); // Destructure the id from useParams
+  const [idNum, setIdNum] = useState(null);
+  const [idName, setIdName] = useState(""); // State to store the file name corresponding to idNum
+
+  useEffect(() => {
+    if (id) {
+      // Assuming the id is a string and might contain the '=' character
+      console.log(id);
+      const idParts = id.split('=');
+      if (idParts.length > 1) {
+        setIdNum(idParts[1]);
+        console.log(idNum);
+      } else {
+        setIdNum(id); // If there is no '=' character, just use the id as is
+        console.log(idNum);
+      }
+    } else {
+      console.log('No ID in the URL');
+    }
+  }, [id]); // Only run the effect when `id` changes
+
+  useEffect(() => {
+    if (idNum && invoiceUuidMap) {
+      // Find the file name corresponding to the idNum (UUID)
+      const idName = Object.keys(invoiceUuidMap).find(key => invoiceUuidMap[key] === idNum);
+      if (idName) {
+        setIdName(idName); // Set the file name in state
+        setSelectedInvoices([idName]); // Select the invoice file name
+      }
+    }
+  }, [idNum, invoiceUuidMap]); // Run the effect when `idNum` or `invoiceUuidMap` changes
 
   const handleClear = () => {
     setFirstName("");
@@ -58,11 +86,25 @@ export default function Sending() {
           (entry) => entry.state === "unvalidated"
         );
 
-        setPassedList(passedData.map((entry) => entry.file.split("/").pop()));
-        setFailedList(failedData.map((entry) => entry.file.split("/").pop()));
-        setUnvalidatedList(
-          unvalidatedData.map((entry) => entry.file.split("/").pop())
-        );
+        const passedList = passedData.map((entry) => entry.file.split("/").pop());
+        const failedList = failedData.map((entry) => entry.file.split("/").pop());
+        const unvalidatedList = unvalidatedData.map((entry) => entry.file.split("/").pop());
+
+        // if (idName) {
+        //   // Only include the invoice with idNum if it exists in the lists
+        //   setPassedList(passedList.includes(idName) ? [idName] : []);
+        //   setFailedList(failedList.includes(idName) ? [idName] : []);
+        //   setUnvalidatedList(unvalidatedList.includes(idName) ? [idName] : []);
+        //   console.log('1');
+        // } else {
+        //   setPassedList(passedList);
+        //   setFailedList(failedList);
+        //   setUnvalidatedList(unvalidatedList);
+        //   console.log(selectedInvoices)
+        // }
+        setPassedList(passedList);
+        setFailedList(failedList);
+        setUnvalidatedList(unvalidatedList);
 
         const uuidMap = response.data.reduce((acc, entry) => {
           acc[entry.file.split("/").pop()] = entry.uuid;
@@ -97,7 +139,7 @@ export default function Sending() {
         { message: fullMessage },
         {
           params: {
-            uuids: uuids.join(","),
+            uuids: uuids.join(",") || idNum,
             email: email,
           },
           headers: {
@@ -135,6 +177,7 @@ export default function Sending() {
         ? prevSelected.filter((item) => item !== invoice)
         : [...prevSelected, invoice]
     );
+    console.log(selectedInvoices)
   };
 
   return (
