@@ -53,7 +53,7 @@ export default function Register() {
         .catch(error => {
             if (error.response) {
                 console.log(username,password,confirmPassword,name,email)
-                setAlert({ severity: 'error', message: error.response.data.detail || 'Registration failed' });
+                setAlert({ severity: 'error', message: error.response.data.error || 'Registration failed' });
                 console.log(error.response.data);
 
             } else {

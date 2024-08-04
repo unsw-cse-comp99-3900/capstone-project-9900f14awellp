@@ -68,7 +68,7 @@ export default function Login() {
         if (error.response) {
           setAlert({
             severity: "error",
-            message: error.response.error || "Login failed",
+            message: error.response.data.error || "Login failed",
           });
           // alert(error.response.data.detail || 'Login failed');
           console.log(username, password);
@@ -106,7 +106,7 @@ export default function Login() {
       })
       .catch((error) => {
         if (error.response) {
-          setAlert({ severity: "error", message: error.response.error });
+          setAlert({ severity: "error", message: error.response.data.error });
           console.log(username, email);
           console.log(error.response);
         } else {

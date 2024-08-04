@@ -110,7 +110,7 @@ export const AlertDialogSlide = ({ fontsize }) => {
           <DialogTitle>{"Use our e-invoice service?"}</DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-slide-description">
-              Let us help invoice 
+              Let us help your invoices 
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -188,12 +188,6 @@ export default function FormDialog({ onFormSubmit }) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="inherit">
-            Cancel
-          </Button>
-          <Button type="submit" color="inherit">
-            Submit
-          </Button>
           <Button onClick={handleClose} color="inherit">
             Cancel
           </Button>
