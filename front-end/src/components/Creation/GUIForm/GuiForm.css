@@ -132,3 +132,30 @@
     height: 80px;
     background-color: transparent;
 }
+
+.custom-form-item {
+  margin-bottom: 0;
+}
+
+.custom-form-item.has-error {
+  margin-bottom: 1px; /* 或者你想要的任何值 */
+}
+.custom-form-item.custom-error .ant-input {
+  border-color: #ff4d4f; /* 红色边框 */
+}
+
+.custom-form-item.custom-error .ant-form-item-explain-error {
+  color: #ff4d4f; /* 红色错误信息 */
+}
+
+/* 聚焦时的样式 */
+.custom-form-item.custom-error .ant-input:focus,
+.custom-form-item.custom-error .ant-input-focused {
+  border-color: #ff4d4f;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+/* 悬停时的样式 */
+.custom-form-item.custom-error .ant-input:hover {
+  border-color: #ff7875;
+}

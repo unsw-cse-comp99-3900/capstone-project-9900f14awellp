@@ -18,6 +18,7 @@ export default function FileUploader({ showAlert }) {
   const [uuid, setUuid] = useState(null);
   const [fileName, setFileName] = useState(null);
   const [fileSize, setFileSize] = useState(null);
+  const [pdfUrl, setPdfUrl] = useState(null);
 
   // Reference to the file input element
   const fileInputRef = useRef(null);
@@ -32,12 +33,23 @@ export default function FileUploader({ showAlert }) {
       setFileName(selectedFile.name);
       setFileSize((selectedFile.size / (1024 * 1024)).toFixed(2)); // Convert to MB
       setUuid(uuidv4());
+
+      // Create a URL for the file
+      const url = URL.createObjectURL(selectedFile);
+      setPdfUrl(url);
     } else {
       // Reset state if file is invalid
       setFile(null);
       setFileName(null);
       setFileSize(null);
       setUuid(null);
+      setPdfUrl(null);
+    }
+  };
+
+  const handlePreview = () => {
+    if (pdfUrl) {
+      window.open(pdfUrl, "_blank");
     }
   };
 
@@ -136,7 +148,11 @@ export default function FileUploader({ showAlert }) {
       </div>
       {/* Preview button */}
       <div className="button-groups">
-        <button className="preview-button" disabled={!file}>
+        <button
+          className="preview-button"
+          disabled={!file}
+          onClick={handlePreview}
+        >
           Preview
         </button>
       </div>

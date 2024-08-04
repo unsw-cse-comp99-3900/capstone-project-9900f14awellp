@@ -217,7 +217,133 @@ export function GuiTable() {
 
   // Define table columns
   const columns = [
-    // ... (column definitions)
+    {
+      title: "Product Name",
+      dataIndex: "description",
+      width: "37%",
+      editable: true,
+      onHeaderCell: () => ({
+        style: {
+          fontFamily: "Lexend Deca, sans-serif",
+          fontSize: "14px",
+          fontWeight: "400",
+          color: "#333",
+        },
+      }),
+      onCell: () => ({
+        style: {
+          fontFamily: "Lexend Deca, sans-serif",
+          fontSize: "13px",
+          fontWeight: "200",
+          color: "#424242",
+        },
+      }),
+    },
+    {
+      title: "Unit Price($)",
+      dataIndex: "unitPrice",
+      editable: true,
+      width: "18%",
+      onHeaderCell: () => ({
+        style: {
+          fontFamily: "Lexend Deca, sans-serif",
+          fontSize: "14px",
+          fontWeight: "400",
+          color: "#333",
+        },
+      }),
+      onCell: () => ({
+        style: {
+          fontFamily: "Lexend Deca, sans-serif",
+          fontSize: "13px",
+          fontWeight: "200",
+          color: "#424242",
+        },
+      }),
+    },
+    {
+      title: "QTY",
+      dataIndex: "quantity",
+      editable: true,
+      width: "10%",
+      onHeaderCell: () => ({
+        style: {
+          fontFamily: "Lexend Deca, sans-serif",
+          fontSize: "14px",
+          fontWeight: "400",
+          color: "#333",
+        },
+      }),
+      onCell: () => ({
+        style: {
+          fontFamily: "Lexend Deca, sans-serif",
+          fontSize: "13px",
+          fontWeight: "200",
+          color: "#424242",
+        },
+      }),
+    },
+    {
+      title: "GST(%)",
+      dataIndex: "gst",
+      width: "10%",
+      editable: true,
+      onHeaderCell: () => ({
+        style: {
+          fontFamily: "Lexend Deca, sans-serif",
+          fontSize: "14px",
+          fontWeight: "400",
+          color: "#333",
+        },
+      }),
+      onCell: () => ({
+        style: {
+          fontFamily: "Lexend Deca, sans-serif",
+          fontSize: "13px",
+          fontWeight: "200",
+          color: "#424242",
+        },
+      }),
+    },
+    {
+      title: "Amount",
+      dataIndex: "totalPrice",
+      width: "18%",
+      onHeaderCell: () => ({
+        style: {
+          fontFamily: "Lexend Deca, sans-serif",
+          fontSize: "14px",
+          fontWeight: "400",
+          color: "#333",
+        },
+      }),
+      onCell: () => ({
+        style: {
+          fontFamily: "Lexend Deca, sans-serif",
+          fontSize: "13px",
+          fontWeight: "400",
+          color: "#424242",
+        },
+      }),
+      render: (_, record) => {
+        const total = calculateTotalPrice(record);
+        return `$${total}`;
+      },
+    },
+    {
+      title: "",
+      dataIndex: "operation",
+      width: "7%",
+      render: (_, record) =>
+        invoiceData.orders.length >= 1 ? (
+          <Popconfirm
+            title="Confirm to delete?"
+            onConfirm={() => handleDelete(record.key)}
+          >
+            <DeleteOutlined style={{ color: "red", cursor: "pointer" }} />
+          </Popconfirm>
+        ) : null,
+    },
   ];
 
   // Configure components for editable table
