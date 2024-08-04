@@ -68,9 +68,9 @@ export default function Choice() {
         console.log(error.message);
         setAlert({ severity: "error", message: error.message });
       });
-    window.location.reload();
-    navigate("/create");
     setOpen(false);
+    navigate("/home");
+    window.location.reload();
   };
 
   const handleOpenCreateForm = () => {
@@ -84,8 +84,8 @@ export default function Choice() {
   const handleSubmitCreateForm = () => {
     setOpenCreateForm(false);
     localStorage.setItem("is_admin", true);
+    navigate("/home");
     window.location.reload();
-    navigate("/create");
   };
 
   const [formData, setFormData] = useState({

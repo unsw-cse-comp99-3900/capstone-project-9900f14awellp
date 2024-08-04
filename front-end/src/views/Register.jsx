@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import { InputTextField, PasswordTextField } from '../components/Inputs';
+import { PasswordTextField } from '../components/Inputs';
 import { ButtonSizes } from '../components/Buttons';
 import { UnderlineLink} from '../components/Link';
 import { AlertDialogSlide } from '../components/Model';
@@ -27,7 +27,6 @@ export default function Register() {
     }
     const handleRegister = () => {
         if (password !== confirmPassword) {
-            // alert('Passwords do not match');
             setAlert({ severity: 'warning', message: 'Passwords do not match' });
             return;
         }
@@ -38,7 +37,7 @@ export default function Register() {
                 name: name,
                 email: email,
                 confirm_password: confirmPassword,
-            }, // Query parameters
+            }, 
             {headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -54,9 +53,8 @@ export default function Register() {
         .catch(error => {
             if (error.response) {
                 console.log(username,password,confirmPassword,name,email)
-                // alert(error.response.data.detail || 'Registration failed');
-                setAlert({ severity: 'error', message: error.response.data.detail || 'Registration failed' });
-                console.log(error.response.data.detail);
+                setAlert({ severity: 'error', message: error.response.data.error || 'Registration failed' });
+                console.log(error.response.data);
 
             } else {
                 setAlert({ severity: 'error', message: error.message });
@@ -71,8 +69,7 @@ export default function Register() {
                     <div style={{
                         position: 'fixed',
                         top: '11vh',
-                        right: 10,
-                        // transform: 'translateX(-50%)',  
+                        right: 10,  
                         width: '30%',
                         zIndex: 9999
                     }}>
