@@ -9,6 +9,27 @@ import { FlagIcon } from "react-flag-kit";
 
 const { TextArea } = Input;
 
+/**
+ * CustomFormItem is a wrapper component for Form.Item that adds custom styling and error handling.
+ *
+ * @param {Object} props - The properties passed to the component.
+ * @param {React.ReactNode} props.children - The child elements to be rendered inside the Form.Item.
+ * @param {string} [props.help] - The help message to be displayed. If present, it indicates an error state.
+ *
+ * @returns {JSX.Element} A Form.Item component with custom styling and error handling.
+ */
+const CustomFormItem = ({ children, ...props }) => {
+  const { help, validateStatus } = props;
+  return (
+    <Form.Item
+      {...props}
+      className={`custom-form-item ${help ? "has-error" : ""} ${validateStatus === "error" ? "custom-error" : ""}`}
+    >
+      {children}
+    </Form.Item>
+  );
+};
+
 // Currency options for the select dropdown
 const options = [
   {
@@ -196,7 +217,7 @@ export function GuiForm() {
           {/* ABN Input with validation */}
           <div className="title-and-input">
             <div>ABN*</div>
-            <Form.Item
+            <CustomFormItem
               validateStatus={myABNError ? "error" : ""}
               help={myABNError}
             >
@@ -209,12 +230,12 @@ export function GuiForm() {
                   handleABNBlur("my_ABN", e.target.value, setMyABNError)
                 }
               />
-            </Form.Item>
+            </CustomFormItem>
           </div>
           {/* Email Input with validation */}
           <div className="title-and-input">
             <div>Email*</div>
-            <Form.Item
+            <CustomFormItem
               validateStatus={myEmailError ? "error" : ""}
               help={myEmailError}
             >
@@ -227,7 +248,7 @@ export function GuiForm() {
                   handleEmailBlur("my_email", e.target.value, setMyEmailError)
                 }
               />
-            </Form.Item>
+            </CustomFormItem>
           </div>
         </div>
       </div>
@@ -263,7 +284,7 @@ export function GuiForm() {
           {/* Client ABN Input with validation */}
           <div className="title-and-input">
             <div>ABN*</div>
-            <Form.Item
+            <CustomFormItem
               validateStatus={clientABNError ? "error" : ""}
               help={clientABNError}
             >
@@ -275,15 +296,15 @@ export function GuiForm() {
                   handleInputChange("client_ABN", e.target.value)
                 }
                 onBlur={(e) =>
-                  handleABNBlur("client_ABN", e.target.value, setMyABNError)
+                  handleABNBlur("client_ABN", e.target.value, setClientABNError)
                 }
               />
-            </Form.Item>
+            </CustomFormItem>
           </div>
           {/* Client Email Input with validation */}
           <div className="title-and-input">
             <div>Email*</div>
-            <Form.Item
+            <CustomFormItem
               validateStatus={clientEmailError ? "error" : ""}
               help={clientEmailError}
             >
@@ -302,7 +323,7 @@ export function GuiForm() {
                   )
                 }
               />
-            </Form.Item>
+            </CustomFormItem>
           </div>
         </div>
       </div>
